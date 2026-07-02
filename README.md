@@ -14,3 +14,4 @@ https://drive.google.com/drive/folders/1cNzwDWj6T90z0Tu3F36VH9q2dUODGaHm?usp=dri
 
 Link Mockups:https://app.milanote.com/1Wo0vq1YlSbddo?p=a2k8d9DKRk0
 
+Link Casos de uso: https://docs.google.com/document/d/179PLOcjdmDZN2ttpPOnyVCjfAl-JFYf-usyJHQH8-G8/edit?usp=sharing
