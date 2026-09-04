@@ -1,89 +1,67 @@
 # Caso de Uso: Cambiar estado de mesas
 
-> Especificación elaborada siguiendo la guía `GUIA-Especificacion-Casos-de-Uso.md` (sección 3).
-> Reglas de negocio RN-01 (rol exclusivo), RN-02 (protección ante reservas activas), RN-03 (estados válidos) y RN-04 (control de concurrencia y actualización en vivo) implementadas para salvaguardar la integridad física y operativa del salón (ver matriz de trazabilidad).
+> Especificación elaborada siguiendo la guía
+> `GUIA-Especificacion-Casos-de-Uso.md` (sección 3).
+> Reglas de negocio RN-01 (solo rol Gerente); RN-02 (estados permitidos: Libre, Ocupada, Reservada, Fuera de servicio); RN-03 (prohibición de marcar Libre si existe reserva en curso) **implementadas** en la solución; cada caso borde cuenta con su test
+> unitario e integración (ver matriz de trazabilidad).
 
 | Campo | Valor |
 | --- | --- |
 | **ID del Caso de Uso** | CU-03 |
 | **Nombre** | Cambiar estado de mesas |
-| **Actor Principal** | Gerente (usuario autenticado con rol Gerente) |
+| **Actor Principal** | Gerente |
 | **Alcance / Nivel** | Sistema; meta de usuario |
-| **Stakeholders e intereses** | Gerente → mantener el mapa del salón actualizado de forma manual ante la dinámica imprevista del salón; Personal de Salón / Mozos → ubicar comensales con base en información visual fidedigna de mesas libres u ocupadas; Clientes en espera → habilitación inmediata de mesas para ser convocados |
-| **Disparador (Trigger)** | El gerente hace clic o selecciona una mesa en el plano interactivo del salón dentro del Panel en Vivo y opta por cambiar su estado |
-| **Prioridad / Frecuencia** | Alta; alta frecuencia durante los turnos de apertura del restaurante |
-| **Reglas de negocio relacionadas** | RN-01 (autorización exclusiva para rol Gerente); RN-02 (invariante de protección: prohibido liberar mesas con reserva activa o comensales presentes); RN-03 (restricción a estados operativos permitidos: Libre, Reservada, Ocupada); RN-04 (control de concurrencia optimista y sincronización en tiempo real) |
+| **Stakeholders e intereses** | Gerente → actualizar en tiempo real la disponibilidad física de las mesas; Mozos → conocer la disponibilidad inmediata para sentar clientes sin reserva; Clientes → recibir una mesa habilitada. |
+| **Disparador (Trigger)** | El gerente selecciona una mesa en el mapa o listado operativo y elige la acción "Cambiar Estado". |
+| **Prioridad / Frecuencia** | Alta; alta frecuencia durante el turno |
+| **Reglas de negocio relacionadas** | RN-01 (solo rol Gerente); RN-02 (estados permitidos: Libre, Ocupada, Reservada, Fuera de servicio); RN-03 (prohibición de marcar Libre si existe reserva en curso) |
 
 ---
 
 ### 1. BREVE DESCRIPCIÓN
-Permite al Gerente modificar de forma manual y en tiempo real el estado operativo de una mesa (Libre, Reservada, Ocupada) desde el plano interactivo del salón en el Panel en Vivo, garantizando que no se liberen mesas con reservas en curso y previniendo conflictos concurrentes.
+Permite al gerente modificar manualmente el estado operativo de una mesa (Libre, Ocupada, Reservada, Fuera de servicio) para reflejar contingencias del salón o liberar/bloquear mesas manualmente.
 
 ### 2. PRECONDICIONES
-- El usuario debe haber iniciado sesión y su token JWT debe certificar el rol `Gerente`.
-- La mesa a modificar debe existir previamente en la base de datos y pertenecer al salón configurado.
-- El sistema y el servicio de señalización en tiempo real (ej. WebSockets / SignalR) deben estar activos.
-- La Capa de Persistencia debe encontrarse operativa.
+- El sistema debe encontrarse operativo y con la base de datos accesible.
+- El actor debe estar autenticado con rol "Gerente".
+- La mesa a modificar debe existir previamente en el sistema.
 
-### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200)
-1. El Gerente ingresa al Panel en Vivo y visualiza el mapa del salón con el estado operativo actual de cada mesa.
-2. El Gerente hace clic sobre una mesa y selecciona uno de los estados permitidos (`"Libre"`, `"Reservada"` u `"Ocupada"`).
-3. El frontend envía una petición al endpoint `PATCH /api/mesas/{id}/estado` con un JSON que contiene `nuevoEstado` y el identificador de concurrencia `version` (rowversion/token de concurrencia).
-4. La **Capa de Presentación** (`MesasController.CambiarEstadoMesa`) valida que el identificador `{id}` de la ruta sea un GUID válido y que el valor del nuevo estado corresponda a un elemento de la enumeración `EstadoMesa` (**RN-03**).
-5. La **Capa de Negocio** (`MesaService.CambiarEstadoMesaAsync`) verifica:
-   - Que el actor cuente con permisos de Gerente (**RN-01**).
-   - Que la entidad `Mesa` exista en la Capa de Persistencia.
-   - Si el estado solicitado es `Libre`, verifica que no existan reservas activas en estado `En curso` ni clientes asignados a dicha mesa (**RN-02**).
-   - Que la versión de la entidad coincida con la enviada, validando que no haya sido modificada en paralelo (**RN-04**).
-6. La **Capa de Persistencia** actualiza el campo `Estado` de la entidad en la tabla `Mesas` e incrementa el token de concurrencia.
-7. El Sistema emite un evento en tiempo real mediante el hub de comunicación hacia todos los clientes suscritos al Panel en Vivo (**RN-04**).
-8. El Sistema responde con código **HTTP 200 OK** conteniendo el DTO de la mesa actualizada (`id`, `numero`, `capacidad`, `estado`, `version`).
+### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
+1. El Actor envía una petición al endpoint `PATCH /api/mesas/{id}/estado` con un JSON conteniendo `nuevoEstado` (`MesaCambiarEstadoDTO`).
+2. La **Capa de Presentación** (`MesasController.CambiarEstado`) valida que el ID de mesa sea un número entero positivo y que el estado enviado corresponda a un valor válido del enum (**RN-02**).
+3. La **Capa de Negocio** (`MesaService.CambiarEstadoMesaAsync`) verifica la existencia de la mesa, la autorización del rol Gerente (**RN-01**) y valida que la mesa no posea una reserva en curso si se intenta pasar a `Libre` sin haber finalizado dicha reserva (**RN-03**).
+4. La **Capa de Persistencia** actualiza el campo `Estado` en la entidad `Mesa` y guarda los cambios en la base de datos.
+5. El Sistema devuelve un código **200 OK** con los datos actualizados de la mesa (ID, número, capacidad y nuevo estado).
 
 ### 4. FLUJOS ALTERNATIVOS (Caminos Tristes / Excepciones)
 
-* **1a. Identificador de mesa inválido o JSON malformado (HTTP 400 Bad Request):**
-  1. Si en el Paso 3 el `{id}` no cumple formato GUID o el cuerpo del JSON presenta inconsistencias sintácticas.
-  2. La Capa de Presentación (model binding) descarta la solicitud.
-  3. El Sistema devuelve un código **400 Bad Request**. Fin del caso de uso.
+* **2a. Estado enviado no válido (HTTP 400 Bad Request):**
+  1. Si en el Paso 2 el valor de `nuevoEstado` no corresponde a ninguno de los estados reconocidos por el sistema (**RN-02**).
+  2. La Capa de Presentación rechaza la petición por error de enlace de modelo.
+  3. El Sistema devuelve un código **400 Bad Request** con el mensaje: "Estado de mesa no válido". Fin del caso de uso.
 
-* **2a. Estado de mesa desconocido o fuera de rango (HTTP 400 Bad Request):**
-  1. Si en el Paso 3 el valor provisto para `nuevoEstado` no es uno de los permitidos (`Libre`, `Reservada`, `Ocupada`), violando la regla **RN-03**.
-  2. La Capa de Presentación rechaza la petición por error de validación de esquema.
-  3. El Sistema devuelve un código **400 Bad Request** con el mensaje: "El estado de mesa especificado no es válido". Fin del caso de uso.
+* **3a. Mesa inexistente (HTTP 404 Not Found):**
+  1. Si en el Paso 3 el ID de la mesa enviado no existe en la base de datos.
+  2. La Capa de Negocio lanza una `MesaNoEncontradaException`.
+  3. El Sistema devuelve un código **404 Not Found** con el mensaje: "La mesa especificada no existe". Fin del caso de uso.
 
-* **3a. Mesa inexistente en el sistema (HTTP 404 Not Found):**
-  1. Si en el Paso 5 el identificador de mesa no existe en los registros de la base de datos.
-  2. La Capa de Negocio no encuentra la entidad y lanza `MesaNotFoundException`.
-  3. El Sistema devuelve un código **404 Not Found** con el mensaje: "La mesa solicitada no existe". Fin del caso de uso.
+* **3b. Intento de liberar mesa con reserva activa en curso (HTTP 409 Conflict):**
+  1. Si en el Paso 3 el gerente intenta cambiar el estado a `Libre` pero la mesa tiene una reserva asociada en estado `En curso` (**RN-03**).
+  2. La Capa de Negocio interrumpe la operación y lanza una `MesaConReservaActivaException`.
+  3. El Sistema devuelve un código **409 Conflict** indicando: "No se puede marcar la mesa como Libre mientras tenga una reserva en curso activa". Fin del caso de uso.
 
-* **3b. Usuario no autorizado para alterar estados de mesa (HTTP 403 Forbidden):**
-  1. Si en el Paso 5 el usuario carece del rol `Gerente` exigido por la regla **RN-01**.
-  2. El middleware de autorización o la Capa de Negocio bloquea la operación.
-  3. El Sistema devuelve un código **403 Forbidden**. Fin del caso de uso.
-
-* **3c. Intento de liberar mesa con reserva activa o comensales asignados (HTTP 409 Conflict):**
-  1. Si en el Paso 5 el Gerente intenta marcar una mesa como `Libre`, pero existe una reserva activa asociada en estado `En curso`, violando la regla **RN-02**.
-  2. La Capa de Negocio detecta la inconsistencia de ocupación y lanza `MesaConReservaActivaException`.
-  3. El Sistema devuelve un código **409 Conflict** con el mensaje: "No se puede marcar la mesa como Libre porque posee una reserva o servicio activo". Fin del caso de uso.
-
-* **3d. Conflicto de concurrencia / Mesa modificada concurrentemente (HTTP 409 Conflict):**
-  1. Si en el Paso 5 otro usuario o proceso modificó el estado de la mesa antes de completarse la petición (discrepancia en el token de concurrencia), conforme a **RN-04**.
-  2. La Capa de Negocio o el contexto de persistencia detecta una colisión de concurrencia (`DbUpdateConcurrencyException`).
-  3. El Sistema devuelve un código **409 Conflict** con el mensaje: "El estado de la mesa fue modificado recientemente por otro usuario. Se ha refrescado la vista". Fin del caso de uso.
-
-* **6a. Error no controlado durante la persistencia (HTTP 500 Internal Server Error):**
-  1. Si en el Paso 6 sobreviene una falla técnica o corte de conectividad con el motor de base de datos.
-  2. El Sistema interrumpe la transacción y captura el fallo en el middleware global.
+* **4a. Fallo técnico en la persistencia (HTTP 500 Internal Server Error):**
+  1. Si en el Paso 4 se produce un error técnico durante la persistencia en la base de datos.
+  2. El Sistema captura la excepción no controlada.
   3. El Sistema devuelve un código **500 Internal Server Error**. Fin del caso de uso.
 
 ### 5. SUB-VARIACIONES (opcional)
-1. El Gerente puede modificar el estado seleccionando la mesa desde el plano gráfico interactivo en dos dimensiones (2D) o desde una vista de tabla resumen de mesas del Panel en Vivo.
-2. Ambos canales consumen el mismo endpoint `PATCH /api/mesas/{id}/estado` y producen idéntico efecto.
+1. El gerente puede cambiar el estado desde la vista de lista de mesas o interactuando directamente sobre el plano visual del salón.
+2. Ambas acciones envían la misma petición a `PATCH /api/mesas/{id}/estado`.
 
 ### 6. POSTCONDICIONES
-- El nuevo estado de la mesa queda guardado de manera persistente en la tabla `Mesas`.
-- El mapa interactivo del Panel en Vivo se actualiza visualmente en tiempo real para todos los puestos conectados (**RN-04**).
-- La disponibilidad global del salón para asignación de nuevos comensales se recalcula automáticamente.
+- El estado de la mesa queda actualizado de forma persistente en la tabla `Mesas`.
+- El nuevo estado se refleja de inmediato en los paneles de disponibilidad y en el mapa del salón.
 
 ---
 
@@ -93,28 +71,29 @@ Permite al Gerente modificar de forma manual y en tiempo real el estado operativ
 
 | Código HTTP | Nombre Técnico | Contexto de Aplicación en el Caso de Uso |
 | --- | --- | --- |
-| `200` | OK | Confirmación de modificación exitosa del estado de la mesa. |
-| `400` | Bad Request | Formato de GUID erróneo, cuerpo JSON inválido o estado no reconocido (RN-03). |
-| `403` | Forbidden | El usuario no posee el rol `Gerente` requerido para modificar mesas manualmente (RN-01). |
-| `404` | Not Found | La mesa especificada no existe en la base de datos. |
-| `409` | Conflict | Intento de liberar una mesa con reserva en curso (RN-02) o colisión de concurrencia optimista (RN-04). |
-| `500` | Internal Server Error | Falla no controlada a nivel de persistencia o infraestructura. |
+| `200` | OK | Actualización exitosa del estado operativo de la mesa. |
+| `400` | Bad Request | Valor de estado no válido (RN-02) o ID no numérico. |
+| `401` | Unauthorized | Falta de autenticación o token inválido. |
+| `403` | Forbidden | Usuario sin privilegios de rol Gerente (RN-01). |
+| `404` | Not Found | La mesa con el ID especificado no existe. |
+| `409` | Conflict | Inconsistencia de negocio: mesa con reserva activa en curso (RN-03). |
+| `500` | Internal Server Error | Error técnico en la capa de persistencia. |
 
 ### Nota: Validación vs. Verificación aplicada
 
-- **Validación (Presentación, → 400):** Verifica el formato sintáctico del identificador GUID y valida que el estado provisto coincida con las constantes declaradas en `EstadoMesa` (**RN-03**).
-- **Verificación (Negocio, → 403/404/409):** Confirma la identidad y perfil del actor (**RN-01**), comprueba la existencia de la entidad en la base de datos (→ 404), evalúa que no existan reservas en curso que impidan la liberación (**RN-02**), controla los tokens de versión para prevenir sobreescrituras concurrentes (**RN-04**) y orquesta la emisión del evento en tiempo real.
+- **Validación (Presentación, → 400):** Comprobación de ID positivo y estado válido en `MesaCambiarEstadoDTO`.
+- **Verificación (Negocio, → 400/404/409):** RN-01 (rol Gerente), verificación de existencia de la mesa y validación de regla RN-03 (integridad entre mesas y reservas activas en `MesaService`).
 
 ### Matriz de trazabilidad CU-03 → Test
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `CambiarEstadoMesaAsync_WithValidData_UpdatesStatusAndEmitsEvent` | `CambiarEstadoMesa_WithValidState_Returns200Ok` |
-| 1a. GUID malformado | `400 Bad Request` | — *(validación de ruta en controller)* | `CambiarEstadoMesa_WithInvalidGuid_Returns400BadRequest` |
-| 2a. Estado no permitido | `400 Bad Request` | — *(deserialización / validación DTO)* | `CambiarEstadoMesa_WithInvalidStateEnum_Returns400BadRequest` |
-| 3a. Mesa inexistente | `404 Not Found` | `CambiarEstadoMesaAsync_WhenMesaNotFound_ThrowsMesaNotFoundException` | `CambiarEstadoMesa_WhenNonExistent_Returns404NotFound` |
-| 3b. Rol no autorizado | `403 Forbidden` | `CambiarEstadoMesaAsync_WithoutGerenteRole_ThrowsUnauthorizedAccessException` | `CambiarEstadoMesa_WithUnauthorizedRole_Returns403Forbidden` |
-| 3c. Liberar mesa con reserva activa | `409 Conflict` | `CambiarEstadoMesaAsync_WhenHasActiveBooking_ThrowsMesaConReservaActivaException` | `CambiarEstadoMesa_WhenTableHasActiveBooking_Returns409Conflict` |
-| 3d. Conflicto concurrencia | `409 Conflict` | `CambiarEstadoMesaAsync_WhenConcurrencyConflict_ThrowsDbUpdateConcurrencyException` | `CambiarEstadoMesa_WhenConcurrencyConflict_Returns409Conflict` |
+| Flujo principal | `200 OK` | `CambiarEstadoMesaAsync_WithValidState_UpdatesMesaSuccessfully` | `CambiarEstadoMesa_Returns200OK` |
+| 2a. Estado no válido | `400 Bad Request` | `— (capturado por validación de enum en DTO)` | `CambiarEstadoMesa_WithInvalidState_Returns400BadRequest` |
+| 3a. Mesa inexistente | `404 Not Found` | `CambiarEstadoMesaAsync_WhenMesaNotFound_ThrowsMesaNoEncontradaException` | `CambiarEstadoMesa_NonExistingId_Returns404NotFound` |
+| 3b. Reserva en curso activa | `409 Conflict` | `CambiarEstadoMesaAsync_WhenReservaEnCurso_ThrowsMesaConReservaActivaException` | `CambiarEstadoMesa_WhenReservaEnCurso_Returns409Conflict` |
 
-> Regla de oro: la lógica de invariantes de mesa (como la no liberación con clientes activos) debe contar con tests unitarios independientes con mocks de repositorio, y tests de integración con cliente HTTP para corroborar los códigos de estado.
+> Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
+> resueltos en la Capa de Presentación el test aplicable es el de integración
+> HTTP, ya que la lógica de negocio no se invoca. Los tests se ejecutan con
+> `dotnet test ReservaRestaurantes.slnx`.
