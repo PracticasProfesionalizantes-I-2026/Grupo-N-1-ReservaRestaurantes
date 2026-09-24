@@ -11,6 +11,7 @@ public class Reserva
     public int CantidadComensales { get; set; }
     public int DuracionEstimadaMinutos { get; set; } = 120;
     public ReservaEstado Estado { get; set; } = ReservaEstado.Pendiente;
+    //public ReservaX Estado { get; set; } = ReservaX.Pendiente;
     public string? Observaciones { get; set; }
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 
