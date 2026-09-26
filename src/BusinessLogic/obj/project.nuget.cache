@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Ov8MPV2lSo4=",
+  "dgSpecHash": "WsZ6WBqewVc=",
   "success": true,
-  "projectFilePath": "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
+  "projectFilePath": "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\jerob\\.nuget\\packages\\microsoft.data.sqlite.core\\10.0.12\\microsoft.data.sqlite.core.10.0.12.nupkg.sha512",
     "C:\\Users\\jerob\\.nuget\\packages\\microsoft.entityframeworkcore\\10.0.12\\microsoft.entityframeworkcore.10.0.12.nupkg.sha512",

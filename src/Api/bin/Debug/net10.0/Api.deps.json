@@ -11,6 +11,7 @@
           "BusinessLogic": "1.0.0",
           "DataAccess": "1.0.0",
           "Microsoft.AspNetCore.OpenApi": "10.0.12",
+          "Migrations": "1.0.0",
           "Scalar.AspNetCore": "2.17.5",
           "Shared": "1.0.0",
           "Swashbuckle.AspNetCore": "10.2.3"
@@ -323,6 +324,18 @@
           }
         }
       },
+      "Migrations/1.0.0": {
+        "dependencies": {
+          "DataAccess": "1.0.0",
+          "Microsoft.EntityFrameworkCore.Sqlite": "10.0.12"
+        },
+        "runtime": {
+          "Migrations.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
       "Shared/1.0.0": {
         "runtime": {
           "Shared.dll": {
@@ -471,6 +484,11 @@
       "sha512": ""
     },
     "DataAccess/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Migrations/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

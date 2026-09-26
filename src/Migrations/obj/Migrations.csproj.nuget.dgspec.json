@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj": {}
+    "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj": {}
   },
   "projects": {
-    "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
+    "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
+        "projectUniqueName": "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
         "projectName": "DataAccess",
-        "projectPath": "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
+        "projectPath": "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
         "packagesPath": "C:\\Users\\jerob\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\obj\\",
+        "outputPath": "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\jerob\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -29,8 +29,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
-                "projectPath": "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
+              "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+                "projectPath": "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
               }
             }
           }
@@ -357,14 +357,14 @@
         }
       }
     },
-    "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj": {
+    "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj",
+        "projectUniqueName": "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj",
         "projectName": "Migrations",
-        "projectPath": "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj",
+        "projectPath": "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj",
         "packagesPath": "C:\\Users\\jerob\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\obj\\",
+        "outputPath": "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\jerob\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -382,8 +382,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
-                "projectPath": "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
+              "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
+                "projectPath": "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
               }
             }
           }
@@ -710,14 +710,14 @@
         }
       }
     },
-    "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+    "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
+        "projectUniqueName": "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
         "projectName": "Shared",
-        "projectPath": "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
+        "projectPath": "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
         "packagesPath": "C:\\Users\\jerob\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\obj\\",
+        "outputPath": "C:\\Users\\jerob\\OneDrive\\Documentos\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\jerob\\AppData\\Roaming\\NuGet\\NuGet.Config",

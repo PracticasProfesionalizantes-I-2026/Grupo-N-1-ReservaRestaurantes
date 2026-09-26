@@ -6,7 +6,7 @@ using Shared.Exceptions;
 namespace Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class ClientesController : ControllerBase
 {
     private readonly IClienteService _clienteService;
@@ -29,7 +29,7 @@ public class ClientesController : ControllerBase
         // Esto es redundante pero lo dejamos para entender api[controller]
         if (!ModelState.IsValid)
         {
-            return BadRequest(ModelState); // Devuelve HTTP 400
+            return ValidationProblem(ModelState); // Devuelve HTTP 400
         }
 
         try
@@ -43,7 +43,7 @@ public class ClientesController : ControllerBase
         catch (ConflictException ex)
         {
             // Captura de excepción de regla de negocio RN-01 -> HTTP 409
-            return Conflict(new { message = ex.Message });
+            return Problem(detail: ex.Message, statusCode: 409, title: "Conflicto de Regla de Negocio");
         }
     }
 
