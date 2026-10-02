@@ -1,9 +1,12 @@
+using System.Text;
 using BusinessLogic;
 using DataAccess.Context;
 using DataAccess.Data;
 using DataAccess.Repositories.Implementations;
 using DataAccess.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +25,30 @@ builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
 
 // Registro de Servicios (BusinessLogic)
 builder.Services.AddBusinessLogic();
+
+// Configuración de Autenticación JWT Bearer (CU-05)
+var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] ?? "SuperSecretKey_GrupoN1_ReservaRestaurantes_2026!";
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "ReservaRestaurantesApi";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "ReservaRestaurantesUsers";
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
+    };
+});
 
 // Controladores y documentación API
 builder.Services.AddControllers();
@@ -49,6 +76,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

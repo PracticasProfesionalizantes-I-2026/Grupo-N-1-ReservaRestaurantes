@@ -1,3 +1,5 @@
+using BusinessLogic.Auth.Implementations;
+using BusinessLogic.Auth.Interfaces;
 using BusinessLogic.Cliente.Implementations;
 using BusinessLogic.Cliente.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +12,10 @@ public static class DependencyInjection
     {
         // Registro del servicio del Caso de Uso CU-04 (Cliente)
         services.AddScoped<IClienteService, ClienteService>();
+
+        // Registro de servicios de Autenticación / JWT (CU-05)
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
