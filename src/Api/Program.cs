@@ -16,7 +16,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
                        ?? "Data Source=restaurant.db";
 
 builder.Services.AddDbContext<RestaurantDbContext>(options =>
-    options.UseSqlite(connectionString, b => b.MigrationsAssembly("Migrations")));
+    options.UseSqlite(connectionString, b => b.MigrationsAssembly("Migrations"))
+           .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
 
 // Registro de Repositorios (DataAccess)
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();

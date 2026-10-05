@@ -9,8 +9,8 @@ public static class DbInitializer
 {
     public static async Task InitializeAsync(RestaurantDbContext context)
     {
-        // Aplica migraciones pendientes en la base de datos SQLite
-        await context.Database.MigrateAsync();
+        // Asegura la creación de la base de datos SQLite y sus tablas
+        await context.Database.EnsureCreatedAsync();
 
         // Si ya hay clientes cargados, la base ya fue inicializada
         if (await context.Clientes.AnyAsync())

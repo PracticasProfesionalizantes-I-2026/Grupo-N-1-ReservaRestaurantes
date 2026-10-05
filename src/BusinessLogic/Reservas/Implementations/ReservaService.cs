@@ -1,0 +1,137 @@
+using BusinessLogic.Reservas.Interfaces;
+using DataAccess.Context;
+using DataAccess.Entities;
+using Microsoft.EntityFrameworkCore;
+using Shared.DTOs.Reservas;
+using Shared.Enums;
+using Shared.Exceptions;
+using ClienteEntity = DataAccess.Entities.Cliente;
+
+namespace BusinessLogic.Reservas.Implementations;
+
+public class ReservaService : IReservaService
+{
+    private readonly RestaurantDbContext _context;
+    private const int DuracionEstándarMinutos = 120;
+
+    public ReservaService(RestaurantDbContext context)
+    {
+        _context = context ?? throw new ArgumentNullException(nameof(context));
+    }
+
+    public async Task<ReservaResponseDTO> SolicitarReservaAsync(Guid clienteId, ReservaSolicitudDTO dto)
+    {
+        // 1. Validar RN-03: Franja horaria operativa (ejemplo: 12:00-16:00 o 20:00-00:00)
+        ValidarFranjaHoraria(dto.FechaHora);
+
+        // 2. Validar que el cliente exista
+        var cliente = await _context.Clientes.FindAsync(clienteId)
+            ?? throw new NotFoundException(nameof(ClienteEntity), clienteId);
+
+        // 3. Validar reserva activa duplicada del cliente en el mismo turno
+        var finReservaSolicitada = dto.FechaHora.AddMinutes(DuracionEstándarMinutos);
+        var tieneReservaActiva = await _context.Reservas
+            .AnyAsync(r => r.ClienteId == clienteId &&
+                           r.Estado != ReservaEstado.Cancelada &&
+                           r.Estado != ReservaEstado.Finalizada &&
+                           r.FechaHora < finReservaSolicitada &&
+                           r.FechaHora.AddMinutes(r.DuracionEstimadaMinutos) > dto.FechaHora);
+
+        if (tieneReservaActiva)
+        {
+            throw new ReservaDuplicadaClienteException();
+        }
+
+        // 4. Validar RN-01 y RN-02: Buscar mesa con capacidad suficiente sin solapamiento
+        var mesasCandidatas = await _context.Mesas
+            .Where(m => m.Activa && m.Capacidad >= dto.CantidadComensales)
+            .OrderBy(m => m.Capacidad) // Asigna la mesa óptima (menor desperdicio de sillas)
+            .ToListAsync();
+
+        Mesa? mesaAsignada = null;
+
+        foreach (var mesa in mesasCandidatas)
+        {
+            var solapada = await _context.Reservas
+                .AnyAsync(r => r.MesaId == mesa.Id &&
+                               r.Estado != ReservaEstado.Cancelada &&
+                               r.FechaHora < finReservaSolicitada &&
+                               r.FechaHora.AddMinutes(r.DuracionEstimadaMinutos) > dto.FechaHora);
+
+            if (!solapada)
+            {
+                mesaAsignada = mesa;
+                break;
+            }
+        }
+
+        // 5. RN-04: Si no hay mesas libres, disparar excepción para derivar a Lista de Espera
+        if (mesaAsignada == null)
+        {
+            throw new SinDisponibilidadException();
+        }
+
+        // 6. Mapear y Persistir en SQLite (La Despensa)
+        var nuevaReserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            ClienteId = clienteId,
+            MesaId = mesaAsignada.Id,
+            FechaHora = dto.FechaHora,
+            CantidadComensales = dto.CantidadComensales,
+            DuracionEstimadaMinutos = DuracionEstándarMinutos,
+            Estado = ReservaEstado.Pendiente,
+            Observaciones = dto.Observaciones,
+            FechaCreacion = DateTime.UtcNow
+        };
+
+        await _context.Reservas.AddAsync(nuevaReserva);
+        await _context.SaveChangesAsync();
+
+        // 7. Retornar DTO de respuesta
+        return MapToResponseDTO(nuevaReserva, cliente, mesaAsignada);
+    }
+
+    public async Task<ReservaResponseDTO?> GetByIdAsync(Guid id)
+    {
+        var reserva = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .FirstOrDefaultAsync(r => r.Id == id);
+
+        if (reserva == null) return null;
+
+        return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
+    }
+
+    private static void ValidarFranjaHoraria(DateTime fechaHora)
+    {
+        var hora = fechaHora.TimeOfDay;
+        var esTurnoAlmuerzo = hora >= new TimeSpan(12, 0, 0) && hora <= new TimeSpan(15, 30, 0);
+        var esTurnoCena = hora >= new TimeSpan(20, 0, 0) && hora <= new TimeSpan(23, 30, 0);
+
+        if (!esTurnoAlmuerzo && !esTurnoCena)
+        {
+            throw new HorarioNoHabilitadoException();
+        }
+    }
+
+    private static ReservaResponseDTO MapToResponseDTO(Reserva r, ClienteEntity c, Mesa m) => new()
+    {
+        Id = r.Id,
+        ClienteId = c.Id,
+        ClienteNombreCompleto = $"{c.Nombre} {c.Apellido}",
+        ClienteEmail = c.Email,
+        ClienteTelefono = c.Telefono,
+        MesaId = m.Id,
+        MesaNumero = m.Numero,
+        MesaCapacidad = m.Capacidad,
+        MesaUbicacion = m.Ubicacion,
+        FechaHora = r.FechaHora,
+        CantidadComensales = r.CantidadComensales,
+        DuracionEstimadaMinutos = r.DuracionEstimadaMinutos,
+        Estado = r.Estado,
+        Observaciones = r.Observaciones,
+        FechaCreacion = r.FechaCreacion
+    };
+}

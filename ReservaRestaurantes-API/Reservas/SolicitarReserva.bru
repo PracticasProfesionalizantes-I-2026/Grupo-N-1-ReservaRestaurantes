@@ -1,0 +1,23 @@
+meta {
+  name: Solicitar Reserva (CU-01)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/reservas/solicitar
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
+
+body:json {
+  {
+    "fechaHora": "2026-10-15T21:00:00",
+    "cantidadComensales": 4,
+    "observaciones": "Mesa cerca de la ventana si es posible"
+  }
+}
