@@ -64,4 +64,41 @@ public class ReservasController : ControllerBase
         if (result == null) return NotFound();
         return Ok(result);
     }
+
+    /// <summary>
+    /// CU-07: Cancelar Reserva (Cliente)
+    /// </summary>
+    [HttpPatch("{id:guid}/cancelar")]
+    [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ReservaResponseDTO>> Cancelar(Guid id, [FromBody] ReservaCancelarDTO? dto)
+    {
+        // Obtener ClienteId desde el Token JWT
+        var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                          ?? User.FindFirst("sub")?.Value;
+
+        if (!Guid.TryParse(clienteIdClaim, out var clienteId))
+        {
+            return Unauthorized(new { message = "Token de autenticación no válido o expirado." });
+        }
+
+        try
+        {
+            var result = await _reservaService.CancelarReservaClienteAsync(id, clienteId, dto);
+            return Ok(result);
+        }
+        catch (ReservaNoEncontradaException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reserva No Encontrada");
+        }
+        catch (TransicionEstadoInvalidaException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado No Cancelable");
+        }
+    }
 }
+
+
