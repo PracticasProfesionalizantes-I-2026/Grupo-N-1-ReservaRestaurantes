@@ -247,15 +247,3 @@ C:\GitHub\Grupo-N-1-ReservaRestaurantes\src\Api\obj\Debug\net10.0\refint\Api.dll
 C:\GitHub\Grupo-N-1-ReservaRestaurantes\src\Api\obj\Debug\net10.0\Api.pdb
 C:\GitHub\Grupo-N-1-ReservaRestaurantes\src\Api\obj\Debug\net10.0\Api.genruntimeconfig.cache
 C:\GitHub\Grupo-N-1-ReservaRestaurantes\src\Api\obj\Debug\net10.0\ref\Api.dll
-C:\Users\Marti\OneDrive\Documentos\Grupo-N-1-ReservaRestaurantes\src\Api\bin\Debug\net10.0\BCrypt-Net-Next.dll
-C:\Users\Marti\OneDrive\Documentos\Grupo-N-1-ReservaRestaurantes\src\Api\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
-C:\Users\Marti\OneDrive\Documentos\Grupo-N-1-ReservaRestaurantes\src\Api\bin\Debug\net10.0\Microsoft.Bcl.Cryptography.dll
-C:\Users\Marti\OneDrive\Documentos\Grupo-N-1-ReservaRestaurantes\src\Api\bin\Debug\net10.0\Microsoft.IdentityModel.Abstractions.dll
-C:\Users\Marti\OneDrive\Documentos\Grupo-N-1-ReservaRestaurantes\src\Api\bin\Debug\net10.0\Microsoft.IdentityModel.JsonWebTokens.dll
-C:\Users\Marti\OneDrive\Documentos\Grupo-N-1-ReservaRestaurantes\src\Api\bin\Debug\net10.0\Microsoft.IdentityModel.Logging.dll
-C:\Users\Marti\OneDrive\Documentos\Grupo-N-1-ReservaRestaurantes\src\Api\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.dll
-C:\Users\Marti\OneDrive\Documentos\Grupo-N-1-ReservaRestaurantes\src\Api\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
-C:\Users\Marti\OneDrive\Documentos\Grupo-N-1-ReservaRestaurantes\src\Api\bin\Debug\net10.0\Microsoft.IdentityModel.Tokens.dll
-C:\Users\Marti\OneDrive\Documentos\Grupo-N-1-ReservaRestaurantes\src\Api\bin\Debug\net10.0\System.IdentityModel.Tokens.Jwt.dll
-C:\Users\Marti\OneDrive\Documentos\Grupo-N-1-ReservaRestaurantes\src\Api\bin\Debug\net10.0\Migrations.dll
-C:\Users\Marti\OneDrive\Documentos\Grupo-N-1-ReservaRestaurantes\src\Api\bin\Debug\net10.0\Migrations.pdb

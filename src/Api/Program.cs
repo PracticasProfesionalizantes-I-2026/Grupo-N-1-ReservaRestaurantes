@@ -104,9 +104,8 @@ if (app.Environment.IsDevelopment())
                .AddPreferredSecuritySchemes("Bearer")
                .AddHttpAuthentication("Bearer", auth =>
                {
-                   auth.Token = builder.Configuration["Scalar:DefaultToken"] ?? string.Empty;
-               })
-               .EnablePersistentAuthentication();
+                   auth.Token = string.Empty;
+               });
     });
 }
 
