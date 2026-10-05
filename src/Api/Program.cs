@@ -1,9 +1,13 @@
+using System.Text;
 using BusinessLogic;
 using DataAccess.Context;
 using DataAccess.Data;
 using DataAccess.Repositories.Implementations;
 using DataAccess.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +17,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
                        ?? "Data Source=restaurant.db";
 
 builder.Services.AddDbContext<RestaurantDbContext>(options =>
-    options.UseSqlite(connectionString, b => b.MigrationsAssembly("Migrations")));
+    options.UseSqlite(connectionString, b => b.MigrationsAssembly("Migrations"))
+           .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning)));
 
 // Registro de Repositorios (DataAccess)
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
@@ -23,11 +28,59 @@ builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
 // Registro de Servicios (BusinessLogic)
 builder.Services.AddBusinessLogic();
 
+// Configuración de Autenticación JWT Bearer (CU-05)
+var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] ?? "SuperSecretKey_GrupoN1_ReservaRestaurantes_2026!";
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "ReservaRestaurantesApi";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "ReservaRestaurantesUsers";
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
+    };
+});
+
 // Controladores y documentación API
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddOpenApi();
+
+// OpenAPI con esquema de seguridad Bearer JWT para Scalar
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, ct) =>
+    {
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+        document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Description = "Ingresá el token JWT obtenido del endpoint /api/v1/Auth/login"
+        };
+
+        document.Security ??= new List<OpenApiSecurityRequirement>();
+        document.Security.Add(new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
+        });
+
+        return Task.CompletedTask;
+    });
+});
 
 var app = builder.Build();
 
@@ -44,11 +97,22 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("Reserva Restaurantes API")
+               .WithDefaultHttpClient(ScalarTarget.Shell, ScalarClient.Curl)
+               .AddPreferredSecuritySchemes("Bearer")
+               .AddHttpAuthentication("Bearer", auth =>
+               {
+                   auth.Token = builder.Configuration["Scalar:DefaultToken"] ?? string.Empty;
+               })
+               .EnablePersistentAuthentication();
+    });
 }
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

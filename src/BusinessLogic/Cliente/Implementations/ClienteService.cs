@@ -34,6 +34,7 @@ public class ClienteService : IClienteService
             Apellido = dto.Apellido.Trim(),
             Email = emailNormalized,
             Telefono = dto.Telefono.Trim(),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
             FechaRegistro = DateTime.UtcNow
         };
 

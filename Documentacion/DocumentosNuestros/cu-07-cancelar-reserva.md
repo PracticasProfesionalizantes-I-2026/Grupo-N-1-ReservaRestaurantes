@@ -14,7 +14,7 @@
 | **Stakeholders e intereses** | Cliente → cancelar un turno al que no asistirá; Restaurante → liberar la mesa con anticipación para otros comensales o lista de espera; Clientes en espera → oportunidad de obtener una mesa. |
 | **Disparador (Trigger)** | El cliente selecciona la opción "Cancelar Reserva" en su panel de reservas. |
 | **Prioridad / Frecuencia** | Alta; media frecuencia |
-| **Reglas de negocio relacionadas** | RN-01 (el cliente solo podrá cancelar sus propias reservas); RN-02 (no se puede cancelar una reserva en estado En curso o Finalizada); RN-03 (la mesa asignada debe quedar liberada inmediatamente) |
+| **Reglas de negocio relacionadas** | RN-02 (no se puede cancelar una reserva en estado En curso o Finalizada); RN-03 (la mesa asignada debe quedar liberada inmediatamente) |
 
 ---
 
