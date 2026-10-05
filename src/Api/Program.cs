@@ -55,7 +55,38 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddOpenApi();
+
+// OpenAPI con esquema de seguridad Bearer JWT para Scalar
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, ct) =>
+    {
+        document.Components ??= new();
+        document.Components.SecuritySchemes ??= new Dictionary<string, Microsoft.OpenApi.Models.OpenApiSecurityScheme>();
+        document.Components.SecuritySchemes["Bearer"] = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+        {
+            Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Description = "Ingresá el token JWT obtenido del endpoint /api/v1/Auth/login"
+        };
+        document.SecurityRequirements ??= new List<Microsoft.OpenApi.Models.OpenApiSecurityRequirement>();
+        document.SecurityRequirements.Add(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+        {
+            [
+                new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                    {
+                        Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                }
+            ] = Array.Empty<string>()
+        });
+        return Task.CompletedTask;
+    });
+});
 
 var app = builder.Build();
 
@@ -72,7 +103,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("Reserva Restaurantes API")
+               .WithDefaultHttpClient(ScalarTarget.Shell, ScalarClient.Curl)
+               .WithPreferredScheme("Bearer")
+               .WithHttpBearerAuthentication(bearer =>
+               {
+                   bearer.Token = string.Empty; // el usuario lo completa en la UI
+               });
+    });
 }
 
 app.UseHttpsRedirection();
