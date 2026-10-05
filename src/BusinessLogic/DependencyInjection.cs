@@ -23,5 +23,7 @@ public static class DependencyInjection
         services.AddScoped<IReservaService, ReservaService>();
 
         return services;
+
+        
     }
 }

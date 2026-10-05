@@ -134,4 +134,39 @@ public class ReservaService : IReservaService
         Observaciones = r.Observaciones,
         FechaCreacion = r.FechaCreacion
     };
+    public async Task<ReservaResponseDTO> CancelarReservaClienteAsync(Guid reservaId, Guid clienteId, ReservaCancelarDTO? dto = null)
+    {
+        // 1. Validar que la reserva exista
+        var reserva = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .FirstOrDefaultAsync(r => r.Id == reservaId)
+         ?? throw new 
+         ReservaNoEncontradaException(reservaId);
+        
+        // 3. Verificar RN-02: Solo se pueden cancelar reservas en estado Pendiente o Confirmada
+
+        if (reserva.Estado == ReservaEstado.Cancelada || 
+            reserva.Estado == ReservaEstado.EnCurso || 
+            reserva.Estado == ReservaEstado.Finalizada)
+    {
+        throw new TransicionEstadoInvalidaException(
+            $"No es posible cancelar una reserva que se encuentra en estado '{reserva.Estado}'.");
+    }
+
+    // 4. Aplicar cambios (RN-03: Liberación de la mesa al pasar a estado Cancelada)
+
+        reserva.Estado = ReservaEstado.Cancelada;
+        if (!string.IsNullOrWhiteSpace(dto?.Motivo))
+        {
+         reserva.Observaciones = string.IsNullOrEmpty(reserva.Observaciones) 
+             ? $"[Motivo Cancelación: {dto.Motivo}]" 
+             : $"{reserva.Observaciones} | [Motivo Cancelación: {dto.Motivo}]";
+        }
+    // 5. Persistir cambios
+        await _context.SaveChangesAsync();
+    // 6. Retornar DTO con la reserva actualizada
+        return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
+    } 
 }
+
