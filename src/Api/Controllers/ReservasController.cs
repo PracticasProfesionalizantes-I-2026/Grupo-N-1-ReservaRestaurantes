@@ -99,6 +99,25 @@ public class ReservasController : ControllerBase
             return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado No Cancelable");
         }
     }
+
+    /// <summary>
+    /// CU-06: Filtrar reservas por fecha
+    /// </summary>
+    [HttpGet("fecha/{fecha:datetime}")]
+    [ProducesResponseType(typeof(IEnumerable<ReservaResponseDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<IEnumerable<ReservaResponseDTO>>> FiltrarPorFecha(DateTime fecha)
+    {
+        // Obtener ClienteId desde el Token JWT
+        var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                          ?? User.FindFirst("sub")?.Value;
+
+        if (!Guid.TryParse(clienteIdClaim, out var clienteId))
+        {
+            return Unauthorized(new { message = "Token de autenticación no válido o expirado." });
+        }
+
+        var reservas = await _reservaService.FiltrarPorFechaAsync(clienteId, fecha);
+        return Ok(reservas);
+    }
 }
-
-

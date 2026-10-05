@@ -168,5 +168,18 @@ public class ReservaService : IReservaService
     // 6. Retornar DTO con la reserva actualizada
         return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
     } 
-}
 
+    public async Task<IEnumerable<ReservaResponseDTO>> FiltrarPorFechaAsync(Guid clienteId, DateTime fecha)
+    {
+        var fechaBuscada = fecha.Date;
+        
+        var reservas = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .Where(r => r.ClienteId == clienteId && r.FechaHora.Date == fechaBuscada)
+            .OrderBy(r => r.FechaHora)
+            .ToListAsync();
+
+        return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
+    }
+}
