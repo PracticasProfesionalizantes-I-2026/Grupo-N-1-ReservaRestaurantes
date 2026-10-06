@@ -297,7 +297,39 @@ public class ReservaService : IReservaService
         // 6. Retornar DTO con el estado actualizado
         return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
     }
-    
+
+    public async Task<ReservaResponseDTO> RechazarReservaAsync(Guid reservaId)
+    {
+        // 1. Buscar la reserva
+        var reserva = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .FirstOrDefaultAsync(r => r.Id == reservaId)
+            ?? throw new ReservaNoEncontradaException(reservaId);
+
+        // 2. Validar RN-02: Solo se pueden rechazar reservas en estado Pendiente
+        if (reserva.Estado != ReservaEstado.Pendiente)
+        {
+            throw new TransicionEstadoInvalidaException(
+                $"Solo pueden rechazarse reservas en estado Pendiente. Estado actual: '{reserva.Estado}'.");
+        }
+
+        // 3. Cambiar estado a Cancelada ya que no existe estado rechazada
+        reserva.Estado = ReservaEstado.Cancelada;
+
+        // 4. Liberar la mesa 
+        if (reserva.Mesa != null)
+        {
+            reserva.Mesa.Estado = MesaEstado.Libre;
+        }
+
+        // 5. Persistir los cambios
+        await _context.SaveChangesAsync();
+
+        // 6. Retornar DTO
+        return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
+    }
+
 
 
 
