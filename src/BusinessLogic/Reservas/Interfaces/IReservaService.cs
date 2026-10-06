@@ -10,4 +10,6 @@ public interface IReservaService
     Task<IEnumerable<ReservaResponseDTO>> FiltrarPorFechaAsync(Guid clienteId, DateTime fecha);
     Task<ReservaResponseDTO> ConfirmarReservaAsync(Guid reservaId);
     Task<ReservaResponseDTO> IniciarReservaAsync(Guid reservaId);
+    Task<ReservaResponseDTO> FinalizarReservaAsync(Guid reservaId);
+    Task<ReservaResponseDTO> CancelarReservaGerenteAsync(Guid reservaId);
 }
