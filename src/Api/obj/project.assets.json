@@ -1506,11 +1506,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj",
+      "projectUniqueName": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj",
       "projectName": "Api",
-      "projectPath": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj",
+      "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj",
       "packagesPath": "C:\\Users\\jerob\\.nuget\\packages\\",
-      "outputPath": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\obj\\",
+      "outputPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\jerob\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -1528,17 +1528,17 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-            "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj": {
-              "projectPath": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj"
+            "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj": {
+              "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj"
             },
-            "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
-              "projectPath": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
+            "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
+              "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
             },
-            "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj": {
-              "projectPath": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj"
+            "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj": {
+              "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj"
             },
-            "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
-              "projectPath": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
+            "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+              "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
             }
           }
         }

@@ -35,7 +35,7 @@ public class ReservasController : ControllerBase
         }
 
         // Obtener ClienteId desde el Token JWT (soporta ClaimTypes.NameIdentifier y 'sub')
-        var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+        var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                           ?? User.FindFirst("sub")?.Value;
         if (!Guid.TryParse(clienteIdClaim, out var clienteId))
         {
@@ -77,7 +77,7 @@ public class ReservasController : ControllerBase
     public async Task<ActionResult<ReservaResponseDTO>> Cancelar(Guid id, [FromBody] ReservaCancelarDTO? dto)
     {
         // Obtener ClienteId desde el Token JWT
-        var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+        var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                           ?? User.FindFirst("sub")?.Value;
 
         if (!Guid.TryParse(clienteIdClaim, out var clienteId))
@@ -109,7 +109,7 @@ public class ReservasController : ControllerBase
     public async Task<ActionResult<IEnumerable<ReservaResponseDTO>>> FiltrarPorFecha(DateTime fecha)
     {
         // Obtener ClienteId desde el Token JWT
-        var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+        var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                           ?? User.FindFirst("sub")?.Value;
 
         if (!Guid.TryParse(clienteIdClaim, out var clienteId))
@@ -120,12 +120,12 @@ public class ReservasController : ControllerBase
         var reservas = await _reservaService.FiltrarPorFechaAsync(clienteId, fecha);
         return Ok(reservas);
     }
-    
+
     /// <summary>
     /// Confirmar Reserva (Solo Gerentes)
     /// </summary>
     [HttpPut("{id:guid}/confirmar")]
-    [Authorize(Roles = "Gerente")] 
+    [Authorize(Roles = "Gerente")]
     [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -153,7 +153,7 @@ public class ReservasController : ControllerBase
         }
     }
 
-    
+
     /// <summary>
     /// CU-13: Iniciar Reserva (Check-In)
     /// </summary>
@@ -252,5 +252,37 @@ public class ReservasController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// CU-16: Rechazar Reserva (Gerente) - Solo aplica a reservas Pendientes
+    /// </summary>
+    [HttpPatch("{id:guid}/rechazar")]
+    [Authorize(Roles = "Gerente")]
+    [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ReservaResponseDTO>> RechazarReserva(Guid id)
+    {
+        try
+        {
+            var result = await _reservaService.RechazarReservaAsync(id);
+            return Ok(result);
+        }
+        catch (ReservaNoEncontradaException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reserva No Encontrada");
+        }
+        catch (TransicionEstadoInvalidaException ex)
+        {
+            // 409 Conflict si la reserva no estaba en Pendiente
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado Inválido para Rechazar");
+        }
+        catch (Exception ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
+        }
+    }
 
 }
