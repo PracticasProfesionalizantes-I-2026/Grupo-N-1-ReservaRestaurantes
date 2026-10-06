@@ -237,5 +237,71 @@ public class ReservaService : IReservaService
         return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
     }
 
+    public async Task<ReservaResponseDTO> FinalizarReservaAsync(Guid reservaId)
+    {
+        // 1. Buscar la reserva incluyendo la entidad Mesa para poder liberarla
+        var reserva = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .FirstOrDefaultAsync(r => r.Id == reservaId)
+            ?? throw new ReservaNoEncontradaException(reservaId);
+
+        // 2. Validar RN-01: Solo se pueden finalizar reservas que están en curso
+        if (reserva.Estado != ReservaEstado.EnCurso)
+        {
+            throw new TransicionEstadoInvalidaException(
+                $"Solo es posible finalizar reservas que se encuentren en curso. Estado actual: '{reserva.Estado}'.");
+        }
+
+        // 3. Aplicar RN-02: Finalizar la reserva y LIBERAR la mesa
+        reserva.Estado = ReservaEstado.Finalizada;
+        reserva.Mesa.Estado = MesaEstado.Libre;
+
+        // 4. Guardar cambios en base de datos
+        await _context.SaveChangesAsync();
+
+        // 5. Retornar DTO con el estado final
+        return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
+    }
+    
+    public async Task<ReservaResponseDTO> CancelarReservaGerenteAsync(Guid reservaId)
+    {
+        // 1. Buscar la reserva incluyendo la Mesa (necesitamos liberarla)
+        var reserva = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .FirstOrDefaultAsync(r => r.Id == reservaId)
+            ?? throw new ReservaNoEncontradaException(reservaId);
+
+        // 2. Validar que la reserva NO esté ya en un estado final (no tiene sentido cancelar algo ya concluido)
+        if (reserva.Estado == ReservaEstado.Cancelada ||
+            reserva.Estado == ReservaEstado.Finalizada ||
+            reserva.Estado == ReservaEstado.NoShow)
+        {
+            throw new TransicionEstadoInvalidaException(
+                $"No es posible cancelar una reserva que ya se encuentra en estado '{reserva.Estado}'.");
+        }
+
+        // 3. Cambiar estado de la reserva
+        reserva.Estado = ReservaEstado.Cancelada;
+
+        // 4. Liberar la mesa inmediatamente (RN-03)
+        if (reserva.Mesa != null)
+        {
+            reserva.Mesa.Estado = MesaEstado.Libre;
+        }
+
+        // 5. Persistir los cambios
+        await _context.SaveChangesAsync();
+
+        // 6. Retornar DTO con el estado actualizado
+        return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
+    }
+    
+
+
+
+
+
 
 }

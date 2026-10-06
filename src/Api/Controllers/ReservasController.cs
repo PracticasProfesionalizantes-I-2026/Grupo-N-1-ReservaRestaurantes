@@ -187,5 +187,70 @@ public class ReservasController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// CU-14: Finalizar Reserva (Check-Out y liberar mesa)
+    /// </summary>
+    [HttpPatch("{id:guid}/finalizar")]
+    [Authorize(Roles = "Gerente")] // RN-03
+    [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ReservaResponseDTO>> FinalizarReserva(Guid id)
+    {
+        try
+        {
+            var result = await _reservaService.FinalizarReservaAsync(id);
+            return Ok(result);
+        }
+        catch (ReservaNoEncontradaException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reserva No Encontrada");
+        }
+        catch (TransicionEstadoInvalidaException ex)
+        {
+            // Retorna 409 Conflict si la reserva no estaba EnCurso
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado Inválido para Finalizar");
+        }
+        catch (Exception ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
+        }
+    }
+
+    /// <summary>
+    /// CU-15: Cancelar Reserva (Gerente - Cancelación Manual)
+    /// </summary>
+    [HttpPatch("gerente/{id:guid}/cancelar")]
+    [Authorize(Roles = "Gerente")]
+    [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ReservaResponseDTO>> CancelarReservaGerente(Guid id)
+    {
+        try
+        {
+            var result = await _reservaService.CancelarReservaGerenteAsync(id);
+            return Ok(result);
+        }
+        catch (ReservaNoEncontradaException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reserva No Encontrada");
+        }
+        catch (TransicionEstadoInvalidaException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado Inválido para Cancelar");
+        }
+        catch (Exception ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
+        }
+    }
+
 
 }

@@ -5,6 +5,7 @@ using BusinessLogic.Cliente.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using BusinessLogic.Reservas.Implementations;
 using BusinessLogic.Reservas.Interfaces;
+using BusinessLogic.Workers;
 
 namespace BusinessLogic;
 
@@ -21,9 +22,12 @@ public static class DependencyInjection
 
         // Registro del servicio del Caso de Uso CU-01 (Reserva)
         services.AddScoped<IReservaService, ReservaService>();
-
-        return services;
-
         
+        // Registrar el servicio en segundo plano (Background Service)
+        services.AddHostedService<ReservaNoShowWorker>();
+
+        return services; 
     }
+    
 }
+
