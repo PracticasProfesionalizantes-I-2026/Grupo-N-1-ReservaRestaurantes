@@ -182,8 +182,6 @@ public class ReservaService : IReservaService
 
         return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
     }
-
-        // src/BusinessLogic/Reservas/Implementations/ReservaService.cs
     
     public async Task<ReservaResponseDTO> ConfirmarReservaAsync(Guid reservaId)
     {
@@ -210,5 +208,34 @@ public class ReservaService : IReservaService
         // 5. Retornar DTO
         return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
     }
+
+    
+    public async Task<ReservaResponseDTO> IniciarReservaAsync(Guid reservaId)
+    {
+        // 1. Buscar la reserva incluyendo la entidad Mesa (necesitamos actualizarla)
+        var reserva = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .FirstOrDefaultAsync(r => r.Id == reservaId)
+            ?? throw new ReservaNoEncontradaException(reservaId);
+
+        // 2. Validar RN-01: Solo se pueden iniciar reservas en estado Confirmada
+        if (reserva.Estado != ReservaEstado.Confirmada)
+        {
+            throw new TransicionEstadoInvalidaException(
+                $"No es posible iniciar una reserva que se encuentra en estado '{reserva.Estado}'. La reserva debe estar 'Confirmada' previamente.");
+        }
+
+        // 3. Aplicar RN-03: Cambiar estado de la reserva y de la mesa asignada
+        reserva.Estado = ReservaEstado.EnCurso;
+        reserva.Mesa.Estado = MesaEstado.Ocupada;
+
+        // 4. Persistir cambios en una única transacción automática de EF Core
+        await _context.SaveChangesAsync();
+
+        // 5. Retornar DTO con los datos actualizados
+        return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
+    }
+
 
 }

@@ -153,4 +153,39 @@ public class ReservasController : ControllerBase
         }
     }
 
+    
+    /// <summary>
+    /// CU-13: Iniciar Reserva (Check-In)
+    /// </summary>
+    [HttpPatch("{id:guid}/iniciar")]
+    [Authorize(Roles = "Gerente")] // RN-02
+    [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ReservaResponseDTO>> IniciarReserva(Guid id)
+    {
+        try
+        {
+            var result = await _reservaService.IniciarReservaAsync(id);
+            return Ok(result);
+        }
+        catch (ReservaNoEncontradaException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reserva No Encontrada");
+        }
+        catch (TransicionEstadoInvalidaException ex)
+        {
+            // Retorna 409 Conflict si la reserva no estaba Confirmada
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado Inválido para Iniciar");
+        }
+        catch (Exception ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
+        }
+    }
+
+
 }
