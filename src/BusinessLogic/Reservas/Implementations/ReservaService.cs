@@ -182,4 +182,33 @@ public class ReservaService : IReservaService
 
         return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
     }
+
+        // src/BusinessLogic/Reservas/Implementations/ReservaService.cs
+    
+    public async Task<ReservaResponseDTO> ConfirmarReservaAsync(Guid reservaId)
+    {
+        // 1. Validar que la reserva exista
+        var reserva = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .FirstOrDefaultAsync(r => r.Id == reservaId)
+            ?? throw new ReservaNoEncontradaException(reservaId);
+
+        // 2. Verificar regla de negocio: Solo se pueden confirmar reservas Pendientes
+        if (reserva.Estado != ReservaEstado.Pendiente)
+        {
+            throw new TransicionEstadoInvalidaException(
+                $"No es posible confirmar una reserva que se encuentra en estado '{reserva.Estado}'. Solo se admiten reservas Pendientes.");
+        }
+
+        // 3. Aplicar cambios
+        reserva.Estado = ReservaEstado.Confirmada;
+
+        // 4. Persistir cambios
+        await _context.SaveChangesAsync();
+
+        // 5. Retornar DTO
+        return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
+    }
+
 }

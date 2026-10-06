@@ -120,4 +120,37 @@ public class ReservasController : ControllerBase
         var reservas = await _reservaService.FiltrarPorFechaAsync(clienteId, fecha);
         return Ok(reservas);
     }
+    
+    /// <summary>
+    /// Confirmar Reserva (Solo Gerentes)
+    /// </summary>
+    [HttpPut("{id:guid}/confirmar")]
+    [Authorize(Roles = "Gerente")] 
+    [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ReservaResponseDTO>> ConfirmarReserva(Guid id)
+    {
+        try
+        {
+            var response = await _reservaService.ConfirmarReservaAsync(id);
+            return Ok(response);
+        }
+        catch (ReservaNoEncontradaException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reserva No Encontrada");
+        }
+        catch (TransicionEstadoInvalidaException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado Inválido para Confirmar");
+        }
+        catch (Exception ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
+        }
+    }
+
 }

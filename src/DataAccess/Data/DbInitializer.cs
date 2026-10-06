@@ -160,6 +160,33 @@ public static class DbInitializer
             Observaciones = "Almuerzo familiar con trona para niño",
             FechaCreacion = DateTime.UtcNow.AddHours(-12)
         };
+        
+        // Creamos gerente manualmente
+        var gerente = new Cliente
+        {
+            Id = Guid.NewGuid(),
+            Nombre = "Lucas",
+            Apellido = "Gerente",
+            Email = "gerente@restaurant.com",
+            Telefono = "1122334455",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Gerente123!"), 
+            Rol = "Gerente" 
+        };
+
+        // Creamos administrador manualmente
+        var admin = new Cliente
+        {
+            Id = Guid.NewGuid(),
+            Nombre = "Martin",
+            Apellido = "Admin",
+            Email = "admin@restaurant.com",
+            Telefono = "9988776655",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"), 
+            Rol = "Admin" 
+        };
+
+        await context.Clientes.AddRangeAsync(gerente, admin);
+
 
         await context.Reservas.AddRangeAsync(reserva1, reserva2);
 
