@@ -332,4 +332,26 @@ public class ReservasController : ControllerBase
     }
 
 
+    /// <summary>
+    /// CU-18: Ver listado de reservas en espera (Reservas Pendientes)
+    /// </summary>
+    [HttpGet("lista-espera")]
+    [Authorize] // Cualquier usuario logueado o podrías restringirlo a "Gerente" si lo requiere
+    [ProducesResponseType(typeof(IEnumerable<ReservaResponseDTO>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IEnumerable<ReservaResponseDTO>>> GetListaEspera()
+    {
+        try
+        {
+            // 1. Llamamos al servicio para obtener la lista
+            var result = await _reservaService.GetListaEsperaAsync();
+            
+            // 2. Si se obtuvo correctamente, devolvemos 200 OK
+            return Ok(result); // HTTP 200
+        }
+        catch (ListaEsperaVaciaException)
+        {
+            // HTTP 404: la lista de espera se encuentra vacía
+            return NotFound(new { mensaje = "No hay reservas en lista de espera." });
+        }
+    }
 }
