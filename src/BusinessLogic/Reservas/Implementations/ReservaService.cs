@@ -182,6 +182,25 @@ public class ReservaService : IReservaService
 
         return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
     }
+
+    public async Task<IEnumerable<ReservaResponseDTO>> GetListaEsperaAsync()
+    {
+        // El usuario definió que la lista de espera son simplemente las reservas en estado Pendiente
+        var reservas = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .Where(r => r.Estado == ReservaEstado.Pendiente)
+            .OrderBy(r => r.FechaHora)
+            .ThenBy(r => r.FechaCreacion)
+            .ToListAsync();
+
+        if (!reservas.Any())
+        {
+            throw new ListaEsperaVaciaException();
+        }
+
+        return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
+    }
     
     public async Task<ReservaResponseDTO> ConfirmarReservaAsync(Guid reservaId)
     {
