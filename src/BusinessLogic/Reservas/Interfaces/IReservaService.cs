@@ -13,4 +13,5 @@ public interface IReservaService
     Task<ReservaResponseDTO> FinalizarReservaAsync(Guid reservaId);
     Task<ReservaResponseDTO> CancelarReservaGerenteAsync(Guid reservaId);
     Task<ReservaResponseDTO> RechazarReservaAsync(Guid reservaId);
+    Task<ReservaResponseDTO> AsignarMesaAsync(Guid reservaId, int mesaId);
 }
