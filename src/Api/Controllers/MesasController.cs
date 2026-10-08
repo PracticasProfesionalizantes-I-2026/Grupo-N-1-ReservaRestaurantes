@@ -86,5 +86,29 @@ namespace Api.Controllers
                 return Conflict(new { mensaje = ex.Message });
             }
         }
+        // PATCH /api/mesas/{id}/estado — Cambiar Estado Mesa (CU-03)
+        [HttpPatch("{id:guid}/estado")]
+        public async Task<IActionResult> CambiarEstadoMesa(Guid id, [FromBody] MesaCambiarEstadoDTO dto)
+        {
+            try
+            {
+                // 1. Llamamos al servicio para cambiar el estado
+                var resultado = await _mesaService.CambiarEstadoMesaAsync(id, dto.NuevoEstado);
+
+                // 2. Si nos devuelve null, es porque no existe
+                if (resultado == null)
+                {
+                    return NotFound(new { mensaje = "Mesa no encontrada." }); // HTTP 404
+                }
+
+                // 3. Si se cambió con éxito, devolvemos 200 OK
+                return Ok(resultado); // HTTP 200
+            }
+            catch (MesaConReservaActivaException ex)
+            {
+                // HTTP 409: la mesa tiene una reserva en curso
+                return Conflict(new { mensaje = ex.Message });
+            }
+        }
     }
 }

@@ -9,6 +9,7 @@ public interface IMesaRepository
     Task<Mesa?> GetByNumeroAsync(int numero);
     Task<bool> ExistsByNumeroAsync(int numero, Guid? excludeId = null);
     Task<bool> HasReservationsAsync(Guid mesaId);
+    Task<bool> HasReservaEnCursoAsync(Guid mesaId);
     Task<IEnumerable<Mesa>> GetActiveTablesAsync();
     Task<Mesa> CreateAsync(Mesa mesa);
     Task UpdateAsync(Mesa mesa);
