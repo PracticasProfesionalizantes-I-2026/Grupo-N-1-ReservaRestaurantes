@@ -1484,11 +1484,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
+      "projectUniqueName": "c:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
       "projectName": "BusinessLogic",
-      "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
+      "projectPath": "c:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
       "packagesPath": "C:\\Users\\Marti\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\obj\\",
+      "outputPath": "c:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Marti\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -1506,11 +1506,11 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
-              "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
+            "c:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
+              "projectPath": "c:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
             },
-            "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
-              "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
+            "c:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+              "projectPath": "c:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
             }
           }
         }
