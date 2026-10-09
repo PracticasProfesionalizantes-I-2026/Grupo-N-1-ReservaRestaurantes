@@ -161,4 +161,17 @@ public class ReservaRepository : IReservaRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<IEnumerable<Reserva>> GetReservasOperativasAsync(DateTime? fecha = null)
+    {
+        var fechaConsulta = fecha?.Date ?? DateTime.Today;
+
+        return await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .Where(r => r.FechaHora.Date == fechaConsulta)
+            .OrderBy(r => r.FechaHora)
+            .ToListAsync();
+    }
 }
+

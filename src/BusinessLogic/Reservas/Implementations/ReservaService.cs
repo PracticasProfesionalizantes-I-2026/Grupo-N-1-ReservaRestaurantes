@@ -401,6 +401,25 @@ public class ReservaService : IReservaService
         return MapToResponseDTO(reserva, reserva.Cliente, mesa);
     }
 
+    public async Task<IEnumerable<ReservaResponseDTO>> GetTableroOperativoAsync(DateTime? fecha = null)
+    {
+        var fechaConsulta = fecha?.Date ?? DateTime.Today;
 
+        var reservas = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .Where(r => r.FechaHora.Date == fechaConsulta)
+            .OrderBy(r => r.FechaHora)
+            .ToListAsync();
 
+        if (!reservas.Any())
+        {
+            throw new SinReservasOperativasException();
+        }
+
+        return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
+    }
 }
+
+
+

@@ -12,4 +12,6 @@ public interface IReservaRepository
     Task<Reserva> CreateAsync(Reserva reserva);
     Task UpdateAsync(Reserva reserva);
     Task DeleteAsync(Guid id);
+    Task<IEnumerable<Reserva>> GetReservasOperativasAsync(DateTime? fecha = null);
 }
+

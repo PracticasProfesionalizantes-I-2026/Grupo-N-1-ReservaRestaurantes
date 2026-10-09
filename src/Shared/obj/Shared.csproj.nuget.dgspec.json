@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {}
+    "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {}
   },
   "projects": {
-    "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+    "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
+        "projectUniqueName": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
         "projectName": "Shared",
-        "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
-        "packagesPath": "C:\\Users\\jerob\\.nuget\\packages\\",
-        "outputPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\obj\\",
+        "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
+        "packagesPath": "C:\\Users\\jeronimo\\.nuget\\packages\\",
+        "outputPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\jerob\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\jeronimo\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
