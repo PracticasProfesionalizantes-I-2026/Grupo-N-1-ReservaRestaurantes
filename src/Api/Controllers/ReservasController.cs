@@ -333,27 +333,36 @@ public class ReservasController : ControllerBase
 
 
     /// <summary>
-    /// CU-18: Ver listado de reservas en espera (Reservas Pendientes)
+    /// CU-18: Ver listado de reservas en espera (Reservas Pendientes - Solo Gerente)
     /// </summary>
     [HttpGet("lista-espera")]
-    [Authorize] // Cualquier usuario logueado o podrías restringirlo a "Gerente" si lo requiere
+    [Authorize(Roles = "Gerente")]
     [ProducesResponseType(typeof(IEnumerable<ReservaResponseDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<ReservaResponseDTO>>> GetListaEspera()
     {
         try
         {
-            // 1. Llamamos al servicio para obtener la lista
             var result = await _reservaService.GetListaEsperaAsync();
-            
-            // 2. Si se obtuvo correctamente, devolvemos 200 OK
-            return Ok(result); // HTTP 200
+            return Ok(result);
         }
-        catch (ListaEsperaVaciaException)
+        catch (ListaEsperaVaciaException ex)
         {
-            // HTTP 404: la lista de espera se encuentra vacía
-            return NotFound(new { mensaje = "No hay reservas en lista de espera." });
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Lista de Espera Vacía");
+        }
+        catch (NotFoundException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Entidad No Encontrada");
+        }
+        catch (Exception ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
         }
     }
+
 
     /// <summary>
     /// CU-02: Tablero Operativo de Reservas (Solo Gerente)
