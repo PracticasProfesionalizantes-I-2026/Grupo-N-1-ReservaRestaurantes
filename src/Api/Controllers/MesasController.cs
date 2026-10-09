@@ -88,6 +88,7 @@ namespace Api.Controllers
         }
         // PATCH /api/mesas/{id}/estado — Cambiar Estado Mesa (CU-03)
         [HttpPatch("{id:guid}/estado")]
+        [Authorize(Roles = "Gerente")] // RN-01: Solo rol Gerente
         public async Task<IActionResult> CambiarEstadoMesa(Guid id, [FromBody] MesaCambiarEstadoDTO dto)
         {
             try
