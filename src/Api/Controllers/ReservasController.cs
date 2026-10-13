@@ -407,6 +407,40 @@ public class ReservasController : ControllerBase
             return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
         }
     }
+    /// <summary>
+    /// CU-11: Filtrar reservas (Solo Gerente).
+    /// Permite combinar los filtros: fecha, estado, mesaId y clienteId. Todos opcionales.
+    /// </summary>
+    [HttpGet("filtrar-reservas-gerente")]
+    [Authorize(Roles = "Gerente")]
+    [ProducesResponseType(typeof(IEnumerable<ReservaResponseDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<IEnumerable<ReservaResponseDTO>>> FiltrarReservas([FromQuery] ReservaFiltroDTO filtro)
+    {
+        try
+        {
+            var result = await _reservaService.FiltrarReservasAsync(filtro);
+            return Ok(result);
+        }
+        catch (SinReservasOperativasException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reservas No Encontradas");
+        }
+        catch (UnauthorizedException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status401Unauthorized, title: "No Autorizado");
+        }
+        catch (Exception ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
+        }
+    }
+
+
 }
 
 

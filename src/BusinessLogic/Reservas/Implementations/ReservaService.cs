@@ -419,6 +419,53 @@ public class ReservaService : IReservaService
 
         return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
     }
+
+
+    /// CU-11: Filtrar reservas (Gerente).
+
+    public async Task<IEnumerable<ReservaResponseDTO>> FiltrarReservasAsync(ReservaFiltroDTO filtro)
+    {
+        var query = _context.Reservas
+            .AsNoTracking()
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .AsQueryable();
+
+        if (filtro.Fecha.HasValue)
+        {
+            var dateOnly = filtro.Fecha.Value.Date;
+            var nextDay = dateOnly.AddDays(1);
+            query = query.Where(r => r.FechaHora >= dateOnly && r.FechaHora < nextDay);
+        }
+
+        if (filtro.Estado.HasValue)
+        {
+            query = query.Where(r => r.Estado == filtro.Estado.Value);
+        }
+
+        if (filtro.MesaId.HasValue)
+        {
+            query = query.Where(r => r.MesaId == filtro.MesaId.Value);
+        }
+
+        if (filtro.ClienteId.HasValue)
+        {
+            query = query.Where(r => r.ClienteId == filtro.ClienteId.Value);
+        }
+
+        var reservas = await query
+            .OrderBy(r => r.FechaHora)
+            .ThenBy(r => r.FechaCreacion)
+            .ToListAsync();
+
+        if (!reservas.Any())
+        {
+            throw new SinReservasOperativasException();
+        }
+
+        return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
+    }
+
 }
 
 
