@@ -54,6 +54,13 @@ public class ClienteRepository : IClienteRepository
             .AnyAsync(r => r.ClienteId == clienteId);
     }
 
+    public async Task<int> CountActiveAdminsAsync()
+    {
+        return await _context.Clientes
+            .AsNoTracking()
+            .CountAsync(c => c.Rol == "Admin" && c.Activo);
+    }
+
     public async Task<Cliente> CreateAsync(Cliente cliente)
     {
         cliente.Id = Guid.NewGuid();

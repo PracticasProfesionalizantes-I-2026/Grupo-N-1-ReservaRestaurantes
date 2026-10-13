@@ -9,6 +9,7 @@ public interface IClienteRepository
     Task<Cliente?> GetByEmailAsync(string email);
     Task<bool> ExistsByEmailAsync(string email, Guid? excludeId = null);
     Task<bool> HasReservationsAsync(Guid clienteId);
+    Task<int> CountActiveAdminsAsync();
     Task<Cliente> CreateAsync(Cliente cliente);
     Task UpdateAsync(Cliente cliente);
     Task DeleteAsync(Guid id);
