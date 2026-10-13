@@ -31,6 +31,9 @@ public static class DependencyInjection
         // Registro del servicio de Mesas (Ej: CU-21)
         services.AddScoped<IMesaService, MesaService>();
 
+        // Registro del servicio de Usuarios (CU-19)
+        services.AddScoped<BusinessLogic.Usuarios.Interfaces.IUsuarioService, BusinessLogic.Usuarios.Implementations.UsuarioService>();
+
         return services; 
     }
 }
