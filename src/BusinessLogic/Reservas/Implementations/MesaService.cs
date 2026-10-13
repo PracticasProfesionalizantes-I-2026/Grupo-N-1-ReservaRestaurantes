@@ -122,4 +122,26 @@ public class MesaService : IMesaService
             Activa = mesa.Activa
         };
     }
+    public async Task<IEnumerable<MesaResponseDTO>> FiltrarMapaMesasAsync(MesaFiltroDTO filtro)
+{
+    // 1. Delegar la consulta filtrada al repositorio
+    var mesas = await _mesaRepository.GetFiltroAsync(
+        filtro.Estado,
+        filtro.CapacidadMinima,
+        filtro.SoloActivas);
+    // 2. RN: Si no hay resultados con esos filtros, lanzar excepción de negocio
+    if (!mesas.Any())
+    {
+        throw new SinMesasDisponiblesException();
+    }
+    // 3. Mapear entidades a DTOs de respuesta
+    return mesas.Select(m => new MesaResponseDTO
+    {
+        Id       = m.Id,
+        Numero   = m.Numero,
+        Capacidad = m.Capacidad,
+        Estado   = m.Estado,
+        Activa   = m.Activa
+    });
+}
 }

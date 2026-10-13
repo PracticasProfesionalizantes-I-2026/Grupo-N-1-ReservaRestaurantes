@@ -14,4 +14,5 @@ public interface IMesaRepository
     Task<Mesa> CreateAsync(Mesa mesa);
     Task UpdateAsync(Mesa mesa);
     Task DeleteAsync(Guid id);
+    Task<IEnumerable<Mesa>> GetFiltroAsync(MesaEstado? estado, int? capacidadMinima, bool? soloActivas);
 }
