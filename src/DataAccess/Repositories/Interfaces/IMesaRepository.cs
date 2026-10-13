@@ -1,4 +1,5 @@
 using DataAccess.Entities;
+using Shared.Enums;
 
 namespace DataAccess.Repositories.Interfaces;
 

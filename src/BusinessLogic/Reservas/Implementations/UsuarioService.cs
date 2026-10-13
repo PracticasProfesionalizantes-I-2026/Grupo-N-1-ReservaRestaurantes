@@ -71,4 +71,47 @@ public class UsuarioService : IUsuarioService
             FechaRegistro = usuario.FechaRegistro
         };
     }
+
+    public async Task<bool> EliminarUsuarioAsync(Guid id, Guid adminEnSesionId)
+    {
+        // 3b: Salvaguarda - Prohibir auto-eliminación de la cuenta en sesión (RN / 409 Conflict)
+        if (id == adminEnSesionId)
+        {
+            throw new ConflictException("No es posible eliminar la propia cuenta de administrador en sesión.");
+        }
+
+        // 3a: Verificar existencia del usuario (404 Not Found)
+        var usuario = await _clienteRepository.GetByIdAsync(id);
+        if (usuario == null)
+        {
+            throw new NotFoundException($"Usuario con ID {id} no fue encontrado.");
+        }
+
+        // Salvaguarda: Prohibir eliminar al único administrador activo
+        if (string.Equals(usuario.Rol, "Admin", StringComparison.OrdinalIgnoreCase) && usuario.Activo)
+        {
+            int adminsActivos = await _clienteRepository.CountActiveAdminsAsync();
+            if (adminsActivos <= 1)
+            {
+                throw new ConflictException("No se puede eliminar al único administrador activo del sistema.");
+            }
+        }
+
+        // RN-03: Evaluar si posee reservas vinculadas en su histórico
+        bool tieneReservas = await _clienteRepository.HasReservationsAsync(id);
+
+        if (tieneReservas)
+        {
+            // Baja lógica: preservar datos históricos e integridad referencial
+            usuario.Activo = false;
+            await _clienteRepository.UpdateAsync(usuario);
+            return false; // Indica que se aplicó baja lógica
+        }
+        else
+        {
+            // Baja física: el usuario no tiene historial de reservas
+            await _clienteRepository.DeleteAsync(id);
+            return true; // Indica que se aplicó baja física
+        }
+    }
 }

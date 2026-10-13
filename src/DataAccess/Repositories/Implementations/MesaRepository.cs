@@ -2,6 +2,7 @@ using DataAccess.Context;
 using DataAccess.Entities;
 using DataAccess.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Shared.Enums;
 
 namespace DataAccess.Repositories.Implementations;
 
