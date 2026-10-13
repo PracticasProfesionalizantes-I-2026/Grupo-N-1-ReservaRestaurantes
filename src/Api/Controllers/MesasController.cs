@@ -111,5 +111,37 @@ namespace Api.Controllers
                 return Conflict(new { mensaje = ex.Message });
             }
         }
+    
+        /// <summary>
+        /// CU-10: Filtrar mapa de mesas (Solo Gerente).
+        /// </summary>
+
+        [HttpGet("filtrar-mapa-de-mesas")]
+        [Authorize(Roles = "Gerente")]
+        [ProducesResponseType(typeof(IEnumerable<MesaResponseDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> FiltrarMapaMesas([FromQuery] MesaFiltroDTO filtro)
+        {
+            try
+            {
+                var result = await _mesaService.FiltrarMapaMesasAsync(filtro);
+                return Ok(result);
+            }
+            catch (SinMesasDisponiblesException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Mesas No Encontradas");
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status401Unauthorized, title: "No Autorizado");
+            }
+            catch (Exception ex)
+            {
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
+            }
+        }
     }
 }

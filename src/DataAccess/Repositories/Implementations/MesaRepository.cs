@@ -92,4 +92,34 @@ public class MesaRepository : IMesaRepository
             await _context.SaveChangesAsync();
         }
     }
+    public async Task<IEnumerable<Mesa>> GetFiltroAsync(
+    MesaEstado? estado,
+    int? capacidadMinima,
+    bool? soloActivas)
+{
+    var query = _context.Mesas
+        .AsNoTracking()
+        .AsQueryable();
+
+    // 1. Filtro por estado
+    if (estado.HasValue)
+    {
+        query = query.Where(m => m.Estado == estado.Value);
+    }
+
+    // 2. Filtro por capacidad mínima
+    if (capacidadMinima.HasValue)
+    {
+        query = query.Where(m => m.Capacidad >= capacidadMinima.Value);
+    }
+
+    // 3. Filtro por activa/inactiva
+    if (soloActivas.HasValue)
+    {
+        query = query.Where(m => m.Activa == soloActivas.Value);
+    }
+
+    return await query.OrderBy(m => m.Numero).ToListAsync();
+}
+
 }
