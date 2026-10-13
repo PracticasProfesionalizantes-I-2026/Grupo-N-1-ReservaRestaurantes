@@ -53,6 +53,13 @@ public class MesaRepository : IMesaRepository
             .AnyAsync(r => r.MesaId == mesaId);
     }
 
+    public async Task<bool> HasReservaEnCursoAsync(Guid mesaId)
+    {
+        return await _context.Reservas
+            .AsNoTracking()
+            .AnyAsync(r => r.MesaId == mesaId && r.Estado == Shared.Enums.ReservaEstado.EnCurso);
+    }
+
     public async Task<IEnumerable<Mesa>> GetActiveTablesAsync()
     {
         return await _context.Mesas

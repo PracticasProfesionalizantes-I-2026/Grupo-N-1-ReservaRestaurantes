@@ -285,4 +285,128 @@ public class ReservasController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// CU-17: Elegir / Reasignar mesa de reserva (Solo Gerente)
+    /// </summary>
+    [HttpPatch("{id:guid}/asignar-mesa")]
+    [Authorize(Roles = "Gerente")]
+    [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ReservaResponseDTO>> AsignarMesa(Guid id, [FromBody] ReservaAsignarMesaDTO dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        try
+        {
+            var result = await _reservaService.AsignarMesaAsync(id, dto.MesaId);
+            return Ok(result);
+        }
+        catch (NotFoundException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Entidad No Encontrada");
+        }
+        catch (CapacidadInsuficienteException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Capacidad Insuficiente");
+        }
+        catch (MesaSolapadaException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Mesa No Disponible");
+        }
+        catch (TransicionEstadoInvalidaException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado Inválido");
+        }
+        catch (Exception ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
+        }
+    }
+
+
+    /// <summary>
+    /// CU-18: Ver listado de reservas en espera (Reservas Pendientes - Solo Gerente)
+    /// </summary>
+    [HttpGet("lista-espera")]
+    [Authorize(Roles = "Gerente")]
+    [ProducesResponseType(typeof(IEnumerable<ReservaResponseDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<IEnumerable<ReservaResponseDTO>>> GetListaEspera()
+    {
+        try
+        {
+            var result = await _reservaService.GetListaEsperaAsync();
+            return Ok(result);
+        }
+        catch (ListaEsperaVaciaException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Lista de Espera Vacía");
+        }
+        catch (NotFoundException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Entidad No Encontrada");
+        }
+        catch (Exception ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
+        }
+    }
+
+
+    /// <summary>
+    /// CU-02: Tablero Operativo de Reservas (Solo Gerente)
+    /// </summary>
+    [HttpGet("lista-reservas")]
+    [Authorize(Roles = "Gerente")]
+    [ProducesResponseType(typeof(IEnumerable<ReservaResponseDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<IEnumerable<ReservaResponseDTO>>> GetTableroOperativo([FromQuery] DateTime? fecha = null)
+    {
+        try
+        {
+            var result = await _reservaService.GetTableroOperativoAsync(fecha);
+            return Ok(result);
+        }
+        catch (ValidationException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest, title: "Parámetros de Consulta Inválidos");
+        }
+        catch (ArgumentException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest, title: "Argumento Inválido");
+        }
+        catch (UnauthorizedException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status401Unauthorized, title: "No Autorizado");
+        }
+        catch (SinReservasOperativasException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reservas No Encontradas");
+        }
+        catch (NotFoundException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Entidad No Encontrada");
+        }
+        catch (Exception ex)
+        {
+            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
+        }
+    }
 }
+
+

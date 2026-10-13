@@ -92,16 +92,34 @@ public class MesaService : IMesaService
         return true;
     }
 
-    public async Task<bool> CambiarEstadoMesaAsync(Guid id, MesaEstado nuevoEstado)
+    public async Task<MesaResponseDTO?> CambiarEstadoMesaAsync(Guid id, MesaEstado nuevoEstado)
     {
         var mesa = await _mesaRepository.GetByIdAsync(id);
         if (mesa == null)
         {
-            return false;
+            return null;
+        }
+
+        // RN-03: Prohibición de marcar Libre si existe reserva en curso
+        if (nuevoEstado == MesaEstado.Libre)
+        {
+            var tieneReservaEnCurso = await _mesaRepository.HasReservaEnCursoAsync(id);
+            if (tieneReservaEnCurso)
+            {
+                throw new MesaConReservaActivaException();
+            }
         }
 
         mesa.Estado = nuevoEstado;
         await _mesaRepository.UpdateAsync(mesa);
-        return true;
+
+        return new MesaResponseDTO
+        {
+            Id = mesa.Id,
+            Numero = mesa.Numero,
+            Capacidad = mesa.Capacidad,
+            Estado = mesa.Estado,
+            Activa = mesa.Activa
+        };
     }
 }

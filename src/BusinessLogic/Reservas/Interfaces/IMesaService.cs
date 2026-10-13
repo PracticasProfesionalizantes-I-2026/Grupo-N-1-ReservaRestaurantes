@@ -5,7 +5,7 @@ namespace BusinessLogic.Mesas.Interfaces;
 
 public interface IMesaService
 {
-    Task<bool> CambiarEstadoMesaAsync(Guid id, MesaEstado nuevoEstado);
+    Task<MesaResponseDTO?> CambiarEstadoMesaAsync(Guid id, MesaEstado nuevoEstado);
     // Existing methods
     Task<MesaResponseDTO> CreateAsync(MesaCreateDTO dto);
     Task<bool> ModificarMesaAsync(Guid id, MesaUpdateDTO mesaDto);

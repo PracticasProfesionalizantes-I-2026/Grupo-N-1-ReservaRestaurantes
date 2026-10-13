@@ -182,6 +182,25 @@ public class ReservaService : IReservaService
 
         return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
     }
+
+    public async Task<IEnumerable<ReservaResponseDTO>> GetListaEsperaAsync()
+    {
+        // El usuario definió que la lista de espera son simplemente las reservas en estado Pendiente
+        var reservas = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .Where(r => r.Estado == ReservaEstado.Pendiente)
+            .OrderBy(r => r.FechaHora)
+            .ThenBy(r => r.FechaCreacion)
+            .ToListAsync();
+
+        if (!reservas.Any())
+        {
+            throw new ListaEsperaVaciaException();
+        }
+
+        return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
+    }
     
     public async Task<ReservaResponseDTO> ConfirmarReservaAsync(Guid reservaId)
     {
@@ -330,10 +349,77 @@ public class ReservaService : IReservaService
         return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
     }
 
+        public async Task<ReservaResponseDTO> AsignarMesaAsync(Guid reservaId, int mesaId)
+    {
+        // 1. Validar que la reserva exista
+        var reserva = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .FirstOrDefaultAsync(r => r.Id == reservaId)
+            ?? throw new NotFoundException(nameof(Reserva), reservaId);
 
+        // 2. Validar que la mesa exista
+        var mesa = await _context.Mesas
+            .FindAsync(mesaId)
+            ?? throw new NotFoundException(nameof(Mesa), mesaId);
 
+        // 3. Validar estado (no se puede cambiar mesa a una reserva ya finalizada o cancelada)
+        if (reserva.Estado == ReservaEstado.Finalizada || reserva.Estado == ReservaEstado.Cancelada)
+        {
+            throw new TransicionEstadoInvalidaException(
+                $"No se puede reasignar mesa a una reserva en estado '{reserva.Estado}'.");
+        }
 
+        // 4. RN-01: Validar capacidad
+        if (mesa.Capacidad < reserva.CantidadComensales)
+        {
+            throw new CapacidadInsuficienteException();
+        }
 
+        // 5. RN-02: Validar solapamiento de horario
+        var finReserva = reserva.FechaHora.AddMinutes(reserva.DuracionEstimadaMinutos);
 
+        var solapada = await _context.Reservas
+            .AnyAsync(r => r.MesaId == mesa.Id &&
+                           r.Id != reservaId &&
+                           r.Estado != ReservaEstado.Cancelada &&
+                           r.Estado != ReservaEstado.Finalizada &&
+                           r.FechaHora < finReserva &&
+                           r.FechaHora.AddMinutes(r.DuracionEstimadaMinutos) > reserva.FechaHora);
 
+        if (solapada)
+        {
+            throw new MesaSolapadaException();
+        }
+
+        // 6. Actualizar mesa y guardar
+        reserva.MesaId = mesa.Id;
+        reserva.Mesa = mesa;
+
+        await _context.SaveChangesAsync();
+
+        return MapToResponseDTO(reserva, reserva.Cliente, mesa);
+    }
+
+    public async Task<IEnumerable<ReservaResponseDTO>> GetTableroOperativoAsync(DateTime? fecha = null)
+    {
+        var fechaConsulta = fecha?.Date ?? DateTime.Today;
+
+        var reservas = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Mesa)
+            .Where(r => r.FechaHora.Date == fechaConsulta)
+            .OrderBy(r => r.FechaHora)
+            .ToListAsync();
+
+        if (!reservas.Any())
+        {
+            throw new SinReservasOperativasException();
+        }
+
+        return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
+    }
 }
+
+
+
