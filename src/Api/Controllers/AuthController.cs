@@ -2,7 +2,6 @@ using BusinessLogic.Auth.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs.Auth;
-using Shared.Exceptions;
 
 namespace Api.Controllers;
 
@@ -31,19 +30,8 @@ public class AuthController : ControllerBase
             return ValidationProblem(ModelState);
         }
 
-        try
-        {
-            var response = await _authService.LoginAsync(dto);
-            return Ok(response);
-        }
-        catch (UnauthorizedException ex)
-        {
-            return Problem(
-                detail: ex.Message,
-                statusCode: StatusCodes.Status401Unauthorized,
-                title: "Error de Autenticación"
-            );
-        }
+        var response = await _authService.LoginAsync(dto);
+        return Ok(response);
     }
 
     /// <summary>

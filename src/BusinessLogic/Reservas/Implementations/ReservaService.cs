@@ -116,17 +116,17 @@ public class ReservaService : IReservaService
         }
     }
 
-    private static ReservaResponseDTO MapToResponseDTO(Reserva r, ClienteEntity c, Mesa m) => new()
+    private static ReservaResponseDTO MapToResponseDTO(Reserva r, ClienteEntity c, Mesa? m) => new()
     {
         Id = r.Id,
         ClienteId = c.Id,
         ClienteNombreCompleto = $"{c.Nombre} {c.Apellido}",
         ClienteEmail = c.Email,
         ClienteTelefono = c.Telefono,
-        MesaId = m.Id,
-        MesaNumero = m.Numero,
-        MesaCapacidad = m.Capacidad,
-        MesaUbicacion = m.Ubicacion,
+        MesaId = m?.Id ?? Guid.Empty,
+        MesaNumero = m?.Numero ?? 0,
+        MesaCapacidad = m?.Capacidad ?? 0,
+        MesaUbicacion = m?.Ubicacion ?? string.Empty,
         FechaHora = r.FechaHora,
         CantidadComensales = r.CantidadComensales,
         DuracionEstimadaMinutos = r.DuracionEstimadaMinutos,

@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Shared.DTOs.Usuarios;
-using Shared.Exceptions;
 
 namespace Api.Controllers;
 
@@ -39,35 +38,8 @@ public class AdminUsuariosController : ControllerBase
             return ValidationProblem(ModelState); // 400 Bad Request
         }
 
-        try
-        {
-            var resultado = await _usuarioService.CambiarRolUsuarioAsync(id, dto);
-            return Ok(resultado); // 200 OK
-        }
-        catch (NotFoundException ex)
-        {
-            return Problem(
-                detail: ex.Message,
-                statusCode: StatusCodes.Status404NotFound,
-                title: "Usuario No Encontrado"
-            );
-        }
-        catch (ConflictException ex)
-        {
-            return Problem(
-                detail: ex.Message,
-                statusCode: StatusCodes.Status409Conflict,
-                title: "Conflicto de Gobernanza"
-            );
-        }
-        catch (ValidationException ex)
-        {
-            return Problem(
-                detail: ex.Message,
-                statusCode: StatusCodes.Status400BadRequest,
-                title: "Rol Inválido"
-            );
-        }
+        var resultado = await _usuarioService.CambiarRolUsuarioAsync(id, dto);
+        return Ok(resultado); // 200 OK
     }
 
     /// <summary>
@@ -105,31 +77,12 @@ public class AdminUsuariosController : ControllerBase
             return Unauthorized(new { message = "Token de autenticación no válido o expirado." });
         }
 
-        try
+        // Invocar la lógica de negocio (CU-20)
+        bool fueBajaFisica = await _usuarioService.EliminarUsuarioAsync(id, adminId);
+        return Ok(new
         {
-            // Invocar la lógica de negocio (CU-20)
-            bool fueBajaFisica = await _usuarioService.EliminarUsuarioAsync(id, adminId);
-            return Ok(new
-            {
-                mensaje = "Usuario eliminado exitosamente.",
-                tipoBaja = fueBajaFisica ? "Fisica" : "Logica"
-            });
-        }
-        catch (NotFoundException ex)
-        {
-            return Problem(
-                detail: ex.Message,
-                statusCode: StatusCodes.Status404NotFound,
-                title: "Usuario No Encontrado"
-            );
-        }
-        catch (ConflictException ex)
-        {
-            return Problem(
-                detail: ex.Message,
-                statusCode: StatusCodes.Status409Conflict,
-                title: "Conflicto"
-            );
-        }
+            mensaje = "Usuario eliminado exitosamente.",
+            tipoBaja = fueBajaFisica ? "Fisica" : "Logica"
+        });
     }
 }

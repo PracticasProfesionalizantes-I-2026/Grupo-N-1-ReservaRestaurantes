@@ -6,4 +6,7 @@
     <Project Path="src/Migrations/Migrations.csproj" />
     <Project Path="src/Shared/Shared.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Tests/Tests.csproj" />
+  </Folder>
 </Solution>
