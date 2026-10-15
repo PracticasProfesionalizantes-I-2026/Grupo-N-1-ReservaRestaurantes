@@ -3,7 +3,6 @@ using BusinessLogic.Reservas.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs.Reservas;
-using Shared.Exceptions;
 
 namespace Api.Controllers;
 
@@ -42,22 +41,13 @@ public class ReservasController : ControllerBase
             return Unauthorized(new { message = "Token de autenticación no válido o expirado." });
         }
 
-        try
-        {
-            var result = await _reservaService.SolicitarReservaAsync(clienteId, dto);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-        }
-        catch (HorarioNoHabilitadoException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest, title: "Horario No Habilitado");
-        }
-        catch (ConflictException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Ya existe una reserva para ese horario.");
-        }
+        var result = await _reservaService.SolicitarReservaAsync(clienteId, dto);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ReservaResponseDTO>> GetById(Guid id)
     {
         var result = await _reservaService.GetByIdAsync(id);
@@ -85,19 +75,8 @@ public class ReservasController : ControllerBase
             return Unauthorized(new { message = "Token de autenticación no válido o expirado." });
         }
 
-        try
-        {
-            var result = await _reservaService.CancelarReservaClienteAsync(id, clienteId, dto);
-            return Ok(result);
-        }
-        catch (ReservaNoEncontradaException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reserva No Encontrada");
-        }
-        catch (TransicionEstadoInvalidaException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado No Cancelable");
-        }
+        var result = await _reservaService.CancelarReservaClienteAsync(id, clienteId, dto);
+        return Ok(result);
     }
 
     /// <summary>
@@ -131,28 +110,11 @@ public class ReservasController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ReservaResponseDTO>> ConfirmarReserva(Guid id)
     {
-        try
-        {
-            var response = await _reservaService.ConfirmarReservaAsync(id);
-            return Ok(response);
-        }
-        catch (ReservaNoEncontradaException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reserva No Encontrada");
-        }
-        catch (TransicionEstadoInvalidaException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado Inválido para Confirmar");
-        }
-        catch (Exception ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
-        }
+        var response = await _reservaService.ConfirmarReservaAsync(id);
+        return Ok(response);
     }
-
 
     /// <summary>
     /// CU-13: Iniciar Reserva (Check-In)
@@ -164,27 +126,10 @@ public class ReservasController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ReservaResponseDTO>> IniciarReserva(Guid id)
     {
-        try
-        {
-            var result = await _reservaService.IniciarReservaAsync(id);
-            return Ok(result);
-        }
-        catch (ReservaNoEncontradaException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reserva No Encontrada");
-        }
-        catch (TransicionEstadoInvalidaException ex)
-        {
-            // Retorna 409 Conflict si la reserva no estaba Confirmada
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado Inválido para Iniciar");
-        }
-        catch (Exception ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
-        }
+        var result = await _reservaService.IniciarReservaAsync(id);
+        return Ok(result);
     }
 
     /// <summary>
@@ -197,27 +142,10 @@ public class ReservasController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ReservaResponseDTO>> FinalizarReserva(Guid id)
     {
-        try
-        {
-            var result = await _reservaService.FinalizarReservaAsync(id);
-            return Ok(result);
-        }
-        catch (ReservaNoEncontradaException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reserva No Encontrada");
-        }
-        catch (TransicionEstadoInvalidaException ex)
-        {
-            // Retorna 409 Conflict si la reserva no estaba EnCurso
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado Inválido para Finalizar");
-        }
-        catch (Exception ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
-        }
+        var result = await _reservaService.FinalizarReservaAsync(id);
+        return Ok(result);
     }
 
     /// <summary>
@@ -230,26 +158,10 @@ public class ReservasController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ReservaResponseDTO>> CancelarReservaGerente(Guid id)
     {
-        try
-        {
-            var result = await _reservaService.CancelarReservaGerenteAsync(id);
-            return Ok(result);
-        }
-        catch (ReservaNoEncontradaException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reserva No Encontrada");
-        }
-        catch (TransicionEstadoInvalidaException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado Inválido para Cancelar");
-        }
-        catch (Exception ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
-        }
+        var result = await _reservaService.CancelarReservaGerenteAsync(id);
+        return Ok(result);
     }
 
     /// <summary>
@@ -262,27 +174,10 @@ public class ReservasController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ReservaResponseDTO>> RechazarReserva(Guid id)
     {
-        try
-        {
-            var result = await _reservaService.RechazarReservaAsync(id);
-            return Ok(result);
-        }
-        catch (ReservaNoEncontradaException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reserva No Encontrada");
-        }
-        catch (TransicionEstadoInvalidaException ex)
-        {
-            // 409 Conflict si la reserva no estaba en Pendiente
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado Inválido para Rechazar");
-        }
-        catch (Exception ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
-        }
+        var result = await _reservaService.RechazarReservaAsync(id);
+        return Ok(result);
     }
 
     /// <summary>
@@ -296,7 +191,6 @@ public class ReservasController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ReservaResponseDTO>> AsignarMesa(Guid id, [FromBody] ReservaAsignarMesaDTO dto)
     {
         if (!ModelState.IsValid)
@@ -304,33 +198,9 @@ public class ReservasController : ControllerBase
             return ValidationProblem(ModelState);
         }
 
-        try
-        {
-            var result = await _reservaService.AsignarMesaAsync(id, dto.MesaId);
-            return Ok(result);
-        }
-        catch (NotFoundException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Entidad No Encontrada");
-        }
-        catch (CapacidadInsuficienteException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Capacidad Insuficiente");
-        }
-        catch (MesaSolapadaException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Mesa No Disponible");
-        }
-        catch (TransicionEstadoInvalidaException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict, title: "Estado Inválido");
-        }
-        catch (Exception ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
-        }
+        var result = await _reservaService.AsignarMesaAsync(id, dto.MesaId);
+        return Ok(result);
     }
-
 
     /// <summary>
     /// CU-18: Ver listado de reservas en espera (Reservas Pendientes - Solo Gerente)
@@ -341,28 +211,11 @@ public class ReservasController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<ReservaResponseDTO>>> GetListaEspera()
     {
-        try
-        {
-            var result = await _reservaService.GetListaEsperaAsync();
-            return Ok(result);
-        }
-        catch (ListaEsperaVaciaException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Lista de Espera Vacía");
-        }
-        catch (NotFoundException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Entidad No Encontrada");
-        }
-        catch (Exception ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
-        }
+        var result = await _reservaService.GetListaEsperaAsync();
+        return Ok(result);
     }
-
 
     /// <summary>
     /// CU-02: Tablero Operativo de Reservas (Solo Gerente)
@@ -374,39 +227,12 @@ public class ReservasController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<ReservaResponseDTO>>> GetTableroOperativo([FromQuery] DateTime? fecha = null)
     {
-        try
-        {
-            var result = await _reservaService.GetTableroOperativoAsync(fecha);
-            return Ok(result);
-        }
-        catch (ValidationException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest, title: "Parámetros de Consulta Inválidos");
-        }
-        catch (ArgumentException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest, title: "Argumento Inválido");
-        }
-        catch (UnauthorizedException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status401Unauthorized, title: "No Autorizado");
-        }
-        catch (SinReservasOperativasException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reservas No Encontradas");
-        }
-        catch (NotFoundException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Entidad No Encontrada");
-        }
-        catch (Exception ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
-        }
+        var result = await _reservaService.GetTableroOperativoAsync(fecha);
+        return Ok(result);
     }
+
     /// <summary>
     /// CU-11: Filtrar reservas (Solo Gerente).
     /// Permite combinar los filtros: fecha, estado, mesaId y clienteId. Todos opcionales.
@@ -418,29 +244,9 @@ public class ReservasController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<ReservaResponseDTO>>> FiltrarReservas([FromQuery] ReservaFiltroDTO filtro)
     {
-        try
-        {
-            var result = await _reservaService.FiltrarReservasAsync(filtro);
-            return Ok(result);
-        }
-        catch (SinReservasOperativasException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Reservas No Encontradas");
-        }
-        catch (UnauthorizedException ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status401Unauthorized, title: "No Autorizado");
-        }
-        catch (Exception ex)
-        {
-            return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
-        }
+        var result = await _reservaService.FiltrarReservasAsync(filtro);
+        return Ok(result);
     }
-
-
 }
-
-

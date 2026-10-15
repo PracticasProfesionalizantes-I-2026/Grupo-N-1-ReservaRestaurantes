@@ -1,4 +1,5 @@
 using System.Text;
+using Api.Middleware;
 using BusinessLogic;
 using DataAccess.Context;
 using DataAccess.Data;
@@ -51,6 +52,10 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
     };
 });
+
+// Manejo centralizado de excepciones (Middleware global)
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // Controladores y documentación API
 builder.Services.AddControllers();
@@ -108,6 +113,9 @@ if (app.Environment.IsDevelopment())
                });
     });
 }
+
+// Middleware global de excepciones — debe ir antes de cualquier middleware que pueda fallar
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 

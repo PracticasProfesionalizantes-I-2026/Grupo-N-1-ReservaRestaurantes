@@ -1,10 +1,8 @@
-using System;
-using System.Threading.Tasks;
 using BusinessLogic.Mesas.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DTOs.Mesas;
-using Shared.Exceptions;
+using Shared.Enums;
 
 namespace Api.Controllers
 {
@@ -15,7 +13,6 @@ namespace Api.Controllers
     {
         private readonly IMesaService _mesaService;
 
-        // 1. Inyectamos el servicio en el constructor
         public MesasController(IMesaService mesaService)
         {
             _mesaService = mesaService;
@@ -26,96 +23,78 @@ namespace Api.Controllers
         // ==========================================
         [HttpPost]
         [Authorize(Roles = "Admin")] // Solo el Admin puede crear mesas
+        [ProducesResponseType(typeof(MesaResponseDTO), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> CrearMesa([FromBody] MesaCreateDTO mesaDto)
         {
-            try
-            {
-                // Llamamos al servicio para crear la mesa
-                var mesaCreada = await _mesaService.CreateAsync(mesaDto);
-
-                // Devolvemos 201 Created con la ubicación del nuevo recurso y el objeto creado
-                return CreatedAtAction(nameof(CrearMesa), new { id = mesaCreada.Id }, mesaCreada);
-            }
-            catch (ConflictException ex)
-            {
-                // HTTP 409: ya existe una mesa con ese número
-                return Conflict(new { mensaje = ex.Message });
-            }
+            var mesaCreada = await _mesaService.CreateAsync(mesaDto);
+            return CreatedAtAction(nameof(CrearMesa), new { id = mesaCreada.Id }, mesaCreada);
         }
 
         // PUT /api/mesas/{id} — Modificar Mesa (CU-22)
         [HttpPut("{id:guid}")]
         [Authorize(Roles = "Admin")] // Solo el Admin puede modificar mesas
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ModificarMesa(Guid id, [FromBody] MesaUpdateDTO mesaDto)
         {
-            // Llamamos al servicio para que intente modificar la mesa
             var resultado = await _mesaService.ModificarMesaAsync(id, mesaDto);
 
-            // Si el servicio devuelve false, significa que no encontró la mesa con ese ID
             if (!resultado)
             {
-                return NotFound(new { mensaje = "Mesa no encontrada." }); // HTTP 404
+                return NotFound(new { mensaje = "Mesa no encontrada." });
             }
 
-            // Si todo salió bien, devolvemos un 204 No Content
             return NoContent();
         }
 
         // DELETE /api/mesas/{id} — Eliminar Mesa (CU-23)
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")] // Solo el Admin puede eliminar mesas
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> EliminarMesa(Guid id)
         {
-            try
-            {
-                // 1. Llamamos al servicio para eliminar
-                var resultado = await _mesaService.EliminarMesaAsync(id);
+            var resultado = await _mesaService.EliminarMesaAsync(id);
 
-                // 2. Si nos devuelve false, es porque no existe
-                if (!resultado)
-                {
-                    return NotFound(new { mensaje = "Mesa no encontrada." }); // HTTP 404
-                }
-
-                // 3. Si se borró con éxito, devolvemos un 204
-                return NoContent(); // HTTP 204
-            }
-            catch (ConflictException ex)
+            if (!resultado)
             {
-                // HTTP 409: la mesa tiene reservas asociadas y no se puede eliminar
-                return Conflict(new { mensaje = ex.Message });
+                return NotFound(new { mensaje = "Mesa no encontrada." });
             }
+
+            return NoContent();
         }
+
         // PATCH /api/mesas/{id}/estado — Cambiar Estado Mesa (CU-03)
         [HttpPatch("{id:guid}/estado")]
         [Authorize(Roles = "Gerente")] // RN-01: Solo rol Gerente
+        [ProducesResponseType(typeof(MesaResponseDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> CambiarEstadoMesa(Guid id, [FromBody] MesaCambiarEstadoDTO dto)
         {
-            try
-            {
-                // 1. Llamamos al servicio para cambiar el estado
-                var resultado = await _mesaService.CambiarEstadoMesaAsync(id, dto.NuevoEstado);
+            var resultado = await _mesaService.CambiarEstadoMesaAsync(id, dto.NuevoEstado);
 
-                // 2. Si nos devuelve null, es porque no existe
-                if (resultado == null)
-                {
-                    return NotFound(new { mensaje = "Mesa no encontrada." }); // HTTP 404
-                }
-
-                // 3. Si se cambió con éxito, devolvemos 200 OK
-                return Ok(resultado); // HTTP 200
-            }
-            catch (MesaConReservaActivaException ex)
+            if (resultado == null)
             {
-                // HTTP 409: la mesa tiene una reserva en curso
-                return Conflict(new { mensaje = ex.Message });
+                return NotFound(new { mensaje = "Mesa no encontrada." });
             }
+
+            return Ok(resultado);
         }
-    
+
         /// <summary>
         /// CU-10: Filtrar mapa de mesas (Solo Gerente).
         /// </summary>
-
         [HttpGet("filtrar-mapa-de-mesas")]
         [Authorize(Roles = "Gerente")]
         [ProducesResponseType(typeof(IEnumerable<MesaResponseDTO>), StatusCodes.Status200OK)]
@@ -125,23 +104,8 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> FiltrarMapaMesas([FromQuery] MesaFiltroDTO filtro)
         {
-            try
-            {
-                var result = await _mesaService.FiltrarMapaMesasAsync(filtro);
-                return Ok(result);
-            }
-            catch (SinMesasDisponiblesException ex)
-            {
-                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound, title: "Mesas No Encontradas");
-            }
-            catch (UnauthorizedException ex)
-            {
-                return Problem(detail: ex.Message, statusCode: StatusCodes.Status401Unauthorized, title: "No Autorizado");
-            }
-            catch (Exception ex)
-            {
-                return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError, title: "Error Interno del Servidor");
-            }
+            var result = await _mesaService.FiltrarMapaMesasAsync(filtro);
+            return Ok(result);
         }
     }
 }
