@@ -111,7 +111,7 @@ namespace Api.Controllers
                 return Conflict(new { mensaje = ex.Message });
             }
         }
-    
+
         /// <summary>
         /// CU-10: Filtrar mapa de mesas (Solo Gerente).
         /// </summary>
