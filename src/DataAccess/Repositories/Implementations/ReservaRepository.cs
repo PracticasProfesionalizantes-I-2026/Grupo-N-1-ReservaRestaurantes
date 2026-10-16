@@ -49,13 +49,12 @@ public class ReservaRepository : IReservaRepository
             query = query.Where(r => r.Estado == estado.Value);
         }
 
-        return await query.OrderBy(r => r.FechaHora).ToListAsync();
+        return await query.OrderBy(r => r.FechaHora).ThenBy(r => r.FechaCreacion).ToListAsync();
     }
 
     public async Task<Reserva?> GetByIdAsync(Guid id)
     {
         return await _context.Reservas
-            .AsNoTracking()
             .Include(r => r.Cliente)
             .Include(r => r.Mesa)
             .FirstOrDefaultAsync(r => r.Id == id);
@@ -133,7 +132,10 @@ public class ReservaRepository : IReservaRepository
 
     public async Task<Reserva> CreateAsync(Reserva reserva)
     {
-        reserva.Id = Guid.NewGuid();
+        if (reserva.Id == Guid.Empty)
+        {
+            reserva.Id = Guid.NewGuid();
+        }
         if (reserva.FechaCreacion == default)
         {
             reserva.FechaCreacion = DateTime.UtcNow;
@@ -148,7 +150,16 @@ public class ReservaRepository : IReservaRepository
 
     public async Task UpdateAsync(Reserva reserva)
     {
-        _context.Reservas.Update(reserva);
+        var local = _context.Reservas.Local.FirstOrDefault(r => r.Id == reserva.Id);
+        if (local != null && !ReferenceEquals(local, reserva))
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
+        var entry = _context.Entry(reserva);
+        if (entry.State == EntityState.Detached)
+        {
+            _context.Reservas.Update(reserva);
+        }
         await _context.SaveChangesAsync();
     }
 

@@ -1,7 +1,6 @@
 using BusinessLogic.Reservas.Interfaces;
-using DataAccess.Context;
 using DataAccess.Entities;
-using Microsoft.EntityFrameworkCore;
+using DataAccess.Repositories.Interfaces;
 using Shared.DTOs.Reservas;
 using Shared.Enums;
 using Shared.Exceptions;
@@ -11,12 +10,19 @@ namespace BusinessLogic.Reservas.Implementations;
 
 public class ReservaService : IReservaService
 {
-    private readonly RestaurantDbContext _context;
+    private readonly IReservaRepository _reservaRepository;
+    private readonly IMesaRepository _mesaRepository;
+    private readonly IClienteRepository _clienteRepository;
     private const int DuracionEstándarMinutos = 120;
 
-    public ReservaService(RestaurantDbContext context)
+    public ReservaService(
+        IReservaRepository reservaRepository,
+        IMesaRepository mesaRepository,
+        IClienteRepository clienteRepository)
     {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
+        _reservaRepository = reservaRepository ?? throw new ArgumentNullException(nameof(reservaRepository));
+        _mesaRepository = mesaRepository ?? throw new ArgumentNullException(nameof(mesaRepository));
+        _clienteRepository = clienteRepository ?? throw new ArgumentNullException(nameof(clienteRepository));
     }
 
     public async Task<ReservaResponseDTO> SolicitarReservaAsync(Guid clienteId, ReservaSolicitudDTO dto)
@@ -25,40 +31,37 @@ public class ReservaService : IReservaService
         ValidarFranjaHoraria(dto.FechaHora);
 
         // 2. Validar que el cliente exista
-        var cliente = await _context.Clientes.FindAsync(clienteId)
+        var cliente = await _clienteRepository.GetByIdAsync(clienteId)
             ?? throw new NotFoundException(nameof(ClienteEntity), clienteId);
 
         // 3. Validar reserva activa duplicada del cliente en el mismo turno
         var finReservaSolicitada = dto.FechaHora.AddMinutes(DuracionEstándarMinutos);
-        var tieneReservaActiva = await _context.Reservas
-            .AnyAsync(r => r.ClienteId == clienteId &&
-                           r.Estado != ReservaEstado.Cancelada &&
-                           r.Estado != ReservaEstado.Finalizada &&
-                           r.FechaHora < finReservaSolicitada &&
-                           r.FechaHora.AddMinutes(r.DuracionEstimadaMinutos) > dto.FechaHora);
+        var solapadasCliente = await _reservaRepository.GetOverlappingReservationsByClienteAsync(
+            clienteId,
+            dto.FechaHora,
+            finReservaSolicitada);
 
-        if (tieneReservaActiva)
+        if (solapadasCliente.Any())
         {
             throw new ReservaDuplicadaClienteException();
         }
 
         // 4. Validar RN-01 y RN-02: Buscar mesa con capacidad suficiente sin solapamiento
-        var mesasCandidatas = await _context.Mesas
-            .Where(m => m.Activa && m.Capacidad >= dto.CantidadComensales)
+        var todasMesas = await _mesaRepository.GetFiltroAsync(null, dto.CantidadComensales, true);
+        var mesasCandidatas = todasMesas
             .OrderBy(m => m.Capacidad) // Asigna la mesa óptima (menor desperdicio de sillas)
-            .ToListAsync();
+            .ThenBy(m => m.Numero);
 
         Mesa? mesaAsignada = null;
 
         foreach (var mesa in mesasCandidatas)
         {
-            var solapada = await _context.Reservas
-                .AnyAsync(r => r.MesaId == mesa.Id &&
-                               r.Estado != ReservaEstado.Cancelada &&
-                               r.FechaHora < finReservaSolicitada &&
-                               r.FechaHora.AddMinutes(r.DuracionEstimadaMinutos) > dto.FechaHora);
+            var solapadas = await _reservaRepository.GetOverlappingReservationsByMesaAsync(
+                mesa.Id,
+                dto.FechaHora,
+                finReservaSolicitada);
 
-            if (!solapada)
+            if (!solapadas.Any())
             {
                 mesaAsignada = mesa;
                 break;
@@ -85,19 +88,15 @@ public class ReservaService : IReservaService
             FechaCreacion = DateTime.UtcNow
         };
 
-        await _context.Reservas.AddAsync(nuevaReserva);
-        await _context.SaveChangesAsync();
+        var reservaCreada = await _reservaRepository.CreateAsync(nuevaReserva);
 
         // 7. Retornar DTO de respuesta
-        return MapToResponseDTO(nuevaReserva, cliente, mesaAsignada);
+        return MapToResponseDTO(reservaCreada, cliente, mesaAsignada);
     }
 
     public async Task<ReservaResponseDTO?> GetByIdAsync(Guid id)
     {
-        var reserva = await _context.Reservas
-            .Include(r => r.Cliente)
-            .Include(r => r.Mesa)
-            .FirstOrDefaultAsync(r => r.Id == id);
+        var reserva = await _reservaRepository.GetByIdAsync(id);
 
         if (reserva == null) return null;
 
@@ -134,65 +133,55 @@ public class ReservaService : IReservaService
         Observaciones = r.Observaciones,
         FechaCreacion = r.FechaCreacion
     };
+
     public async Task<ReservaResponseDTO> CancelarReservaClienteAsync(Guid reservaId, Guid clienteId, ReservaCancelarDTO? dto = null)
     {
         // 1. Validar que la reserva exista
-        var reserva = await _context.Reservas
-            .Include(r => r.Cliente)
-            .Include(r => r.Mesa)
-            .FirstOrDefaultAsync(r => r.Id == reservaId)
-         ?? throw new 
-         ReservaNoEncontradaException(reservaId);
-        
-        // 3. Verificar RN-02: Solo se pueden cancelar reservas en estado Pendiente o Confirmada
+        var reserva = await _reservaRepository.GetByIdAsync(reservaId)
+            ?? throw new ReservaNoEncontradaException(reservaId);
 
+        // 2. Verificar RN-02: Solo se pueden cancelar reservas en estado Pendiente o Confirmada
         if (reserva.Estado == ReservaEstado.Cancelada || 
             reserva.Estado == ReservaEstado.EnCurso || 
             reserva.Estado == ReservaEstado.Finalizada)
-    {
-        throw new TransicionEstadoInvalidaException(
-            $"No es posible cancelar una reserva que se encuentra en estado '{reserva.Estado}'.");
-    }
+        {
+            throw new TransicionEstadoInvalidaException(
+                $"No es posible cancelar una reserva que se encuentra en estado '{reserva.Estado}'.");
+        }
 
-    // 4. Aplicar cambios (RN-03: Liberación de la mesa al pasar a estado Cancelada)
-
+        // 3. Aplicar cambios (RN-03: Liberación de la mesa al pasar a estado Cancelada)
         reserva.Estado = ReservaEstado.Cancelada;
+        if (reserva.Mesa != null)
+        {
+            reserva.Mesa.Estado = MesaEstado.Libre;
+            await _mesaRepository.UpdateAsync(reserva.Mesa);
+        }
+
         if (!string.IsNullOrWhiteSpace(dto?.Motivo))
         {
-         reserva.Observaciones = string.IsNullOrEmpty(reserva.Observaciones) 
-             ? $"[Motivo Cancelación: {dto.Motivo}]" 
-             : $"{reserva.Observaciones} | [Motivo Cancelación: {dto.Motivo}]";
+            reserva.Observaciones = string.IsNullOrEmpty(reserva.Observaciones) 
+                ? $"[Motivo Cancelación: {dto.Motivo}]" 
+                : $"{reserva.Observaciones} | [Motivo Cancelación: {dto.Motivo}]";
         }
-    // 5. Persistir cambios
-        await _context.SaveChangesAsync();
-    // 6. Retornar DTO con la reserva actualizada
+
+        // 4. Persistir cambios
+        await _reservaRepository.UpdateAsync(reserva);
+
+        // 5. Retornar DTO con la reserva actualizada
         return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
     } 
 
     public async Task<IEnumerable<ReservaResponseDTO>> FiltrarPorFechaAsync(Guid clienteId, DateTime fecha)
     {
-        var fechaBuscada = fecha.Date;
-        
-        var reservas = await _context.Reservas
-            .Include(r => r.Cliente)
-            .Include(r => r.Mesa)
-            .Where(r => r.ClienteId == clienteId && r.FechaHora.Date == fechaBuscada)
-            .OrderBy(r => r.FechaHora)
-            .ToListAsync();
+        var reservas = await _reservaRepository.GetAllAsync(fecha: fecha, clienteId: clienteId);
 
         return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
     }
 
     public async Task<IEnumerable<ReservaResponseDTO>> GetListaEsperaAsync()
     {
-        // El usuario definió que la lista de espera son simplemente las reservas en estado Pendiente
-        var reservas = await _context.Reservas
-            .Include(r => r.Cliente)
-            .Include(r => r.Mesa)
-            .Where(r => r.Estado == ReservaEstado.Pendiente)
-            .OrderBy(r => r.FechaHora)
-            .ThenBy(r => r.FechaCreacion)
-            .ToListAsync();
+        // La lista de espera son las reservas en estado Pendiente
+        var reservas = await _reservaRepository.GetAllAsync(estado: ReservaEstado.Pendiente);
 
         if (!reservas.Any())
         {
@@ -205,10 +194,7 @@ public class ReservaService : IReservaService
     public async Task<ReservaResponseDTO> ConfirmarReservaAsync(Guid reservaId)
     {
         // 1. Validar que la reserva exista
-        var reserva = await _context.Reservas
-            .Include(r => r.Cliente)
-            .Include(r => r.Mesa)
-            .FirstOrDefaultAsync(r => r.Id == reservaId)
+        var reserva = await _reservaRepository.GetByIdAsync(reservaId)
             ?? throw new ReservaNoEncontradaException(reservaId);
 
         // 2. Verificar regla de negocio: Solo se pueden confirmar reservas Pendientes
@@ -222,20 +208,16 @@ public class ReservaService : IReservaService
         reserva.Estado = ReservaEstado.Confirmada;
 
         // 4. Persistir cambios
-        await _context.SaveChangesAsync();
+        await _reservaRepository.UpdateAsync(reserva);
 
         // 5. Retornar DTO
         return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
     }
 
-    
     public async Task<ReservaResponseDTO> IniciarReservaAsync(Guid reservaId)
     {
         // 1. Buscar la reserva incluyendo la entidad Mesa (necesitamos actualizarla)
-        var reserva = await _context.Reservas
-            .Include(r => r.Cliente)
-            .Include(r => r.Mesa)
-            .FirstOrDefaultAsync(r => r.Id == reservaId)
+        var reserva = await _reservaRepository.GetByIdAsync(reservaId)
             ?? throw new ReservaNoEncontradaException(reservaId);
 
         // 2. Validar RN-01: Solo se pueden iniciar reservas en estado Confirmada
@@ -247,10 +229,14 @@ public class ReservaService : IReservaService
 
         // 3. Aplicar RN-03: Cambiar estado de la reserva y de la mesa asignada
         reserva.Estado = ReservaEstado.EnCurso;
-        reserva.Mesa.Estado = MesaEstado.Ocupada;
+        if (reserva.Mesa != null)
+        {
+            reserva.Mesa.Estado = MesaEstado.Ocupada;
+            await _mesaRepository.UpdateAsync(reserva.Mesa);
+        }
 
-        // 4. Persistir cambios en una única transacción automática de EF Core
-        await _context.SaveChangesAsync();
+        // 4. Persistir cambios
+        await _reservaRepository.UpdateAsync(reserva);
 
         // 5. Retornar DTO con los datos actualizados
         return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
@@ -259,10 +245,7 @@ public class ReservaService : IReservaService
     public async Task<ReservaResponseDTO> FinalizarReservaAsync(Guid reservaId)
     {
         // 1. Buscar la reserva incluyendo la entidad Mesa para poder liberarla
-        var reserva = await _context.Reservas
-            .Include(r => r.Cliente)
-            .Include(r => r.Mesa)
-            .FirstOrDefaultAsync(r => r.Id == reservaId)
+        var reserva = await _reservaRepository.GetByIdAsync(reservaId)
             ?? throw new ReservaNoEncontradaException(reservaId);
 
         // 2. Validar RN-01: Solo se pueden finalizar reservas que están en curso
@@ -274,10 +257,14 @@ public class ReservaService : IReservaService
 
         // 3. Aplicar RN-02: Finalizar la reserva y LIBERAR la mesa
         reserva.Estado = ReservaEstado.Finalizada;
-        reserva.Mesa.Estado = MesaEstado.Libre;
+        if (reserva.Mesa != null)
+        {
+            reserva.Mesa.Estado = MesaEstado.Libre;
+            await _mesaRepository.UpdateAsync(reserva.Mesa);
+        }
 
         // 4. Guardar cambios en base de datos
-        await _context.SaveChangesAsync();
+        await _reservaRepository.UpdateAsync(reserva);
 
         // 5. Retornar DTO con el estado final
         return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
@@ -286,10 +273,7 @@ public class ReservaService : IReservaService
     public async Task<ReservaResponseDTO> CancelarReservaGerenteAsync(Guid reservaId)
     {
         // 1. Buscar la reserva incluyendo la Mesa (necesitamos liberarla)
-        var reserva = await _context.Reservas
-            .Include(r => r.Cliente)
-            .Include(r => r.Mesa)
-            .FirstOrDefaultAsync(r => r.Id == reservaId)
+        var reserva = await _reservaRepository.GetByIdAsync(reservaId)
             ?? throw new ReservaNoEncontradaException(reservaId);
 
         // 2. Validar que la reserva NO esté ya en un estado final (no tiene sentido cancelar algo ya concluido)
@@ -308,10 +292,11 @@ public class ReservaService : IReservaService
         if (reserva.Mesa != null)
         {
             reserva.Mesa.Estado = MesaEstado.Libre;
+            await _mesaRepository.UpdateAsync(reserva.Mesa);
         }
 
         // 5. Persistir los cambios
-        await _context.SaveChangesAsync();
+        await _reservaRepository.UpdateAsync(reserva);
 
         // 6. Retornar DTO con el estado actualizado
         return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
@@ -320,10 +305,7 @@ public class ReservaService : IReservaService
     public async Task<ReservaResponseDTO> RechazarReservaAsync(Guid reservaId)
     {
         // 1. Buscar la reserva
-        var reserva = await _context.Reservas
-            .Include(r => r.Cliente)
-            .Include(r => r.Mesa)
-            .FirstOrDefaultAsync(r => r.Id == reservaId)
+        var reserva = await _reservaRepository.GetByIdAsync(reservaId)
             ?? throw new ReservaNoEncontradaException(reservaId);
 
         // 2. Validar RN-02: Solo se pueden rechazar reservas en estado Pendiente
@@ -340,27 +322,24 @@ public class ReservaService : IReservaService
         if (reserva.Mesa != null)
         {
             reserva.Mesa.Estado = MesaEstado.Libre;
+            await _mesaRepository.UpdateAsync(reserva.Mesa);
         }
 
         // 5. Persistir los cambios
-        await _context.SaveChangesAsync();
+        await _reservaRepository.UpdateAsync(reserva);
 
         // 6. Retornar DTO
         return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
     }
 
-        public async Task<ReservaResponseDTO> AsignarMesaAsync(Guid reservaId, int mesaId)
+    public async Task<ReservaResponseDTO> AsignarMesaAsync(Guid reservaId, int mesaId)
     {
         // 1. Validar que la reserva exista
-        var reserva = await _context.Reservas
-            .Include(r => r.Cliente)
-            .Include(r => r.Mesa)
-            .FirstOrDefaultAsync(r => r.Id == reservaId)
+        var reserva = await _reservaRepository.GetByIdAsync(reservaId)
             ?? throw new NotFoundException(nameof(Reserva), reservaId);
 
-        // 2. Validar que la mesa exista
-        var mesa = await _context.Mesas
-            .FindAsync(mesaId)
+        // 2. Validar que la mesa exista por número de mesa
+        var mesa = await _mesaRepository.GetByNumeroAsync(mesaId)
             ?? throw new NotFoundException(nameof(Mesa), mesaId);
 
         // 3. Validar estado (no se puede cambiar mesa a una reserva ya finalizada o cancelada)
@@ -379,15 +358,13 @@ public class ReservaService : IReservaService
         // 5. RN-02: Validar solapamiento de horario
         var finReserva = reserva.FechaHora.AddMinutes(reserva.DuracionEstimadaMinutos);
 
-        var solapada = await _context.Reservas
-            .AnyAsync(r => r.MesaId == mesa.Id &&
-                           r.Id != reservaId &&
-                           r.Estado != ReservaEstado.Cancelada &&
-                           r.Estado != ReservaEstado.Finalizada &&
-                           r.FechaHora < finReserva &&
-                           r.FechaHora.AddMinutes(r.DuracionEstimadaMinutos) > reserva.FechaHora);
+        var solapadas = await _reservaRepository.GetOverlappingReservationsByMesaAsync(
+            mesa.Id,
+            reserva.FechaHora,
+            finReserva,
+            reservaId);
 
-        if (solapada)
+        if (solapadas.Any())
         {
             throw new MesaSolapadaException();
         }
@@ -396,7 +373,7 @@ public class ReservaService : IReservaService
         reserva.MesaId = mesa.Id;
         reserva.Mesa = mesa;
 
-        await _context.SaveChangesAsync();
+        await _reservaRepository.UpdateAsync(reserva);
 
         return MapToResponseDTO(reserva, reserva.Cliente, mesa);
     }
@@ -405,12 +382,7 @@ public class ReservaService : IReservaService
     {
         var fechaConsulta = fecha?.Date ?? DateTime.Today;
 
-        var reservas = await _context.Reservas
-            .Include(r => r.Cliente)
-            .Include(r => r.Mesa)
-            .Where(r => r.FechaHora.Date == fechaConsulta)
-            .OrderBy(r => r.FechaHora)
-            .ToListAsync();
+        var reservas = await _reservaRepository.GetReservasOperativasAsync(fechaConsulta);
 
         if (!reservas.Any())
         {
@@ -419,44 +391,15 @@ public class ReservaService : IReservaService
 
         return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
     }
-
 
     /// CU-11: Filtrar reservas (Gerente).
-
     public async Task<IEnumerable<ReservaResponseDTO>> FiltrarReservasAsync(ReservaFiltroDTO filtro)
     {
-        var query = _context.Reservas
-            .AsNoTracking()
-            .Include(r => r.Cliente)
-            .Include(r => r.Mesa)
-            .AsQueryable();
-
-        if (filtro.Fecha.HasValue)
-        {
-            var dateOnly = filtro.Fecha.Value.Date;
-            var nextDay = dateOnly.AddDays(1);
-            query = query.Where(r => r.FechaHora >= dateOnly && r.FechaHora < nextDay);
-        }
-
-        if (filtro.Estado.HasValue)
-        {
-            query = query.Where(r => r.Estado == filtro.Estado.Value);
-        }
-
-        if (filtro.MesaId.HasValue)
-        {
-            query = query.Where(r => r.MesaId == filtro.MesaId.Value);
-        }
-
-        if (filtro.ClienteId.HasValue)
-        {
-            query = query.Where(r => r.ClienteId == filtro.ClienteId.Value);
-        }
-
-        var reservas = await query
-            .OrderBy(r => r.FechaHora)
-            .ThenBy(r => r.FechaCreacion)
-            .ToListAsync();
+        var reservas = await _reservaRepository.GetAllAsync(
+            filtro.Fecha,
+            filtro.ClienteId,
+            filtro.MesaId,
+            filtro.Estado);
 
         if (!reservas.Any())
         {
@@ -465,8 +408,4 @@ public class ReservaService : IReservaService
 
         return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
     }
-
 }
-
-
-

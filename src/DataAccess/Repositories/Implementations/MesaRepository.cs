@@ -80,7 +80,16 @@ public class MesaRepository : IMesaRepository
 
     public async Task UpdateAsync(Mesa mesa)
     {
-        _context.Mesas.Update(mesa);
+        var local = _context.Mesas.Local.FirstOrDefault(m => m.Id == mesa.Id);
+        if (local != null && !ReferenceEquals(local, mesa))
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
+        var entry = _context.Entry(mesa);
+        if (entry.State == EntityState.Detached)
+        {
+            _context.Mesas.Update(mesa);
+        }
         await _context.SaveChangesAsync();
     }
 
