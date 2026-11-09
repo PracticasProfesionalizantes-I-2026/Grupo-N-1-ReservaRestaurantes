@@ -10,11 +10,16 @@ public class AuthService : IAuthService
 {
     private readonly IClienteRepository _clienteRepository;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly ITokenRevocationService? _tokenRevocationService;
 
-    public AuthService(IClienteRepository clienteRepository, IJwtTokenGenerator jwtTokenGenerator)
+    public AuthService(
+        IClienteRepository clienteRepository,
+        IJwtTokenGenerator jwtTokenGenerator,
+        ITokenRevocationService? tokenRevocationService = null)
     {
         _clienteRepository = clienteRepository ?? throw new ArgumentNullException(nameof(clienteRepository));
         _jwtTokenGenerator = jwtTokenGenerator ?? throw new ArgumentNullException(nameof(jwtTokenGenerator));
+        _tokenRevocationService = tokenRevocationService;
     }
 
     public async Task<UsuarioResponseDTO> RegisterAsync(UsuarioRegisterDTO dto)
@@ -96,13 +101,15 @@ public class AuthService : IAuthService
             throw new UnauthorizedException("Credenciales inválidas.");
         }
 
-        // 4. Generar Token JWT
+        // 4. Generar Token JWT y Refresh Token
         var (token, expiration) = _jwtTokenGenerator.GenerateToken(cliente);
+        var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
 
         // 5. Retornar DTO de respuesta
         return new LoginResponseDTO
         {
             Token = token,
+            RefreshToken = refreshToken,
             Expiration = expiration,
             UserId = cliente.Id,
             Email = cliente.Email,
@@ -111,10 +118,18 @@ public class AuthService : IAuthService
         };
     }
 
-    public Task LogoutAsync()
+    public Task LogoutAsync(string? token = null, Guid? userId = null)
     {
-        // Cierre de sesión sin estado (Stateless JWT)
-        // El token expira o es descartado por el cliente.
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            _tokenRevocationService?.RevokeToken(token);
+        }
+
+        if (userId.HasValue)
+        {
+            _tokenRevocationService?.RevokeUserTokens(userId.Value);
+        }
+
         return Task.CompletedTask;
     }
 
@@ -126,7 +141,7 @@ public class AuthService : IAuthService
         }
 
         // Verifica que la contraseña almacenada sea un hash válido de BCrypt
-        if (storedHash.StartsWith("$2a$") || storedHash.StartsWith("$2b$") || storedHash.StartsWith("$2y$"))
+        if (storedHash.StartsWith("$2a$") || storedHash.StartsWith("$2b$") || storedHash.StartsWith("$2y$") || storedHash.StartsWith("$2x$"))
         {
             return BCrypt.Net.BCrypt.Verify(password, storedHash);
         }

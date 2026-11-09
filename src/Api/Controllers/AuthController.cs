@@ -59,7 +59,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// CU-07: Cerrar Sesión
+    /// CU-07 / CU-08: Cerrar Sesión (Revocación de token JWT activo)
     /// </summary>
     [HttpPost("logout")]
     [Authorize]
@@ -67,7 +67,15 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Logout()
     {
-        await _authService.LogoutAsync();
+        var authHeader = Request.Headers.Authorization.ToString();
+        var token = authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+            ? authHeader[7..].Trim()
+            : authHeader.Trim();
+
+        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        Guid? userId = Guid.TryParse(userIdStr, out var parsedId) ? parsedId : null;
+
+        await _authService.LogoutAsync(token, userId);
         return Ok(new { message = "Sesión cerrada exitosamente." });
     }
 }

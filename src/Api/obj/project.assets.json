@@ -68,11 +68,7 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
-<<<<<<< HEAD
       "Microsoft.Data.Sqlite.Core/10.0.14": {
-=======
-      "Microsoft.Data.Sqlite.Core/10.0.13": {
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "type": "package",
         "dependencies": {
           "SQLitePCLRaw.core": "2.1.13"
@@ -88,19 +84,11 @@
           }
         }
       },
-<<<<<<< HEAD
       "Microsoft.EntityFrameworkCore/10.0.14": {
         "type": "package",
         "dependencies": {
           "Microsoft.EntityFrameworkCore.Abstractions": "10.0.14",
           "Microsoft.EntityFrameworkCore.Analyzers": "10.0.14"
-=======
-      "Microsoft.EntityFrameworkCore/10.0.13": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore.Abstractions": "10.0.13",
-          "Microsoft.EntityFrameworkCore.Analyzers": "10.0.13"
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         },
         "compile": {
           "lib/net10.0/Microsoft.EntityFrameworkCore.dll": {
@@ -116,11 +104,7 @@
           "buildTransitive/net10.0/Microsoft.EntityFrameworkCore.props": {}
         }
       },
-<<<<<<< HEAD
       "Microsoft.EntityFrameworkCore.Abstractions/10.0.14": {
-=======
-      "Microsoft.EntityFrameworkCore.Abstractions/10.0.13": {
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "type": "package",
         "compile": {
           "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.dll": {
@@ -133,7 +117,6 @@
           }
         }
       },
-<<<<<<< HEAD
       "Microsoft.EntityFrameworkCore.Analyzers/10.0.14": {
         "type": "package"
       },
@@ -141,15 +124,6 @@
         "type": "package",
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "10.0.14"
-=======
-      "Microsoft.EntityFrameworkCore.Analyzers/10.0.13": {
-        "type": "package"
-      },
-      "Microsoft.EntityFrameworkCore.Relational/10.0.13": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore": "10.0.13"
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         },
         "compile": {
           "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.dll": {
@@ -162,19 +136,11 @@
           }
         }
       },
-<<<<<<< HEAD
       "Microsoft.EntityFrameworkCore.Sqlite/10.0.14": {
         "type": "package",
         "dependencies": {
           "Microsoft.EntityFrameworkCore.Sqlite.Core": "10.0.14",
           "Microsoft.Extensions.DependencyModel": "10.0.14",
-=======
-      "Microsoft.EntityFrameworkCore.Sqlite/10.0.13": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore.Sqlite.Core": "10.0.13",
-          "Microsoft.Extensions.DependencyModel": "10.0.13",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
           "SQLitePCLRaw.bundle_e_sqlite3": "2.1.13",
           "SQLitePCLRaw.core": "2.1.13"
         },
@@ -185,21 +151,12 @@
           "lib/net10.0/_._": {}
         }
       },
-<<<<<<< HEAD
       "Microsoft.EntityFrameworkCore.Sqlite.Core/10.0.14": {
         "type": "package",
         "dependencies": {
           "Microsoft.Data.Sqlite.Core": "10.0.14",
           "Microsoft.EntityFrameworkCore.Relational": "10.0.14",
           "Microsoft.Extensions.DependencyModel": "10.0.14",
-=======
-      "Microsoft.EntityFrameworkCore.Sqlite.Core/10.0.13": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Data.Sqlite.Core": "10.0.13",
-          "Microsoft.EntityFrameworkCore.Relational": "10.0.13",
-          "Microsoft.Extensions.DependencyModel": "10.0.13",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
           "SQLitePCLRaw.core": "2.1.13"
         },
         "compile": {
@@ -224,11 +181,7 @@
           "buildMultiTargeting/Microsoft.Extensions.ApiDescription.Server.targets": {}
         }
       },
-<<<<<<< HEAD
       "Microsoft.Extensions.DependencyModel/10.0.14": {
-=======
-      "Microsoft.Extensions.DependencyModel/10.0.13": {
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "type": "package",
         "compile": {
           "lib/net10.0/Microsoft.Extensions.DependencyModel.dll": {
@@ -735,17 +688,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-<<<<<<< HEAD
     "Microsoft.Data.Sqlite.Core/10.0.14": {
       "sha512": "1p9rO3Q2X/L/9YrYog3vaDzi8u+WZfJCOkDYoHqmofqYP0DLPLPyZcS2Rnh/79JXAodgbs1AgsaNwLpIvC3Xew==",
       "type": "package",
       "path": "microsoft.data.sqlite.core/10.0.14",
-=======
-    "Microsoft.Data.Sqlite.Core/10.0.13": {
-      "sha512": "Gge8XsSCOwcbkbdmt2UDAe6kIv9Q0vA6yb3wsTStjjexaMFLTWfc/1gH4kbhJ+zWiXRTRA4lG2sOQNVfir204w==",
-      "type": "package",
-      "path": "microsoft.data.sqlite.core/10.0.13",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -755,7 +701,6 @@
         "lib/net8.0/Microsoft.Data.Sqlite.xml",
         "lib/netstandard2.0/Microsoft.Data.Sqlite.dll",
         "lib/netstandard2.0/Microsoft.Data.Sqlite.xml",
-<<<<<<< HEAD
         "microsoft.data.sqlite.core.10.0.14.nupkg.sha512",
         "microsoft.data.sqlite.core.nuspec"
       ]
@@ -764,16 +709,6 @@
       "sha512": "vY3931PYPIDBbKovGHbACmpOWvURvKNyRXfCjMh5yLW+FH6vLWeqUu2xzSCRo4Oz4tgx9GYpd0JlV5LDyAoQdg==",
       "type": "package",
       "path": "microsoft.entityframeworkcore/10.0.14",
-=======
-        "microsoft.data.sqlite.core.10.0.13.nupkg.sha512",
-        "microsoft.data.sqlite.core.nuspec"
-      ]
-    },
-    "Microsoft.EntityFrameworkCore/10.0.13": {
-      "sha512": "u/z4nTQUJ5nJEXAQekgQEQZkh0delp4gL+ESHn7Z6k037c8HC5mSNu1/YdBgxGm7DtLjhOxktNl+aQMzw6wN7A==",
-      "type": "package",
-      "path": "microsoft.entityframeworkcore/10.0.13",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -782,7 +717,6 @@
         "buildTransitive/net10.0/Microsoft.EntityFrameworkCore.props",
         "lib/net10.0/Microsoft.EntityFrameworkCore.dll",
         "lib/net10.0/Microsoft.EntityFrameworkCore.xml",
-<<<<<<< HEAD
         "microsoft.entityframeworkcore.10.0.14.nupkg.sha512",
         "microsoft.entityframeworkcore.nuspec"
       ]
@@ -791,16 +725,6 @@
       "sha512": "/SaznoTTFfKzxYEbCPAwwKBR3XT92DZgH4jJ3/cqs2skP3o2D+TL6i9Aaj+8Azwtu6/sRd0ve4P2mN12nfVmCw==",
       "type": "package",
       "path": "microsoft.entityframeworkcore.abstractions/10.0.14",
-=======
-        "microsoft.entityframeworkcore.10.0.13.nupkg.sha512",
-        "microsoft.entityframeworkcore.nuspec"
-      ]
-    },
-    "Microsoft.EntityFrameworkCore.Abstractions/10.0.13": {
-      "sha512": "ARw+tZ3eiTosnK5nJPUGEzeUQcjyqCqs3qKA3lPtIRH5yJo3qIgxm7AvkZVIT9iWkS2083UsWe3Rj1MysW3p5A==",
-      "type": "package",
-      "path": "microsoft.entityframeworkcore.abstractions/10.0.13",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -808,7 +732,6 @@
         "PACKAGE.md",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.dll",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.xml",
-<<<<<<< HEAD
         "microsoft.entityframeworkcore.abstractions.10.0.14.nupkg.sha512",
         "microsoft.entityframeworkcore.abstractions.nuspec"
       ]
@@ -817,23 +740,12 @@
       "sha512": "gaANlGNTxkgODX2eeVT8jjd3AmlFilQV4DFf8qoW30+wUCm2o4N7nEHtZvnHIwfhaJni2DqcjE47Au7tC0Q5jA==",
       "type": "package",
       "path": "microsoft.entityframeworkcore.analyzers/10.0.14",
-=======
-        "microsoft.entityframeworkcore.abstractions.10.0.13.nupkg.sha512",
-        "microsoft.entityframeworkcore.abstractions.nuspec"
-      ]
-    },
-    "Microsoft.EntityFrameworkCore.Analyzers/10.0.13": {
-      "sha512": "zBx6VeEz/hkhlm0BJ2V+9xebUuDDIszcKvurJceQHuZPEXuXubrL6Lneo9VZiliRyJbQlB2oNKLkJXd3gHteQA==",
-      "type": "package",
-      "path": "microsoft.entityframeworkcore.analyzers/10.0.13",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
         "analyzers/dotnet/cs/Microsoft.EntityFrameworkCore.Analyzers.dll",
         "docs/PACKAGE.md",
-<<<<<<< HEAD
         "microsoft.entityframeworkcore.analyzers.10.0.14.nupkg.sha512",
         "microsoft.entityframeworkcore.analyzers.nuspec"
       ]
@@ -842,16 +754,6 @@
       "sha512": "Ut0kgtfoKX9QElQVEXSEAgdQc79jISWStVWSOhfPDDHNSKMwFzSXG3gtdYFTAbsBoV+8NtXdVaj4xwdqeky8UA==",
       "type": "package",
       "path": "microsoft.entityframeworkcore.relational/10.0.14",
-=======
-        "microsoft.entityframeworkcore.analyzers.10.0.13.nupkg.sha512",
-        "microsoft.entityframeworkcore.analyzers.nuspec"
-      ]
-    },
-    "Microsoft.EntityFrameworkCore.Relational/10.0.13": {
-      "sha512": "QU/sbTtDR5wVAJRVecC1GwM7mwH8bvKOZNm+lulzMr5rhjdb8DDEFIqqdhF08JIo51DPv5uQdZ1nXoZsD5pTag==",
-      "type": "package",
-      "path": "microsoft.entityframeworkcore.relational/10.0.13",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -859,7 +761,6 @@
         "PACKAGE.md",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.dll",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.xml",
-<<<<<<< HEAD
         "microsoft.entityframeworkcore.relational.10.0.14.nupkg.sha512",
         "microsoft.entityframeworkcore.relational.nuspec"
       ]
@@ -868,23 +769,12 @@
       "sha512": "lxrwnVwvlIfQD4IF4WUVupE6Qxfj3MfFftDVwo7tsGAWCKLL8Ttb8UjIt+gE4e9nRlH7EgdC6TrsArFGnNYREw==",
       "type": "package",
       "path": "microsoft.entityframeworkcore.sqlite/10.0.14",
-=======
-        "microsoft.entityframeworkcore.relational.10.0.13.nupkg.sha512",
-        "microsoft.entityframeworkcore.relational.nuspec"
-      ]
-    },
-    "Microsoft.EntityFrameworkCore.Sqlite/10.0.13": {
-      "sha512": "CqPgFVpKjdNjPHO1fqK5Uw/h7RfY6LyjPko9cLiXTBkxUhjO0Bt48tnF/ddw5PL2k5JaR8myDcyogcONY7juLg==",
-      "type": "package",
-      "path": "microsoft.entityframeworkcore.sqlite/10.0.13",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
         "PACKAGE.md",
         "lib/net10.0/_._",
-<<<<<<< HEAD
         "microsoft.entityframeworkcore.sqlite.10.0.14.nupkg.sha512",
         "microsoft.entityframeworkcore.sqlite.nuspec"
       ]
@@ -893,16 +783,6 @@
       "sha512": "08VGlMQ9WbK869as9Ho+VZQbM5Qu6zdorgeh6ShVwQgLYgfUBiaIm02T7spfW7Xc1MBHCvclwPgGWpvx5BYGXQ==",
       "type": "package",
       "path": "microsoft.entityframeworkcore.sqlite.core/10.0.14",
-=======
-        "microsoft.entityframeworkcore.sqlite.10.0.13.nupkg.sha512",
-        "microsoft.entityframeworkcore.sqlite.nuspec"
-      ]
-    },
-    "Microsoft.EntityFrameworkCore.Sqlite.Core/10.0.13": {
-      "sha512": "zXJAJOS34unH9sWP6ywyUmaZ/yeHy0/CljvdsHvzhN/rXHRBXsPRYymTU65my0rGoa60mh7HUXVPEGOxfsiWSg==",
-      "type": "package",
-      "path": "microsoft.entityframeworkcore.sqlite.core/10.0.13",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -910,11 +790,7 @@
         "PACKAGE.md",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Sqlite.dll",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Sqlite.xml",
-<<<<<<< HEAD
         "microsoft.entityframeworkcore.sqlite.core.10.0.14.nupkg.sha512",
-=======
-        "microsoft.entityframeworkcore.sqlite.core.10.0.13.nupkg.sha512",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "microsoft.entityframeworkcore.sqlite.core.nuspec"
       ]
     },
@@ -1178,17 +1054,10 @@
         "tools/net462/netstandard.dll"
       ]
     },
-<<<<<<< HEAD
     "Microsoft.Extensions.DependencyModel/10.0.14": {
       "sha512": "N8OcqM0370wSXMJ3ZxO66rSElHrIgxvpfUn0vV7zRj7NvKo0nfwgEoTmC3Yz3860o60IaQ4KIPyeLIGX9EeNWA==",
       "type": "package",
       "path": "microsoft.extensions.dependencymodel/10.0.14",
-=======
-    "Microsoft.Extensions.DependencyModel/10.0.13": {
-      "sha512": "6TyllZsToy3S/Ziu67GddljRTttuVJ8bbrbVUrsdHqH5678Oax5MpaEubxLoPoWLvgUBYo4KfcAig0mkBtktXQ==",
-      "type": "package",
-      "path": "microsoft.extensions.dependencymodel/10.0.13",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1209,11 +1078,7 @@
         "lib/net9.0/Microsoft.Extensions.DependencyModel.xml",
         "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.dll",
         "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.xml",
-<<<<<<< HEAD
         "microsoft.extensions.dependencymodel.10.0.14.nupkg.sha512",
-=======
-        "microsoft.extensions.dependencymodel.10.0.13.nupkg.sha512",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "microsoft.extensions.dependencymodel.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -1636,27 +1501,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Marti\\.nuget\\packages\\": {}
+    "C:\\Users\\jerob\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-<<<<<<< HEAD
-      "projectUniqueName": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj",
+      "projectUniqueName": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj",
       "projectName": "Api",
-      "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj",
-      "packagesPath": "C:\\Users\\Marti\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\obj\\",
-=======
-      "projectUniqueName": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj",
-      "projectName": "Api",
-      "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj",
-      "packagesPath": "C:\\Users\\jeronimo\\.nuget\\packages\\",
-      "outputPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\obj\\",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
+      "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj",
+      "packagesPath": "C:\\Users\\jerob\\.nuget\\packages\\",
+      "outputPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Marti\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\jerob\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -1671,31 +1528,17 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-<<<<<<< HEAD
-            "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj": {
-              "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj"
+            "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj": {
+              "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj"
             },
-            "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
-              "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
+            "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
+              "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
             },
-            "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj": {
-              "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj"
+            "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj": {
+              "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj"
             },
-            "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
-              "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
-=======
-            "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj": {
-              "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj"
-            },
-            "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
-              "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
-            },
-            "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj": {
-              "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj"
-            },
-            "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
-              "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
+            "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+              "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
             }
           }
         }
@@ -1757,7 +1600,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.403/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

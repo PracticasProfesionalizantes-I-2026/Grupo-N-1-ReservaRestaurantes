@@ -156,6 +156,8 @@ public class AuthServiceTests
 
         _jwtMock.Setup(j => j.GenerateToken(cliente))
             .Returns(("token-jwt-mock", DateTime.UtcNow.AddHours(1)));
+        _jwtMock.Setup(j => j.GenerateRefreshToken())
+            .Returns("refresh-token-mock-123");
 
         var dto = new LoginRequestDTO
         {
@@ -169,6 +171,7 @@ public class AuthServiceTests
         // Assert
         Assert.NotNull(resultado);
         Assert.Equal("token-jwt-mock", resultado.Token);
+        Assert.Equal("refresh-token-mock-123", resultado.RefreshToken);
         Assert.Equal("martin@example.com", resultado.Email);
         Assert.Equal("Cliente", resultado.Role);
     }
@@ -184,6 +187,94 @@ public class AuthServiceTests
         {
             Email = "noexiste@example.com",
             Password = "wrongpassword"
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<UnauthorizedException>(
+            () => _sut.LoginAsync(dto));
+    }
+
+    [Fact]
+    public async Task LoginAsync_ContrasenaAlmacenadaEnTextoPlano_DeniegaLoginYLanzaUnauthorizedException()
+    {
+        // Arrange — Usuario con contraseña guardada en texto plano (sin hash BCrypt)
+        var cliente = new Cliente
+        {
+            Id = Guid.NewGuid(),
+            Nombre = "Inseguro",
+            Apellido = "Usuario",
+            Email = "inseguro@test.com",
+            PasswordHash = "PasswordPlana123!", // En texto plano, NO es hash BCrypt
+            Rol = "Cliente",
+            Activo = true
+        };
+
+        _clienteRepoMock.Setup(r => r.GetByEmailAsync("inseguro@test.com"))
+            .ReturnsAsync(cliente);
+
+        var dto = new LoginRequestDTO
+        {
+            Email = "inseguro@test.com",
+            Password = "PasswordPlana123!" // La misma clave exacta
+        };
+
+        // Act & Assert — Debe denegar el login por no tener hash BCrypt válido
+        await Assert.ThrowsAsync<UnauthorizedException>(
+            () => _sut.LoginAsync(dto));
+    }
+
+    [Fact]
+    public async Task LoginAsync_HashNoBCrypt_DeniegaLoginYLanzaUnauthorizedException()
+    {
+        // Arrange — Usuario con hash MD5 o formato no soportado
+        var cliente = new Cliente
+        {
+            Id = Guid.NewGuid(),
+            Nombre = "Hash",
+            Apellido = "Invalido",
+            Email = "hashinvalido@test.com",
+            PasswordHash = "e10adc3949ba59abbe56e057f20f883e", // MD5
+            Rol = "Cliente",
+            Activo = true
+        };
+
+        _clienteRepoMock.Setup(r => r.GetByEmailAsync("hashinvalido@test.com"))
+            .ReturnsAsync(cliente);
+
+        var dto = new LoginRequestDTO
+        {
+            Email = "hashinvalido@test.com",
+            Password = "123456"
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<UnauthorizedException>(
+            () => _sut.LoginAsync(dto));
+    }
+
+    [Fact]
+    public async Task LoginAsync_ContrasenaBCryptIncorrecta_LanzaUnauthorizedException()
+    {
+        // Arrange — Hash BCrypt legítimo pero contraseña ingresada incorrecta
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword("ContrasenaCorrecta123!");
+        var cliente = new Cliente
+        {
+            Id = Guid.NewGuid(),
+            Nombre = "Valido",
+            Apellido = "Usuario",
+            Email = "valido@test.com",
+            PasswordHash = passwordHash,
+            Rol = "Cliente",
+            Activo = true
+        };
+
+        _clienteRepoMock.Setup(r => r.GetByEmailAsync("valido@test.com"))
+            .ReturnsAsync(cliente);
+
+        var dto = new LoginRequestDTO
+        {
+            Email = "valido@test.com",
+            Password = "ContrasenaErronea999!"
         };
 
         // Act & Assert

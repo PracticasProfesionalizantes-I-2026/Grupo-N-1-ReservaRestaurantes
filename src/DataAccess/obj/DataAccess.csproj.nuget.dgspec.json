@@ -1,34 +1,20 @@
 {
   "format": 1,
   "restore": {
-<<<<<<< HEAD
-    "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {}
+    "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
+    "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
+        "projectUniqueName": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
         "projectName": "DataAccess",
-        "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
-        "packagesPath": "C:\\Users\\Marti\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\obj\\",
-=======
-    "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {}
-  },
-  "projects": {
-    "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
-        "projectName": "DataAccess",
-        "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
-        "packagesPath": "C:\\Users\\jeronimo\\.nuget\\packages\\",
-        "outputPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\obj\\",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
+        "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
+        "packagesPath": "C:\\Users\\jerob\\.nuget\\packages\\",
+        "outputPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Marti\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\jerob\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -43,13 +29,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-<<<<<<< HEAD
-              "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
-                "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
-=======
-              "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
-                "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
+              "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+                "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
               }
             }
           }
@@ -102,7 +83,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.403/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -380,28 +361,17 @@
         }
       }
     },
-<<<<<<< HEAD
-    "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+    "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
+        "projectUniqueName": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
         "projectName": "Shared",
-        "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
-        "packagesPath": "C:\\Users\\Marti\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\obj\\",
-=======
-    "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
-        "projectName": "Shared",
-        "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
-        "packagesPath": "C:\\Users\\jeronimo\\.nuget\\packages\\",
-        "outputPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\obj\\",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
+        "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
+        "packagesPath": "C:\\Users\\jerob\\.nuget\\packages\\",
+        "outputPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Marti\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\jerob\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -450,7 +420,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.403/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",

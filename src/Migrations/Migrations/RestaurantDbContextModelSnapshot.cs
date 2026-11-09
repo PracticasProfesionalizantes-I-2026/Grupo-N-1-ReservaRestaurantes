@@ -139,7 +139,7 @@ namespace Migrations.Migrations
 
                     b.HasIndex("MesaId", "FechaHora")
                         .IsUnique()
-                        .HasFilter("\"Estado\" NOT IN (4, 5, 6)");
+                        .HasFilter("\"Estado\" NOT IN (4, 5, 6, 7)");
 
                     b.ToTable("Reservas");
                 });

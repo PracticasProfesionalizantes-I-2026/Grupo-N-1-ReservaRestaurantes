@@ -7,5 +7,6 @@ public enum ReservaEstado
     EnCurso = 3,
     Finalizada = 4,
     Cancelada = 5,
-    NoShow = 6
+    NoShow = 6,
+    Rechazada = 7
 }

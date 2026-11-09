@@ -5,6 +5,14 @@ using Shared.Enums;
 
 namespace DataAccess.Data;
 
+/// <summary>
+/// Inicializa la base de datos aplicando migraciones pendientes y sembrando datos iniciales.
+/// 
+/// Credenciales demo para desarrollo / pruebas:
+/// - Clientes (juan.perez@example.com, maria.gonzalez@example.com, etc.): "Cliente123!" (configurable vía CLIENTE_PASSWORD)
+/// - Gerente (gerente@restaurant.com): "Gerente123!" (configurable vía GERENTE_PASSWORD)
+/// - Admin (admin@restaurant.com): "Admin123!" (configurable vía ADMIN_PASSWORD)
+/// </summary>
 public static class DbInitializer
 {
     public static async Task InitializeAsync(RestaurantDbContext context)
@@ -12,6 +20,14 @@ public static class DbInitializer
         // Asegura la aplicación de las migraciones en la base de datos SQLite
         await context.Database.MigrateAsync();
 
+        await SeedOnlyAsync(context);
+    }
+
+    /// <summary>
+    /// Solo siembra datos sin aplicar migraciones. Útil en tests que usan EnsureCreated().
+    /// </summary>
+    public static async Task SeedOnlyAsync(RestaurantDbContext context)
+    {
         // Si ya hay clientes cargados, la base ya fue inicializada (idempotencia)
         if (await context.Clientes.AnyAsync())
         {
@@ -19,7 +35,8 @@ public static class DbInitializer
         }
 
         // 1. Clientes semilla
-        var clientePasswordHash = BCrypt.Net.BCrypt.HashPassword("Cliente123!");
+        var clientePassword = Environment.GetEnvironmentVariable("CLIENTE_PASSWORD") ?? "Cliente123!";
+        var clientePasswordHash = BCrypt.Net.BCrypt.HashPassword(clientePassword);
 
         var cliente1 = new Cliente
         {
@@ -168,6 +185,7 @@ public static class DbInitializer
         };
         
         // Creamos gerente manualmente
+        var gerentePassword = Environment.GetEnvironmentVariable("GERENTE_PASSWORD") ?? "Gerente123!";
         var gerente = new Cliente
         {
             Id = Guid.NewGuid(),
@@ -175,11 +193,12 @@ public static class DbInitializer
             Apellido = "Gerente",
             Email = "gerente@restaurant.com",
             Telefono = "1122334455",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(Environment.GetEnvironmentVariable("GERENTE_PASSWORD") ?? throw new InvalidOperationException("Set GERENTE_PASSWORD env var")), 
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(gerentePassword), 
             Rol = "Gerente" 
         };
 
         // Creamos administrador manualmente
+        var adminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD") ?? "Admin123!";
         var admin = new Cliente
         {
             Id = Guid.NewGuid(),
@@ -187,7 +206,7 @@ public static class DbInitializer
             Apellido = "Admin",
             Email = "admin@restaurant.com",
             Telefono = "9988776655",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(Environment.GetEnvironmentVariable("ADMIN_PASSWORD") ?? throw new InvalidOperationException("Set ADMIN_PASSWORD env var")), 
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword), 
             Rol = "Admin" 
         };
 

@@ -505,8 +505,12 @@ public class ReservaService : IReservaService
         return MapToResponseDTO(reserva, reserva.Cliente, mesa);
     }
     
-    public async Task<ReservaResponseDTO> CancelarReservaGerenteAsync(Guid reservaId)
+    public async Task<ReservaResponseDTO> CancelarReservaGerenteAsync(Guid reservaId, ReservaCancelarDTO dto)
     {
+        // CU-15: el motivo es obligatorio para cancelaciones del gerente
+        if (string.IsNullOrWhiteSpace(dto?.Motivo))
+            throw new ValidationException("El motivo de cancelación es obligatorio para el gerente.");
+
         // 1. Buscar la reserva incluyendo la Mesa (necesitamos liberarla)
         var reserva = await _reservaRepository.GetByIdAsync(reservaId)
             ?? throw new ReservaNoEncontradaException(reservaId);
@@ -514,7 +518,8 @@ public class ReservaService : IReservaService
         // 2. Validar que la reserva NO esté ya en un estado final (no tiene sentido cancelar algo ya concluido)
         if (reserva.Estado == ReservaEstado.Cancelada ||
             reserva.Estado == ReservaEstado.Finalizada ||
-            reserva.Estado == ReservaEstado.NoShow)
+            reserva.Estado == ReservaEstado.NoShow ||
+            reserva.Estado == ReservaEstado.Rechazada)
         {
             throw new TransicionEstadoInvalidaException(
                 $"No es posible cancelar una reserva que ya se encuentra en estado '{reserva.Estado}'.");
@@ -523,22 +528,31 @@ public class ReservaService : IReservaService
         // 3. Cambiar estado de la reserva
         reserva.Estado = ReservaEstado.Cancelada;
 
-        // 4. Liberar la mesa inmediatamente (RN-03)
+        // 4. Persistir motivo en Observaciones
+        reserva.Observaciones = string.IsNullOrEmpty(reserva.Observaciones)
+            ? $"[Motivo Cancelación Gerente: {dto.Motivo}]"
+            : $"{reserva.Observaciones} | [Motivo Cancelación Gerente: {dto.Motivo}]";
+
+        // 5. Liberar la mesa inmediatamente (RN-03)
         if (reserva.Mesa != null)
         {
             reserva.Mesa.Estado = MesaEstado.Libre;
             await _mesaRepository.UpdateAsync(reserva.Mesa);
         }
 
-        // 5. Persistir los cambios
+        // 6. Persistir los cambios
         await _reservaRepository.UpdateAsync(reserva);
 
-        // 6. Retornar DTO con el estado actualizado
+        // 7. Retornar DTO con el estado actualizado
         return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
     }
 
-    public async Task<ReservaResponseDTO> RechazarReservaAsync(Guid reservaId)
+    public async Task<ReservaResponseDTO> RechazarReservaAsync(Guid reservaId, ReservaRechazarDTO dto)
     {
+        // CU-16: el motivo de rechazo es obligatorio
+        if (string.IsNullOrWhiteSpace(dto?.MotivoRechazo))
+            throw new ValidationException("El motivo de rechazo es obligatorio.");
+
         // 1. Buscar la reserva
         var reserva = await _reservaRepository.GetByIdAsync(reservaId)
             ?? throw new ReservaNoEncontradaException(reservaId);
@@ -550,47 +564,63 @@ public class ReservaService : IReservaService
                 $"Solo pueden rechazarse reservas en estado Pendiente. Estado actual: '{reserva.Estado}'.");
         }
 
-        // 3. Cambiar estado a Cancelada ya que no existe estado rechazada
-        reserva.Estado = ReservaEstado.Cancelada;
+        // 3. Cambiar estado a Rechazada
+        reserva.Estado = ReservaEstado.Rechazada;
 
-        // 4. Liberar la mesa 
+        // 4. Persistir motivo en Observaciones
+        reserva.Observaciones = string.IsNullOrEmpty(reserva.Observaciones)
+            ? $"[Motivo Rechazo: {dto.MotivoRechazo}]"
+            : $"{reserva.Observaciones} | [Motivo Rechazo: {dto.MotivoRechazo}]";
+
+        // 5. Liberar la mesa si tenía asignada (RN-03)
         if (reserva.Mesa != null)
         {
             reserva.Mesa.Estado = MesaEstado.Libre;
             await _mesaRepository.UpdateAsync(reserva.Mesa);
         }
 
-        // 5. Persistir los cambios
+        // 6. Persistir los cambios
         await _reservaRepository.UpdateAsync(reserva);
 
-        // 6. Retornar DTO
+        // 7. Retornar DTO
         return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
     }
 
-    public async Task<ReservaResponseDTO> AsignarMesaAsync(Guid reservaId, int mesaId)
+    public async Task<ReservaResponseDTO> AsignarMesaAsync(Guid reservaId, Guid mesaId)
     {
         // 1. Validar que la reserva exista
         var reserva = await _reservaRepository.GetByIdAsync(reservaId)
             ?? throw new NotFoundException(nameof(Reserva), reservaId);
 
-        // 2. Validar que la mesa exista por número de mesa
-        var mesa = await _mesaRepository.GetByNumeroAsync(mesaId)
+        // 2. Validar que la mesa exista por ID
+        var mesa = await _mesaRepository.GetByIdAsync(mesaId)
             ?? throw new NotFoundException(nameof(Mesa), mesaId);
 
-        // 3. Validar estado (no se puede cambiar mesa a una reserva ya finalizada o cancelada)
+        // 3. Validar estado de la reserva (no se puede cambiar mesa a una reserva ya finalizada o cancelada)
         if (reserva.Estado == ReservaEstado.Finalizada || reserva.Estado == ReservaEstado.Cancelada)
         {
             throw new TransicionEstadoInvalidaException(
                 $"No se puede reasignar mesa a una reserva en estado '{reserva.Estado}'.");
         }
 
-        // 4. RN-01: Validar capacidad
+        // 4. Validar estado de la mesa (debe estar activa y no en mantenimiento)
+        if (!mesa.Activa)
+        {
+            throw new ValidationException(nameof(mesa.Activa), "La mesa seleccionada está inactiva.");
+        }
+
+        if (mesa.Estado == MesaEstado.EnMantenimiento)
+        {
+            throw new ValidationException(nameof(mesa.Estado), "La mesa seleccionada se encuentra en mantenimiento.");
+        }
+
+        // 5. RN-01: Validar capacidad
         if (mesa.Capacidad < reserva.CantidadComensales)
         {
             throw new CapacidadInsuficienteException();
         }
 
-        // 5. RN-02: Validar solapamiento de horario
+        // 6. RN-02: Validar solapamiento de horario
         var finReserva = reserva.FechaHora.AddMinutes(reserva.DuracionEstimadaMinutos);
 
         var solapadas = await _reservaRepository.GetOverlappingReservationsByMesaAsync(
@@ -604,7 +634,7 @@ public class ReservaService : IReservaService
             throw new MesaSolapadaException();
         }
 
-        // 6. Actualizar mesa y guardar
+        // 7. Actualizar mesa y guardar
         reserva.MesaId = mesa.Id;
         reserva.Mesa = mesa;
 

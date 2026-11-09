@@ -10,10 +10,12 @@ namespace BusinessLogic.Mesas.Implementations;
 public class MesaService : IMesaService
 {
     private readonly IMesaRepository _mesaRepository;
+    private readonly IReservaRepository? _reservaRepository;
 
-    public MesaService(IMesaRepository mesaRepository)
+    public MesaService(IMesaRepository mesaRepository, IReservaRepository? reservaRepository = null)
     {
         _mesaRepository = mesaRepository ?? throw new ArgumentNullException(nameof(mesaRepository));
+        _reservaRepository = reservaRepository;
     }
 
     public async Task<MesaResponseDTO?> GetByIdAsync(Guid id)
@@ -86,9 +88,24 @@ public class MesaService : IMesaService
             return false;
         }
 
+        if (mesaDto.Numero <= 0)
+        {
+            throw new ValidationException(nameof(mesaDto.Numero), "El número de mesa debe ser mayor a 0.");
+        }
+
         if (mesaDto.Capacidad <= 0)
         {
             throw new ValidationException(nameof(mesaDto.Capacidad), "La capacidad de la mesa debe ser mayor a cero.");
+        }
+
+        // RN-03 / RF-02: Validar unicidad de número excluyendo la mesa actual
+        if (mesa.Numero != mesaDto.Numero)
+        {
+            var existeNumero = await _mesaRepository.ExistsByNumeroAsync(mesaDto.Numero, id);
+            if (existeNumero)
+            {
+                throw new ConflictException($"Ya existe una mesa registrada con el número {mesaDto.Numero}.");
+            }
         }
 
         // RN: Si se intenta desactivar, validar que no tenga reservas en curso activas
@@ -101,13 +118,29 @@ public class MesaService : IMesaService
             }
         }
 
+        // RN-03 / RF-02: Validar que la nueva capacidad no rompa reservas futuras activas
+        if (_reservaRepository != null && mesaDto.Capacidad < mesa.Capacidad)
+        {
+            var reservas = await _reservaRepository.GetAllAsync(mesaId: id);
+            var reservaConflicto = reservas.FirstOrDefault(r =>
+                r.FechaHora >= DateTime.UtcNow &&
+                r.Estado != ReservaEstado.Cancelada &&
+                r.Estado != ReservaEstado.Finalizada &&
+                r.Estado != ReservaEstado.NoShow &&
+                r.CantidadComensales > mesaDto.Capacidad);
+
+            if (reservaConflicto != null)
+            {
+                throw new ConflictException(
+                    $"No se puede reducir la capacidad a {mesaDto.Capacidad} comensales porque la reserva {reservaConflicto.Id} requiere capacidad para {reservaConflicto.CantidadComensales}.");
+            }
+        }
+
         // 3. Modificamos los valores de la mesa
+        mesa.Numero = mesaDto.Numero;
         mesa.Capacidad = mesaDto.Capacidad;
         mesa.Activa = mesaDto.Activa;
-        if (!string.IsNullOrWhiteSpace(mesaDto.Ubicacion))
-        {
-            mesa.Ubicacion = mesaDto.Ubicacion.Trim();
-        }
+        mesa.Ubicacion = string.IsNullOrWhiteSpace(mesaDto.Ubicacion) ? "Salón Principal" : mesaDto.Ubicacion.Trim();
 
         // 4. Guardamos los cambios a través del repositorio
         await _mesaRepository.UpdateAsync(mesa);

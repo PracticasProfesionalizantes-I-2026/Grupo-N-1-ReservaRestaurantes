@@ -15,9 +15,9 @@ public interface IReservaService
     Task<ReservaResponseDTO> IniciarReservaAsync(Guid reservaId);
     Task<ReservaResponseDTO> FinalizarReservaAsync(Guid reservaId);
     Task<ReservaResponseDTO> CambiarEstadoAsync(Guid reservaId, ReservaCambiarEstadoDTO dto);
-    Task<ReservaResponseDTO> CancelarReservaGerenteAsync(Guid reservaId);
-    Task<ReservaResponseDTO> RechazarReservaAsync(Guid reservaId);
-    Task<ReservaResponseDTO> AsignarMesaAsync(Guid reservaId, int mesaId);
+    Task<ReservaResponseDTO> CancelarReservaGerenteAsync(Guid reservaId, ReservaCancelarDTO dto);
+    Task<ReservaResponseDTO> RechazarReservaAsync(Guid reservaId, ReservaRechazarDTO dto);
+    Task<ReservaResponseDTO> AsignarMesaAsync(Guid reservaId, Guid mesaId);
     Task<IEnumerable<ReservaResponseDTO>> GetTableroOperativoAsync(DateTime? fecha = null);
     Task<IEnumerable<ReservaResponseDTO>> FiltrarReservasAsync(ReservaFiltroDTO filtro);
 

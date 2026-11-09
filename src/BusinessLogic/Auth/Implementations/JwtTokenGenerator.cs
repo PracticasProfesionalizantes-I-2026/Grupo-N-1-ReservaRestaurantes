@@ -20,11 +20,17 @@ public class JwtTokenGenerator : IJwtTokenGenerator
     public (string Token, DateTime Expiration) GenerateToken(EntityCliente cliente)
     {
         var secretKey = _configuration["Jwt:SecretKey"] 
-                        ?? Environment.GetEnvironmentVariable("AGY_JWT_SECRET") 
-                        ?? "SuperSecretKey_GrupoN1_ReservaRestaurantes_2026!";
+                        ?? Environment.GetEnvironmentVariable("JWT_SECRET") 
+                        ?? Environment.GetEnvironmentVariable("AGY_JWT_SECRET");
+
+        if (string.IsNullOrWhiteSpace(secretKey))
+        {
+            throw new InvalidOperationException("La clave secreta de JWT no está configurada. Configure 'Jwt:SecretKey' o la variable de entorno 'JWT_SECRET'.");
+        }
+
         var issuer = _configuration["Jwt:Issuer"] ?? "ReservaRestaurantesApi";
         var audience = _configuration["Jwt:Audience"] ?? "ReservaRestaurantesUsers";
-        var expirationMinutes = int.TryParse(_configuration["Jwt:ExpirationMinutes"], out var minutes) ? minutes : 60;
+        var expirationMinutes = int.TryParse(_configuration["Jwt:ExpirationMinutes"], out var minutes) && minutes > 0 ? minutes : 60;
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -37,7 +43,8 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             new Claim(ClaimTypes.Email, cliente.Email),
             new Claim(JwtRegisteredClaimNames.GivenName, cliente.Nombre),
             new Claim(JwtRegisteredClaimNames.FamilyName, cliente.Apellido),
-            new Claim(ClaimTypes.Role, string.IsNullOrWhiteSpace(cliente.Rol) ? "Cliente" : cliente.Rol)
+            new Claim(ClaimTypes.Role, string.IsNullOrWhiteSpace(cliente.Rol) ? "Cliente" : cliente.Rol),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
         var expiration = DateTime.UtcNow.AddMinutes(expirationMinutes);
@@ -55,5 +62,13 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         var token = tokenHandler.CreateToken(tokenDescriptor);
 
         return (tokenHandler.WriteToken(token), expiration);
+    }
+
+    public string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[64];
+        using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 }

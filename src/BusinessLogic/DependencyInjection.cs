@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<IClienteService, ClienteService>();
 
         // Registro de servicios de Autenticación / JWT (CU-05 y CU-08)
+        services.AddSingleton<ITokenRevocationService, TokenRevocationService>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IAuthService, AuthService>();
 

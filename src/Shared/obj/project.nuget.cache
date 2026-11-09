@@ -1,14 +1,8 @@
 {
   "version": 2,
-<<<<<<< HEAD
-  "dgSpecHash": "Qh9vPJgeo/A=",
+  "dgSpecHash": "S5FOgWAUPTk=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
-=======
-  "dgSpecHash": "kUXpMSIcq/4=",
-  "success": true,
-  "projectFilePath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
+  "projectFilePath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

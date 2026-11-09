@@ -11,11 +11,7 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property.EntryPointFilePath = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = BusinessLogic
-<<<<<<< HEAD
-build_property.ProjectDir = C:\Users\Marti\OneDrive\Documentos\Grupo-N-1-ReservaRestaurantes\src\BusinessLogic\
-=======
-build_property.ProjectDir = C:\repos\Grupo-N-1-ReservaRestaurantes\src\BusinessLogic\
->>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
+build_property.ProjectDir = C:\GitHub\Grupo-N-1-ReservaRestaurantes\src\BusinessLogic\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.EffectiveAnalysisLevelStyle = 10.0

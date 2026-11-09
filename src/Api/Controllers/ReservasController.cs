@@ -223,9 +223,12 @@ public class ReservasController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<ReservaResponseDTO>> CancelarReservaGerente(Guid id)
+    public async Task<ActionResult<ReservaResponseDTO>> CancelarReservaGerente(Guid id, [FromBody] ReservaCancelarDTO dto)
     {
-        var result = await _reservaService.CancelarReservaGerenteAsync(id);
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var result = await _reservaService.CancelarReservaGerenteAsync(id, dto);
         return Ok(result);
     }
 
@@ -239,9 +242,12 @@ public class ReservasController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<ReservaResponseDTO>> RechazarReserva(Guid id)
+    public async Task<ActionResult<ReservaResponseDTO>> RechazarReserva(Guid id, [FromBody] ReservaRechazarDTO dto)
     {
-        var result = await _reservaService.RechazarReservaAsync(id);
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        var result = await _reservaService.RechazarReservaAsync(id, dto);
         return Ok(result);
     }
 

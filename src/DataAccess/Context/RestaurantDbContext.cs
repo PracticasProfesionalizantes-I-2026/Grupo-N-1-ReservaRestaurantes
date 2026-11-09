@@ -74,7 +74,7 @@ public class RestaurantDbContext : DbContext
             entity.HasIndex(r => r.Estado);
             entity.HasIndex(r => new { r.MesaId, r.FechaHora })
                   .IsUnique()
-                  .HasFilter("\"Estado\" NOT IN (4, 5, 6)");
+                  .HasFilter("\"Estado\" NOT IN (4, 5, 6, 7)");
             entity.HasIndex(r => new { r.ClienteId, r.FechaHora });
         });
     }

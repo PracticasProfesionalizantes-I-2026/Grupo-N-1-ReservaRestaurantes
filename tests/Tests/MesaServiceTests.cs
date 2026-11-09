@@ -16,12 +16,14 @@ public class MesaServiceTests
 {
     // ─── Fixture común ────────────────────────────────────────────────────────
     private readonly Mock<IMesaRepository> _repoMock;
+    private readonly Mock<IReservaRepository> _reservaRepoMock;
     private readonly MesaService _sut; // System Under Test
 
     public MesaServiceTests()
     {
         _repoMock = new Mock<IMesaRepository>();
-        _sut = new MesaService(_repoMock.Object);
+        _reservaRepoMock = new Mock<IReservaRepository>();
+        _sut = new MesaService(_repoMock.Object, _reservaRepoMock.Object);
     }
 
     // =========================================================================
@@ -70,8 +72,8 @@ public class MesaServiceTests
     {
         // Arrange
         var id = Guid.NewGuid();
-        var mesaExistente = new Mesa { Id = id, Numero = 1, Capacidad = 2, Activa = true };
-        var dto = new MesaUpdateDTO { Capacidad = 6, Activa = false };
+        var mesaExistente = new Mesa { Id = id, Numero = 1, Capacidad = 2, Ubicacion = "Terraza", Activa = true };
+        var dto = new MesaUpdateDTO { Numero = 1, Capacidad = 6, Ubicacion = "Salón Principal", Activa = false };
 
         _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(mesaExistente);
         _repoMock.Setup(r => r.UpdateAsync(It.IsAny<Mesa>())).Returns(Task.CompletedTask);
@@ -81,7 +83,9 @@ public class MesaServiceTests
 
         // Assert
         Assert.True(resultado);
+        Assert.Equal(1, mesaExistente.Numero);
         Assert.Equal(6, mesaExistente.Capacidad);
+        Assert.Equal("Salón Principal", mesaExistente.Ubicacion);
         Assert.False(mesaExistente.Activa);
         _repoMock.Verify(r => r.UpdateAsync(mesaExistente), Times.Once);
     }
@@ -94,11 +98,100 @@ public class MesaServiceTests
         _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((Mesa?)null);
 
         // Act
-        var resultado = await _sut.ModificarMesaAsync(id, new MesaUpdateDTO { Capacidad = 4, Activa = true });
+        var resultado = await _sut.ModificarMesaAsync(id, new MesaUpdateDTO { Numero = 1, Capacidad = 4, Activa = true });
 
         // Assert
         Assert.False(resultado);
         _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Mesa>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ModificarMesaAsync_CambioDeNumeroDuplicado_LanzaConflictException()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var mesaExistente = new Mesa { Id = id, Numero = 1, Capacidad = 4, Activa = true };
+        var dto = new MesaUpdateDTO { Numero = 2, Capacidad = 4, Activa = true };
+
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(mesaExistente);
+        _repoMock.Setup(r => r.ExistsByNumeroAsync(2, id)).ReturnsAsync(true);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ConflictException>(() => _sut.ModificarMesaAsync(id, dto));
+        _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Mesa>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ModificarMesaAsync_NumeroInvalido_LanzaValidationException()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var mesaExistente = new Mesa { Id = id, Numero = 1, Capacidad = 4, Activa = true };
+        var dto = new MesaUpdateDTO { Numero = 0, Capacidad = 4, Activa = true };
+
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(mesaExistente);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ValidationException>(() => _sut.ModificarMesaAsync(id, dto));
+        _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Mesa>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ModificarMesaAsync_CapacidadRompeReservaFutura_LanzaConflictException()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var mesaExistente = new Mesa { Id = id, Numero = 1, Capacidad = 6, Activa = true };
+        var dto = new MesaUpdateDTO { Numero = 1, Capacidad = 2, Activa = true };
+
+        var reservaFutura = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            MesaId = id,
+            FechaHora = DateTime.UtcNow.AddDays(2),
+            CantidadComensales = 5,
+            Estado = ReservaEstado.Confirmada
+        };
+
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(mesaExistente);
+        _reservaRepoMock.Setup(r => r.GetAllAsync(null, null, id, null))
+            .ReturnsAsync(new List<Reserva> { reservaFutura });
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ConflictException>(() => _sut.ModificarMesaAsync(id, dto));
+        _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Mesa>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ModificarMesaAsync_CapacidadMenorSinReservasFuturasConflictivas_ActualizaCorrectamente()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var mesaExistente = new Mesa { Id = id, Numero = 1, Capacidad = 6, Activa = true };
+        var dto = new MesaUpdateDTO { Numero = 1, Capacidad = 4, Ubicacion = "Ventana", Activa = true };
+
+        var reservaFuturaCompatible = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            MesaId = id,
+            FechaHora = DateTime.UtcNow.AddDays(2),
+            CantidadComensales = 3,
+            Estado = ReservaEstado.Confirmada
+        };
+
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(mesaExistente);
+        _reservaRepoMock.Setup(r => r.GetAllAsync(null, null, id, null))
+            .ReturnsAsync(new List<Reserva> { reservaFuturaCompatible });
+        _repoMock.Setup(r => r.UpdateAsync(It.IsAny<Mesa>())).Returns(Task.CompletedTask);
+
+        // Act
+        var resultado = await _sut.ModificarMesaAsync(id, dto);
+
+        // Assert
+        Assert.True(resultado);
+        Assert.Equal(4, mesaExistente.Capacidad);
+        Assert.Equal("Ventana", mesaExistente.Ubicacion);
+        _repoMock.Verify(r => r.UpdateAsync(mesaExistente), Times.Once);
     }
 
     // =========================================================================

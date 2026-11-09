@@ -21,15 +21,18 @@ public class UsuarioService : IUsuarioService
     private readonly IClienteRepository _clienteRepository;
     private readonly IReservaRepository? _reservaRepository;
     private readonly IMesaRepository? _mesaRepository;
+    private readonly BusinessLogic.Auth.Interfaces.ITokenRevocationService? _tokenRevocationService;
 
     public UsuarioService(
         IClienteRepository clienteRepository,
         IReservaRepository? reservaRepository = null,
-        IMesaRepository? mesaRepository = null)
+        IMesaRepository? mesaRepository = null,
+        BusinessLogic.Auth.Interfaces.ITokenRevocationService? tokenRevocationService = null)
     {
         _clienteRepository = clienteRepository ?? throw new ArgumentNullException(nameof(clienteRepository));
         _reservaRepository = reservaRepository;
         _mesaRepository = mesaRepository;
+        _tokenRevocationService = tokenRevocationService;
     }
 
     public async Task<UsuarioResponseDTO> CambiarRolUsuarioAsync(Guid id, UsuarioCambiarRolDTO dto)
@@ -69,6 +72,9 @@ public class UsuarioService : IUsuarioService
         // Actualización de rol
         usuario.Rol = nuevoRolNormalizado;
         await _clienteRepository.UpdateAsync(usuario);
+
+        // RN-03 / SEC-07: Revocación de sesiones y tokens activos al cambiar de rol
+        _tokenRevocationService?.RevokeUserTokens(id);
 
         return new UsuarioResponseDTO
         {
@@ -115,12 +121,20 @@ public class UsuarioService : IUsuarioService
             // Baja lógica: preservar datos históricos e integridad referencial
             usuario.Activo = false;
             await _clienteRepository.UpdateAsync(usuario);
+
+            // SEC-07: Revocar tokens activos al desactivar cuenta
+            _tokenRevocationService?.RevokeUserTokens(id);
+
             return false; // Indica que se aplicó baja lógica
         }
         else
         {
             // Baja física: el usuario no tiene historial de reservas
             await _clienteRepository.DeleteAsync(id);
+
+            // SEC-07: Revocar tokens activos al eliminar cuenta
+            _tokenRevocationService?.RevokeUserTokens(id);
+
             return true; // Indica que se aplicó baja física
         }
     }

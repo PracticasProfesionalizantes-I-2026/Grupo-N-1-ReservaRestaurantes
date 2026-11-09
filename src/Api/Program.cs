@@ -32,10 +32,12 @@ builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
 builder.Services.AddBusinessLogic();
 
 // Configuración de Autenticación JWT Bearer (CU-05)
-var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] ?? Environment.GetEnvironmentVariable("AGY_JWT_SECRET");
+var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] 
+                   ?? Environment.GetEnvironmentVariable("JWT_SECRET") 
+                   ?? Environment.GetEnvironmentVariable("AGY_JWT_SECRET");
 if (string.IsNullOrWhiteSpace(jwtSecretKey))
 {
-    throw new InvalidOperationException("JWT secret key is not configured. Set environment variable AGY_JWT_SECRET or configuration Jwt:SecretKey.");
+    throw new InvalidOperationException("La clave secreta de JWT no está configurada. Configure 'Jwt:SecretKey' en User Secrets o mediante la variable de entorno 'JWT_SECRET'.");
 }
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "ReservaRestaurantesApi";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "ReservaRestaurantesUsers";
@@ -56,6 +58,30 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtIssuer,
         ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = context =>
+        {
+            var revocationService = context.HttpContext.RequestServices.GetRequiredService<BusinessLogic.Auth.Interfaces.ITokenRevocationService>();
+            var authHeader = context.Request.Headers.Authorization.ToString();
+            var rawToken = authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+                ? authHeader[7..].Trim()
+                : authHeader.Trim();
+
+            var userIdStr = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                            ?? context.Principal?.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+            Guid? userId = Guid.TryParse(userIdStr, out var parsedId) ? parsedId : null;
+            var iat = context.SecurityToken?.ValidFrom;
+
+            if (revocationService.IsRevoked(rawToken, userId, iat))
+            {
+                context.Fail("El token ha sido revocado.");
+            }
+
+            return Task.CompletedTask;
+        }
     };
 });
 
