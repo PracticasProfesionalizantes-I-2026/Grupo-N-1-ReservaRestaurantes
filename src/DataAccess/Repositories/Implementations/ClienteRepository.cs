@@ -32,14 +32,16 @@ public class ClienteRepository : IClienteRepository
 
     public async Task<Cliente?> GetByEmailAsync(string email)
     {
+        var normalizedEmail = email?.Trim().ToLowerInvariant() ?? string.Empty;
         return await _context.Clientes
             .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower());
+            .FirstOrDefaultAsync(c => c.Email == normalizedEmail);
     }
 
     public async Task<bool> ExistsByEmailAsync(string email, Guid? excludeId = null)
     {
-        var query = _context.Clientes.AsNoTracking().Where(c => c.Email.ToLower() == email.ToLower());
+        var normalizedEmail = email?.Trim().ToLowerInvariant() ?? string.Empty;
+        var query = _context.Clientes.AsNoTracking().Where(c => c.Email == normalizedEmail);
         if (excludeId.HasValue)
         {
             query = query.Where(c => c.Id != excludeId.Value);

@@ -31,8 +31,8 @@ public class ReservaNoShowWorker : BackgroundService
                 using var scope = _serviceProvider.CreateScope();
                 var context = scope.ServiceProvider.GetRequiredService<RestaurantDbContext>();
 
-                // Calculamos cuál es la fecha/hora límite (Hace 15 minutos atrás)
-                var limiteTolerancia = DateTime.UtcNow.AddMinutes(-15);
+                // Calculamos cuál es la fecha/hora límite (15 minutos de tolerancia sobre el horario del restaurante)
+                var limiteTolerancia = DateTime.Now.AddMinutes(-15);
 
                 // Buscamos reservas "Confirmadas" cuya fecha/hora programada sea anterior al límite
                 var reservasExpiradas = await context.Reservas

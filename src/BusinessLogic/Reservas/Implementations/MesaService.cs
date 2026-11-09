@@ -16,8 +16,31 @@ public class MesaService : IMesaService
         _mesaRepository = mesaRepository ?? throw new ArgumentNullException(nameof(mesaRepository));
     }
 
+    public async Task<MesaResponseDTO?> GetByIdAsync(Guid id)
+    {
+        var mesa = await _mesaRepository.GetByIdAsync(id);
+        if (mesa == null) return null;
+
+        return new MesaResponseDTO
+        {
+            Id = mesa.Id,
+            Numero = mesa.Numero,
+            Capacidad = mesa.Capacidad,
+            Ubicacion = mesa.Ubicacion,
+            Estado = mesa.Estado,
+            Activa = mesa.Activa
+        };
+    }
+
     public async Task<MesaResponseDTO> CreateAsync(MesaCreateDTO dto)
     {
+        if (dto == null) throw new ArgumentNullException(nameof(dto));
+
+        if (dto.Capacidad <= 0)
+        {
+            throw new ValidationException(nameof(dto.Capacidad), "La capacidad de la mesa debe ser mayor a cero.");
+        }
+
         // 1. Validar regla de negocio: No pueden existir dos mesas con el mismo número
         var existeMesa = await _mesaRepository.ExistsByNumeroAsync(dto.Numero);
         if (existeMesa)
@@ -29,8 +52,10 @@ public class MesaService : IMesaService
         var nuevaMesa = new Mesa
         {
             Numero = dto.Numero,
-            Capacidad = dto.Capacidad
-            // Estado y Activa ya tienen valores por defecto (Libre y true) en la entidad
+            Capacidad = dto.Capacidad,
+            Ubicacion = string.IsNullOrWhiteSpace(dto.Ubicacion) ? "Salón Principal" : dto.Ubicacion.Trim(),
+            Estado = MesaEstado.Libre,
+            Activa = true
         };
 
         // 3. Persistir en la base de datos
@@ -42,6 +67,7 @@ public class MesaService : IMesaService
             Id = mesaCreada.Id,
             Numero = mesaCreada.Numero,
             Capacidad = mesaCreada.Capacidad,
+            Ubicacion = mesaCreada.Ubicacion,
             Estado = mesaCreada.Estado,
             Activa = mesaCreada.Activa
         };
@@ -49,6 +75,8 @@ public class MesaService : IMesaService
 
     public async Task<bool> ModificarMesaAsync(Guid id, MesaUpdateDTO mesaDto)
     {
+        if (mesaDto == null) throw new ArgumentNullException(nameof(mesaDto));
+
         // 1. Buscamos la mesa actual usando tu repositorio
         var mesa = await _mesaRepository.GetByIdAsync(id);
 
@@ -58,9 +86,28 @@ public class MesaService : IMesaService
             return false;
         }
 
+        if (mesaDto.Capacidad <= 0)
+        {
+            throw new ValidationException(nameof(mesaDto.Capacidad), "La capacidad de la mesa debe ser mayor a cero.");
+        }
+
+        // RN: Si se intenta desactivar, validar que no tenga reservas en curso activas
+        if (!mesaDto.Activa && mesa.Activa)
+        {
+            var tieneReservaEnCurso = await _mesaRepository.HasReservaEnCursoAsync(id);
+            if (tieneReservaEnCurso)
+            {
+                throw new ConflictException("No se puede desactivar una mesa que posee reservas activas en curso.");
+            }
+        }
+
         // 3. Modificamos los valores de la mesa
         mesa.Capacidad = mesaDto.Capacidad;
         mesa.Activa = mesaDto.Activa;
+        if (!string.IsNullOrWhiteSpace(mesaDto.Ubicacion))
+        {
+            mesa.Ubicacion = mesaDto.Ubicacion.Trim();
+        }
 
         // 4. Guardamos los cambios a través del repositorio
         await _mesaRepository.UpdateAsync(mesa);
@@ -118,30 +165,35 @@ public class MesaService : IMesaService
             Id = mesa.Id,
             Numero = mesa.Numero,
             Capacidad = mesa.Capacidad,
+            Ubicacion = mesa.Ubicacion,
             Estado = mesa.Estado,
             Activa = mesa.Activa
         };
     }
+
     public async Task<IEnumerable<MesaResponseDTO>> FiltrarMapaMesasAsync(MesaFiltroDTO filtro)
-{
-    // 1. Delegar la consulta filtrada al repositorio
-    var mesas = await _mesaRepository.GetFiltroAsync(
-        filtro.Estado,
-        filtro.CapacidadMinima,
-        filtro.SoloActivas);
-    // 2. RN: Si no hay resultados con esos filtros, lanzar excepción de negocio
-    if (!mesas.Any())
     {
-        throw new SinMesasDisponiblesException();
+        // 1. Delegar la consulta filtrada al repositorio
+        var mesas = (await _mesaRepository.GetFiltroAsync(
+            filtro.Estado,
+            filtro.CapacidadMinima,
+            filtro.SoloActivas)).ToList();
+
+        // 2. RN: Si no hay resultados con esos filtros, lanzar excepción de negocio
+        if (!mesas.Any())
+        {
+            throw new SinMesasDisponiblesException();
+        }
+
+        // 3. Mapear entidades a DTOs de respuesta
+        return mesas.Select(m => new MesaResponseDTO
+        {
+            Id        = m.Id,
+            Numero    = m.Numero,
+            Capacidad = m.Capacidad,
+            Ubicacion = m.Ubicacion,
+            Estado    = m.Estado,
+            Activa    = m.Activa
+        });
     }
-    // 3. Mapear entidades a DTOs de respuesta
-    return mesas.Select(m => new MesaResponseDTO
-    {
-        Id       = m.Id,
-        Numero   = m.Numero,
-        Capacidad = m.Capacidad,
-        Estado   = m.Estado,
-        Activa   = m.Activa
-    });
-}
 }

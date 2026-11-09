@@ -45,6 +45,11 @@ Permite a un nuevo usuario crear una cuenta en el sistema proporcionando su nomb
   2. La Capa de Presentación rechaza la petición.
   3. El Sistema devuelve un código **400 Bad Request** indicando: "La contraseña debe contener al menos 8 caracteres y combinar letras y números". Fin del caso de uso.
 
+* **2c. Formato de teléfono inválido o con letras (HTTP 400 Bad Request):**
+  1. Si en el Paso 2 el teléfono contiene letras, caracteres especiales no permitidos o no respeta la longitud válida (entre 7 y 25 caracteres).
+  2. La Capa de Presentación y de Negocio rechazan la petición por error de validación.
+  3. El Sistema devuelve un código **400 Bad Request** con el mensaje descriptivo: "El formato del teléfono es inválido. Solo se permiten números y los símbolos '+', '-', '()', y no se permiten letras." Fin del caso de uso.
+
 * **3a. Correo electrónico ya registrado en el sistema (HTTP 409 Conflict):**
   1. Si en el Paso 3 la verificación determina que el correo electrónico ya existe en la base de datos, violando la regla **RN-01**.
   2. La Capa de Negocio frena la ejecución y lanza una `EmailDuplicadoException`.
@@ -57,7 +62,8 @@ Permite a un nuevo usuario crear una cuenta en el sistema proporcionando su nomb
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El registro puede efectuarse desde la interfaz web o mediante clientes de prueba API.
-2. En ambos casos se envía el payload al endpoint `POST /api/auth/register`.
+2. En ambos casos se envía el payload al endpoint `POST /api/v1/auth/register` (o `POST /api/auth/register`).
+3. De forma homóloga y para compatibilidad con la API de clientes, el alta puede realizarse a través de `POST /api/v1/Clientes` (`ClienteCreateDTO`) o `POST /api/v1/auth/register` (`UsuarioRegisterDTO`), ambos con rate limiting, hash BCrypt y asignación de rol `Cliente`.
 
 ### 6. POSTCONDICIONES
 - Se crea un nuevo registro persistente en la tabla `Usuarios` con credenciales hasheadas y rol `Cliente`.
@@ -78,17 +84,18 @@ Permite a un nuevo usuario crear una cuenta en el sistema proporcionando su nomb
 
 ### Nota: Validación vs. Verificación aplicada
 
-- **Validación (Presentación, → 400):** Data annotations `[Required]`, `[EmailAddress]` y `[MinLength(8)]` sobre `UsuarioRegisterDTO` en la Capa de Presentación.
-- **Verificación (Negocio, → 400/404/409):** Comprobación de unicidad de email (**RN-01**), normalización de campos, hash de contraseña y asignación de rol Cliente (**RN-03**) en `AuthService`.
+- **Validación (Presentación, → 400):** Data annotations `[Required]`, `[EmailAddress]`, `[MinLength(6)]` y `[RegularExpression]` (formato numérico de teléfono sin letras) sobre los DTOs de registro (`ClienteCreateDTO`) en la Capa de Presentación.
+- **Verificación (Negocio, → 400/404/409):** Validación de formato telefónico en `ClienteService`, comprobación de unicidad de email (**RN-01**), normalización de campos, hash de contraseña y asignación de rol Cliente (**RN-03**).
 
 ### Matriz de trazabilidad CU-04 → Test
 
-| Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
+| Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración / Presentación |
 | --- | --- | --- | --- |
-| Flujo principal | `201 Created` | `RegisterAsync_WithValidData_CreatesUserWithClienteRole` | `Register_Returns201CreatedAndUserSummary` |
-| 2a. Formato email inválido | `400 Bad Request` | `— (detectado por validación de DTO)` | `Register_WithInvalidEmail_Returns400BadRequest` |
-| 2b. Contraseña débil | `400 Bad Request` | `— (detectado por validación de DTO)` | `Register_WithWeakPassword_Returns400BadRequest` |
-| 3a. Email duplicado | `409 Conflict` | `RegisterAsync_WhenEmailExists_ThrowsEmailDuplicadoException` | `Register_WhenEmailAlreadyExists_Returns409Conflict` |
+| Flujo principal | `201 Created` | `CreateAsync_ConTelefonoValido_CreaClienteExitosamente` | `ClienteCreateDTO_DataAnnotation_ConTelefonoValido_PasaValidacion` |
+| 2a. Formato email inválido | `400 Bad Request` | `— (detectado por validación de DTO)` | `Validator.TryValidateObject` |
+| 2b. Contraseña débil | `400 Bad Request` | `— (detectado por validación de DTO)` | `Validator.TryValidateObject` |
+| 2c. Teléfono con letras | `400 Bad Request` | `CreateAsync_ConTelefonoConLetras_LanzaValidationException` | `ClienteCreateDTO_DataAnnotation_ConTelefonoConLetras_FallaValidacion` |
+| 3a. Email duplicado | `409 Conflict` | `CreateAsync_WhenEmailExists_ThrowsConflictException` | `POST /api/v1/Clientes` con email existente |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

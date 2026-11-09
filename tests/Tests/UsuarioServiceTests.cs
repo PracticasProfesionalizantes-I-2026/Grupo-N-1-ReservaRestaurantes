@@ -209,4 +209,167 @@ public class UsuarioServiceTests
         await Assert.ThrowsAsync<ConflictException>(() => _sut.EliminarUsuarioAsync(id, adminId));
         _repoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
     }
+
+    // =========================================================================
+    // CU-09: GetContextoInicioAsync
+    // =========================================================================
+
+    [Fact]
+    public async Task GetContextoInicioAsync_Cliente_RetornaResumenClienteYAccesosRapidos()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var usuario = new Cliente
+        {
+            Id = id,
+            Nombre = "Juan",
+            Apellido = "Pérez",
+            Email = "juan@example.com",
+            Rol = "Cliente",
+            Activo = true
+        };
+
+        var reservaMock = new Mock<IReservaRepository>();
+        var sut = new UsuarioService(_repoMock.Object, reservaMock.Object);
+
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(usuario);
+        reservaMock.Setup(r => r.GetAllAsync(null, id, null, null))
+            .ReturnsAsync(new List<Reserva>
+            {
+                new Reserva
+                {
+                    Id = Guid.NewGuid(),
+                    ClienteId = id,
+                    Estado = Shared.Enums.ReservaEstado.Confirmada,
+                    FechaHora = DateTime.Today.AddHours(20)
+                }
+            });
+
+        // Act
+        var resultado = await sut.GetContextoInicioAsync(id, "Cliente");
+
+        // Assert
+        Assert.NotNull(resultado);
+        Assert.Equal("Juan Pérez", resultado.NombreCompleto);
+        Assert.Equal("Cliente", resultado.Rol);
+        Assert.Contains("Mis Reservas", resultado.AccesosRapidos);
+        Assert.NotNull(resultado.ResumenCliente);
+        Assert.Equal(1, resultado.ResumenCliente.TotalReservasActivas);
+        Assert.Single(resultado.ResumenCliente.ProximasReservas);
+    }
+
+    [Fact]
+    public async Task GetContextoInicioAsync_Gerente_RetornaMetricasDelSalonYAccesosRapidos()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var usuario = new Cliente
+        {
+            Id = id,
+            Nombre = "Carlos",
+            Apellido = "Gerente",
+            Email = "gerente@example.com",
+            Rol = "Gerente",
+            Activo = true
+        };
+
+        var reservaMock = new Mock<IReservaRepository>();
+        var mesaMock = new Mock<IMesaRepository>();
+        var sut = new UsuarioService(_repoMock.Object, reservaMock.Object, mesaMock.Object);
+
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(usuario);
+        mesaMock.Setup(m => m.GetAllAsync())
+            .ReturnsAsync(new List<Mesa>
+            {
+                new Mesa { Id = Guid.NewGuid(), Numero = 1, Estado = Shared.Enums.MesaEstado.Libre, Activa = true },
+                new Mesa { Id = Guid.NewGuid(), Numero = 2, Estado = Shared.Enums.MesaEstado.Ocupada, Activa = true }
+            });
+
+        reservaMock.Setup(r => r.GetAllAsync(It.IsAny<DateTime>(), null, null, null))
+            .ReturnsAsync(new List<Reserva> { new Reserva { Id = Guid.NewGuid() } });
+
+        reservaMock.Setup(r => r.GetAllAsync(null, null, null, Shared.Enums.ReservaEstado.Pendiente))
+            .ReturnsAsync(new List<Reserva> { new Reserva { Id = Guid.NewGuid() } });
+
+        // Act
+        var resultado = await sut.GetContextoInicioAsync(id, "Gerente");
+
+        // Assert
+        Assert.NotNull(resultado);
+        Assert.Equal("Gerente", resultado.Rol);
+        Assert.Contains("Tablero Operativo", resultado.AccesosRapidos);
+        Assert.NotNull(resultado.ResumenGerente);
+        Assert.Equal(2, resultado.ResumenGerente.TotalMesas);
+        Assert.Equal(1, resultado.ResumenGerente.MesasLibres);
+        Assert.Equal(1, resultado.ResumenGerente.MesasOcupadas);
+        Assert.Equal(1, resultado.ResumenGerente.ReservasHoy);
+        Assert.Equal(1, resultado.ResumenGerente.ReservasPendientesListaEspera);
+    }
+
+    [Fact]
+    public async Task GetContextoInicioAsync_Admin_RetornaMetricasGenerales()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var usuario = new Cliente
+        {
+            Id = id,
+            Nombre = "Admin",
+            Apellido = "Principal",
+            Email = "admin@example.com",
+            Rol = "Admin",
+            Activo = true
+        };
+
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(usuario);
+        _repoMock.Setup(r => r.GetAllAsync())
+            .ReturnsAsync(new List<Cliente> { usuario, new Cliente { Id = Guid.NewGuid(), Activo = true } });
+        _repoMock.Setup(r => r.CountActiveAdminsAsync()).ReturnsAsync(1);
+
+        // Act
+        var resultado = await _sut.GetContextoInicioAsync(id, "Admin");
+
+        // Assert
+        Assert.NotNull(resultado);
+        Assert.Equal("Admin", resultado.Rol);
+        Assert.Contains("Gestión de Usuarios", resultado.AccesosRapidos);
+        Assert.NotNull(resultado.ResumenAdmin);
+        Assert.Equal(2, resultado.ResumenAdmin.TotalUsuarios);
+        Assert.Equal(1, resultado.ResumenAdmin.AdminsActivos);
+    }
+
+    [Fact]
+    public async Task GetContextoInicioAsync_UsuarioInexistente_LanzaNotFoundException()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((Cliente?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<NotFoundException>(() => _sut.GetContextoInicioAsync(id));
+    }
+
+    [Fact]
+    public async Task GetContextoInicioAsync_UsuarioInactivo_LanzaAccesoDenegadoException()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var usuario = new Cliente { Id = id, Activo = false, Rol = "Cliente" };
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(usuario);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<AccesoDenegadoException>(() => _sut.GetContextoInicioAsync(id));
+    }
+
+    [Fact]
+    public async Task GetContextoInicioAsync_RolInvalido_LanzaAccesoDenegadoException()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var usuario = new Cliente { Id = id, Activo = true, Rol = "Invitado" };
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(usuario);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<AccesoDenegadoException>(() => _sut.GetContextoInicioAsync(id, "Invitado"));
+    }
 }

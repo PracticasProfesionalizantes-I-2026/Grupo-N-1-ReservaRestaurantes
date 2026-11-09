@@ -22,8 +22,14 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IAuthService, AuthService>();
 
-// Registro del servicio del Caso de Uso CU-01 (Reserva)
+        // Registro de servicio de Notificaciones
+        services.AddScoped<BusinessLogic.Notifications.Interfaces.INotificationService, BusinessLogic.Notifications.Implementations.NotificationService>();
+
+        // Registro del servicio del Caso de Uso CU-01 (Reserva)
         services.AddScoped<IReservaService, ReservaService>();
+
+        // Registro del servicio del Caso de Uso CU-18 (Lista de Espera)
+        services.AddScoped<IListaEsperaService, ListaEsperaService>();
         
         // Registrar el servicio en segundo plano (Background Service)
         services.AddHostedService<ReservaNoShowWorker>();

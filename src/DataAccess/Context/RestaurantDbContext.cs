@@ -25,6 +25,9 @@ public class RestaurantDbContext : DbContext
             entity.Property(c => c.Apellido).IsRequired().HasMaxLength(100);
             entity.Property(c => c.Email).IsRequired().HasMaxLength(150);
             entity.Property(c => c.Telefono).IsRequired().HasMaxLength(30);
+            entity.Property(c => c.PasswordHash).IsRequired().HasMaxLength(255);
+            entity.Property(c => c.Rol).IsRequired().HasMaxLength(50);
+            entity.Property(c => c.Activo).IsRequired();
             entity.Property(c => c.FechaRegistro).IsRequired();
 
             entity.HasIndex(c => c.Email).IsUnique();
@@ -38,7 +41,7 @@ public class RestaurantDbContext : DbContext
             entity.Property(m => m.Capacidad).IsRequired();
             entity.Property(m => m.Ubicacion).IsRequired().HasMaxLength(80);
             entity.Property(m => m.Estado).IsRequired().HasConversion<int>();
-            entity.Property(m => m.Activa).IsRequired().HasDefaultValue(true);
+            entity.Property(m => m.Activa).IsRequired();
 
             entity.HasIndex(m => m.Numero).IsUnique();
         });
@@ -49,7 +52,7 @@ public class RestaurantDbContext : DbContext
             entity.HasKey(r => r.Id);
             entity.Property(r => r.FechaHora).IsRequired();
             entity.Property(r => r.CantidadComensales).IsRequired();
-            entity.Property(r => r.DuracionEstimadaMinutos).IsRequired().HasDefaultValue(120);
+            entity.Property(r => r.DuracionEstimadaMinutos).IsRequired();
             entity.Property(r => r.Estado).IsRequired().HasConversion<int>();
             entity.Property(r => r.Observaciones).HasMaxLength(500);
             entity.Property(r => r.FechaCreacion).IsRequired();
@@ -65,6 +68,14 @@ public class RestaurantDbContext : DbContext
                   .WithMany(m => m.Reservas)
                   .HasForeignKey(r => r.MesaId)
                   .OnDelete(DeleteBehavior.Restrict);
+
+            // Índices para optimizar búsquedas operativas y solapamientos
+            entity.HasIndex(r => r.FechaHora);
+            entity.HasIndex(r => r.Estado);
+            entity.HasIndex(r => new { r.MesaId, r.FechaHora })
+                  .IsUnique()
+                  .HasFilter("\"Estado\" NOT IN (4, 5, 6)");
+            entity.HasIndex(r => new { r.ClienteId, r.FechaHora });
         });
     }
 }

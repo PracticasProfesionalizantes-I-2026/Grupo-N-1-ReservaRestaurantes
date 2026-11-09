@@ -15,13 +15,16 @@ namespace Migrations.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
             modelBuilder.Entity("DataAccess.Entities.Cliente", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Apellido")
                         .IsRequired()
@@ -39,6 +42,16 @@ namespace Migrations.Migrations
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Rol")
+                        .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Telefono")
@@ -61,9 +74,7 @@ namespace Migrations.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Activa")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Capacidad")
                         .HasColumnType("INTEGER");
@@ -100,9 +111,7 @@ namespace Migrations.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("DuracionEstimadaMinutos")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(120);
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Estado")
                         .HasColumnType("INTEGER");
@@ -122,9 +131,15 @@ namespace Migrations.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClienteId");
+                    b.HasIndex("Estado");
 
-                    b.HasIndex("MesaId");
+                    b.HasIndex("FechaHora");
+
+                    b.HasIndex("ClienteId", "FechaHora");
+
+                    b.HasIndex("MesaId", "FechaHora")
+                        .IsUnique()
+                        .HasFilter("\"Estado\" NOT IN (4, 5, 6)");
 
                     b.ToTable("Reservas");
                 });

@@ -20,7 +20,18 @@ public class ClienteService : IClienteService
         // 1. Normalización de datos
         var emailNormalized = dto.Email.Trim().ToLower();
 
-        // 2. Verificación de Regla de Negocio RN-01 (Email Único)
+        // 2. Validación de formato de teléfono (no permitir letras ni caracteres no permitidos)
+        if (string.IsNullOrWhiteSpace(dto.Telefono))
+        {
+            throw new ValidationException(nameof(dto.Telefono), "El teléfono es obligatorio.");
+        }
+
+        if (!System.Text.RegularExpressions.Regex.IsMatch(dto.Telefono.Trim(), @"^\+?(?=(?:.*\d){7,})[\d\s\-\(\)]+$"))
+        {
+            throw new ValidationException(nameof(dto.Telefono), "El formato del teléfono es inválido. No se permiten letras ni caracteres especiales.");
+        }
+
+        // 3. Verificación de Regla de Negocio RN-01 (Email Único)
         bool emailExiste = await _clienteRepository.ExistsByEmailAsync(emailNormalized);
         if (emailExiste)
         {
@@ -35,6 +46,8 @@ public class ClienteService : IClienteService
             Email = emailNormalized,
             Telefono = dto.Telefono.Trim(),
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+            Rol = "Cliente",
+            Activo = true,
             FechaRegistro = DateTime.UtcNow
         };
 

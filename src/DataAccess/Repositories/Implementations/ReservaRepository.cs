@@ -66,8 +66,9 @@ public class ReservaRepository : IReservaRepository
         DateTime end,
         Guid? excludeReservaId = null)
     {
-        // Traemos reservas de la mesa que no estén canceladas ni finalizadas para la ventana de fecha
-        var windowStart = start.Date;
+        // Traemos reservas de la mesa que no estén canceladas, finalizadas ni marcadas como No-Show
+        // Cubrimos desde el día anterior para incluir turnos nocturnos que cruzan la medianoche
+        var windowStart = start.Date.AddDays(-1);
         var windowEnd = end.Date.AddDays(1);
 
         var query = _context.Reservas
@@ -77,6 +78,7 @@ public class ReservaRepository : IReservaRepository
             .Where(r => r.MesaId == mesaId &&
                         r.Estado != ReservaEstado.Cancelada &&
                         r.Estado != ReservaEstado.Finalizada &&
+                        r.Estado != ReservaEstado.NoShow &&
                         r.FechaHora >= windowStart &&
                         r.FechaHora < windowEnd);
 
@@ -102,7 +104,7 @@ public class ReservaRepository : IReservaRepository
         DateTime end,
         Guid? excludeReservaId = null)
     {
-        var windowStart = start.Date;
+        var windowStart = start.Date.AddDays(-1);
         var windowEnd = end.Date.AddDays(1);
 
         var query = _context.Reservas
@@ -112,6 +114,7 @@ public class ReservaRepository : IReservaRepository
             .Where(r => r.ClienteId == clienteId &&
                         r.Estado != ReservaEstado.Cancelada &&
                         r.Estado != ReservaEstado.Finalizada &&
+                        r.Estado != ReservaEstado.NoShow &&
                         r.FechaHora >= windowStart &&
                         r.FechaHora < windowEnd);
 
@@ -176,13 +179,41 @@ public class ReservaRepository : IReservaRepository
     public async Task<IEnumerable<Reserva>> GetReservasOperativasAsync(DateTime? fecha = null)
     {
         var fechaConsulta = fecha?.Date ?? DateTime.Today;
+        var diaSiguiente = fechaConsulta.AddDays(1);
 
         return await _context.Reservas
             .Include(r => r.Cliente)
             .Include(r => r.Mesa)
-            .Where(r => r.FechaHora.Date == fechaConsulta)
+            .Where(r => r.FechaHora >= fechaConsulta && r.FechaHora < diaSiguiente)
             .OrderBy(r => r.FechaHora)
             .ToListAsync();
+    }
+
+    public async Task<T> ExecuteInTransactionAsync<T>(Func<Task<T>> operation, System.Data.IsolationLevel isolationLevel = System.Data.IsolationLevel.Serializable)
+    {
+        if (operation == null) throw new ArgumentNullException(nameof(operation));
+
+        if (!_context.Database.IsRelational())
+        {
+            return await operation();
+        }
+
+        var executionStrategy = _context.Database.CreateExecutionStrategy();
+        return await executionStrategy.ExecuteAsync(async () =>
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync(isolationLevel);
+            try
+            {
+                var result = await operation();
+                await transaction.CommitAsync();
+                return result;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        });
     }
 }
 

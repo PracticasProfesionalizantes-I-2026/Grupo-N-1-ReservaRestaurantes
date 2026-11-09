@@ -1,9 +1,17 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Shared.DTOs.Mesas;
 
 public class MesaCreateDTO
 {
+    [Required(ErrorMessage = "El número de mesa es obligatorio.")]
+    [Range(1, 1000, ErrorMessage = "El número de mesa debe ser mayor a 0.")]
     public int Numero { get; set; }
+
+    [Required(ErrorMessage = "La capacidad es obligatoria.")]
+    [Range(1, 50, ErrorMessage = "La capacidad debe ser entre 1 y 50 comensales.")]
     public int Capacidad { get; set; }
 
-
+    [StringLength(80, ErrorMessage = "La ubicación no puede superar los 80 caracteres.")]
+    public string Ubicacion { get; set; } = "Salón Principal";
 }

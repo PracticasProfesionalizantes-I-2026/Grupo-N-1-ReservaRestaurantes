@@ -36,6 +36,9 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             // 401 Unauthorized — acceso denegado por credenciales o sesión
             UnauthorizedException               => (StatusCodes.Status401Unauthorized, "No Autorizado"),
 
+            // 403 Forbidden — acceso denegado por permisos insuficientes o recurso ajeno
+            AccesoDenegadoException             => (StatusCodes.Status403Forbidden,    "Acceso Denegado"),
+
             // 404 Not Found — recursos inexistentes (subclases antes de NotFoundException base)
             ReservaNoEncontradaException        => (StatusCodes.Status404NotFound,     "Reserva No Encontrada"),
             MesaNoEncontradaException           => (StatusCodes.Status404NotFound,     "Mesa No Encontrada"),
@@ -51,8 +54,11 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             SinDisponibilidadException          => (StatusCodes.Status409Conflict,     "Sin Disponibilidad"),
             ReservaDuplicadaClienteException    => (StatusCodes.Status409Conflict,     "Reserva Duplicada"),
             CapacidadInsuficienteException      => (StatusCodes.Status409Conflict,     "Capacidad Insuficiente"),
+            MesaNoCompatibleException           => (StatusCodes.Status409Conflict,     "Mesa No Compatible"),
+            EmailDuplicadoException             => (StatusCodes.Status409Conflict,     "Email Duplicado"),
             ConflictException                   => (StatusCodes.Status409Conflict,     "Conflicto de Negocio"),
             BusinessRuleException               => (StatusCodes.Status409Conflict,     "Regla de Negocio Incumplida"),
+            Microsoft.EntityFrameworkCore.DbUpdateException => (StatusCodes.Status409Conflict, "Conflicto de Base de Datos"),
 
             // 500 Internal Server Error — errores inesperados (se loguean con stack trace)
             _ => (StatusCodes.Status500InternalServerError, "Error Interno del Servidor")
@@ -76,13 +82,22 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
         }
 
         // Construir respuesta ProblemDetails (RFC 7807)
+        var detail = exception is Microsoft.EntityFrameworkCore.DbUpdateException
+            ? (exception.InnerException?.Message ?? exception.Message)
+            : exception.Message;
+
         var problemDetails = new ProblemDetails
         {
             Status = statusCode,
             Title  = title,
-            Detail = exception.Message,
+            Detail = detail,
             Type   = $"https://httpstatuses.com/{statusCode}"
         };
+
+        if (exception is ValidationException validationEx && validationEx.Errors?.Count > 0)
+        {
+            problemDetails.Extensions["errors"] = validationEx.Errors;
+        }
 
         httpContext.Response.StatusCode = statusCode;
         httpContext.Response.ContentType = "application/problem+json";

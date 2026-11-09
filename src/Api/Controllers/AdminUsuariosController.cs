@@ -8,6 +8,7 @@ using Shared.DTOs.Usuarios;
 namespace Api.Controllers;
 
 [ApiController]
+[Route("api/v1/admin/usuarios")]
 [Route("api/admin/usuarios")]
 [Authorize(Roles = "Admin")] // RN-01: Solo el Admin podrá gestionar roles de usuarios
 public class AdminUsuariosController : ControllerBase
@@ -55,10 +56,11 @@ public class AdminUsuariosController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> EliminarUsuario(
         [FromRoute] Guid id,
+        [FromQuery] bool? confirmar = null,
         [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] UsuarioEliminarDTO? dto = null)
     {
-        // RN-02: Comprobar confirmación explícita
-        bool confirmacionValida = dto?.Confirmado == true;
+        // RN-02: Comprobar confirmación explícita (vía Query Parameter ?confirmar=true o Body)
+        bool confirmacionValida = (confirmar == true) || (dto?.Confirmado == true);
         if (!confirmacionValida)
         {
             return Problem(

@@ -18,7 +18,8 @@ public class ClienteCreateDTO
     public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El teléfono es obligatorio.")]
-    [StringLength(15, ErrorMessage = "El teléfono no puede superar los 15 caracteres.")]
+    [StringLength(25, MinimumLength = 7, ErrorMessage = "El teléfono debe tener entre 7 y 25 caracteres.")]
+    [RegularExpression(@"^\+?(?=(?:.*\d){7,})[\d\s\-\(\)]+$", ErrorMessage = "El formato del teléfono es inválido. Solo se permiten números y los símbolos '+', '-', '()', y no se permiten letras.")]
     public string Telefono { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "La contraseña es obligatoria.")]

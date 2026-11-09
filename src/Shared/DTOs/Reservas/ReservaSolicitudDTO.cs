@@ -11,5 +11,6 @@ public class ReservaSolicitudDTO
     [Range(1, 20, ErrorMessage = "La cantidad de comensales debe ser entre 1 y 20.")]
     public int CantidadComensales { get; set; }
 
+    [StringLength(500, ErrorMessage = "Las observaciones no pueden superar los 500 caracteres.")]
     public string? Observaciones { get; set; }
 }

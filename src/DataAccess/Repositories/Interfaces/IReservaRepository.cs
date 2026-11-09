@@ -13,5 +13,6 @@ public interface IReservaRepository
     Task UpdateAsync(Reserva reserva);
     Task DeleteAsync(Guid id);
     Task<IEnumerable<Reserva>> GetReservasOperativasAsync(DateTime? fecha = null);
+    Task<T> ExecuteInTransactionAsync<T>(Func<Task<T>> operation, System.Data.IsolationLevel isolationLevel = System.Data.IsolationLevel.Serializable);
 }
 

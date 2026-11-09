@@ -19,7 +19,9 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 
     public (string Token, DateTime Expiration) GenerateToken(EntityCliente cliente)
     {
-        var secretKey = _configuration["Jwt:SecretKey"] ?? "SuperSecretKey_GrupoN1_ReservaRestaurantes_2026!";
+        var secretKey = _configuration["Jwt:SecretKey"] 
+                        ?? Environment.GetEnvironmentVariable("AGY_JWT_SECRET") 
+                        ?? "SuperSecretKey_GrupoN1_ReservaRestaurantes_2026!";
         var issuer = _configuration["Jwt:Issuer"] ?? "ReservaRestaurantesApi";
         var audience = _configuration["Jwt:Audience"] ?? "ReservaRestaurantesUsers";
         var expirationMinutes = int.TryParse(_configuration["Jwt:ExpirationMinutes"], out var minutes) ? minutes : 60;

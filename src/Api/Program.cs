@@ -1,4 +1,5 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using Api.Middleware;
 using BusinessLogic;
 using DataAccess.Context;
@@ -6,6 +7,7 @@ using DataAccess.Data;
 using DataAccess.Repositories.Implementations;
 using DataAccess.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -30,7 +32,11 @@ builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
 builder.Services.AddBusinessLogic();
 
 // Configuración de Autenticación JWT Bearer (CU-05)
-var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] ?? "SuperSecretKey_GrupoN1_ReservaRestaurantes_2026!";
+var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] ?? Environment.GetEnvironmentVariable("AGY_JWT_SECRET");
+if (string.IsNullOrWhiteSpace(jwtSecretKey))
+{
+    throw new InvalidOperationException("JWT secret key is not configured. Set environment variable AGY_JWT_SECRET or configuration Jwt:SecretKey.");
+}
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "ReservaRestaurantesApi";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "ReservaRestaurantesUsers";
 
@@ -56,6 +62,19 @@ builder.Services.AddAuthentication(options =>
 // Manejo centralizado de excepciones (Middleware global)
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+
+// Configuración de Rate Limiting para endpoints públicos (ej. registro de clientes)
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddFixedWindowLimiter("RegistrationPolicy", opt =>
+    {
+        opt.PermitLimit = 10;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 2;
+    });
+});
 
 // Controladores y documentación API
 builder.Services.AddControllers();
@@ -118,6 +137,8 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

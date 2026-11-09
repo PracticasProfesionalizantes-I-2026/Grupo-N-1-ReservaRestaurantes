@@ -47,11 +47,50 @@ public class ReservasController : ControllerBase
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ReservaResponseDTO>> GetById(Guid id)
     {
-        var result = await _reservaService.GetByIdAsync(id);
+        var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                          ?? User.FindFirst("sub")?.Value;
+
+        Guid? usuarioId = Guid.TryParse(usuarioIdClaim, out var parsedId) ? parsedId : null;
+        var rol = User.FindFirst(ClaimTypes.Role)?.Value 
+               ?? User.FindFirst("role")?.Value;
+
+        var result = await _reservaService.GetByIdAsync(id, usuarioId, rol);
         if (result == null) return NotFound();
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// RF-07 / CU-08: Modificar Reserva
+    /// Permite al cliente (dueño) o a un Gerente/Admin modificar fecha, hora, comensales, mesa y observaciones de una reserva.
+    /// </summary>
+    [HttpPut("{id:guid}")]
+    [HttpPatch("{id:guid}")]
+    [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ReservaResponseDTO>> Modificar(Guid id, [FromBody] ReservaUpdateDTO dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                          ?? User.FindFirst("sub")?.Value;
+
+        Guid? usuarioId = Guid.TryParse(usuarioIdClaim, out var parsedId) ? parsedId : null;
+        var rol = User.FindFirst(ClaimTypes.Role)?.Value 
+               ?? User.FindFirst("role")?.Value;
+
+        var result = await _reservaService.ModificarReservaAsync(id, dto, usuarioId, rol);
         return Ok(result);
     }
 
@@ -62,6 +101,7 @@ public class ReservasController : ControllerBase
     [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<ReservaResponseDTO>> Cancelar(Guid id, [FromBody] ReservaCancelarDTO? dto)
@@ -101,8 +141,9 @@ public class ReservasController : ControllerBase
     }
 
     /// <summary>
-    /// Confirmar Reserva (Solo Gerentes)
+    /// Confirmar Reserva (Solo Gerentes) - CU-12
     /// </summary>
+    [HttpPatch("{id:guid}/confirmar")]
     [HttpPut("{id:guid}/confirmar")]
     [Authorize(Roles = "Gerente")]
     [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
@@ -145,6 +186,30 @@ public class ReservasController : ControllerBase
     public async Task<ActionResult<ReservaResponseDTO>> FinalizarReserva(Guid id)
     {
         var result = await _reservaService.FinalizarReservaAsync(id);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// RF-10 / CU-10: Cambio genérico / manual de estado de reserva (Solo Gerente y Admin)
+    /// Aplica validación estricta de máquina de estados del restaurante y actualiza la mesa asociada.
+    /// </summary>
+    [HttpPatch("{id:guid}/estado")]
+    [HttpPut("{id:guid}/estado")]
+    [Authorize(Roles = "Gerente,Admin")]
+    [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ReservaResponseDTO>> CambiarEstado(Guid id, [FromBody] ReservaCambiarEstadoDTO dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var result = await _reservaService.CambiarEstadoAsync(id, dto);
         return Ok(result);
     }
 
@@ -218,6 +283,24 @@ public class ReservasController : ControllerBase
     }
 
     /// <summary>
+    /// RF-13 / CU-18: Promover reserva en lista de espera a confirmada asignando mesa liberada/disponible
+    /// </summary>
+    [HttpPatch("lista-espera/{id:guid}/promover")]
+    [HttpPatch("{id:guid}/promover")]
+    [Authorize(Roles = "Gerente,Admin")]
+    [ProducesResponseType(typeof(ReservaResponseDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ReservaResponseDTO>> PromoverListaEspera(Guid id, [FromBody] ReservaPromoverDTO? dto = null)
+    {
+        var result = await _reservaService.PromoverListaEsperaAsync(id, dto?.MesaId);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// CU-02: Tablero Operativo de Reservas (Solo Gerente)
     /// </summary>
     [HttpGet("lista-reservas")]
@@ -237,6 +320,7 @@ public class ReservasController : ControllerBase
     /// CU-11: Filtrar reservas (Solo Gerente).
     /// Permite combinar los filtros: fecha, estado, mesaId y clienteId. Todos opcionales.
     /// </summary>
+    [HttpGet("filtrar-reservas")]
     [HttpGet("filtrar-reservas-gerente")]
     [Authorize(Roles = "Gerente")]
     [ProducesResponseType(typeof(IEnumerable<ReservaResponseDTO>), StatusCodes.Status200OK)]

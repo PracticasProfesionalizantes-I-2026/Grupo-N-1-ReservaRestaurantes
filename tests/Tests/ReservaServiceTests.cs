@@ -25,6 +25,11 @@ public class ReservaServiceTests
         _reservaRepoMock = new Mock<IReservaRepository>();
         _mesaRepoMock = new Mock<IMesaRepository>();
         _clienteRepoMock = new Mock<IClienteRepository>();
+
+        _reservaRepoMock
+            .Setup(r => r.ExecuteInTransactionAsync(It.IsAny<Func<Task<ReservaResponseDTO>>>(), It.IsAny<System.Data.IsolationLevel>()))
+            .Returns<Func<Task<ReservaResponseDTO>>, System.Data.IsolationLevel>((op, _) => op());
+
         _sut = new ReservaService(_reservaRepoMock.Object, _mesaRepoMock.Object, _clienteRepoMock.Object);
     }
 
@@ -430,9 +435,11 @@ public class ReservaServiceTests
     public async Task CancelarReservaClienteAsync_ReservaEnCurso_LanzaTransicionEstadoInvalidaException()
     {
         // Arrange (RN-02: no cancelar EnCurso, Finalizada ni Cancelada)
+        var clienteId = Guid.NewGuid();
         var reserva = new Reserva
         {
             Id = Guid.NewGuid(),
+            ClienteId = clienteId,
             Estado = ReservaEstado.EnCurso,
             FechaHora = FechaHoraValida()
         };
@@ -440,7 +447,30 @@ public class ReservaServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<TransicionEstadoInvalidaException>(
-            () => _sut.CancelarReservaClienteAsync(reserva.Id, Guid.NewGuid()));
+            () => _sut.CancelarReservaClienteAsync(reserva.Id, clienteId));
+    }
+
+    [Fact]
+    public async Task CancelarReservaClienteAsync_ReservaDeOtroCliente_LanzaAccesoDenegadoException()
+    {
+        // Arrange (Prevención de IDOR: un cliente no puede cancelar la reserva de otro)
+        var propietarioId = Guid.NewGuid();
+        var atacanteId = Guid.NewGuid();
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            ClienteId = propietarioId,
+            Estado = ReservaEstado.Confirmada,
+            FechaHora = FechaHoraValida()
+        };
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<AccesoDenegadoException>(
+            () => _sut.CancelarReservaClienteAsync(reserva.Id, atacanteId));
+
+        Assert.Contains("permisos para cancelar una reserva ajena", ex.Message);
+        _reservaRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Reserva>()), Times.Never);
     }
 
     // =========================================================================
@@ -488,6 +518,85 @@ public class ReservaServiceTests
 
         // Assert
         Assert.Null(resultado);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ClientePropietario_RetornaDTO()
+    {
+        // Arrange
+        var cliente = CrearCliente();
+        var mesa = CrearMesa();
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            ClienteId = cliente.Id,
+            Cliente = cliente,
+            Mesa = mesa,
+            FechaHora = FechaHoraValida(),
+            CantidadComensales = 2,
+            Estado = ReservaEstado.Confirmada
+        };
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+
+        // Act
+        var resultado = await _sut.GetByIdAsync(reserva.Id, cliente.Id, "Cliente");
+
+        // Assert
+        Assert.NotNull(resultado);
+        Assert.Equal(reserva.Id, resultado.Id);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ClienteAjeno_LanzaAccesoDenegadoException()
+    {
+        // Arrange (Prevención de IDOR en consulta de reserva)
+        var propietario = CrearCliente();
+        var atacanteId = Guid.NewGuid();
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            ClienteId = propietario.Id,
+            Cliente = propietario,
+            Mesa = CrearMesa(),
+            FechaHora = FechaHoraValida(),
+            CantidadComensales = 2,
+            Estado = ReservaEstado.Confirmada
+        };
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<AccesoDenegadoException>(
+            () => _sut.GetByIdAsync(reserva.Id, atacanteId, "Cliente"));
+
+        Assert.Contains("permisos para consultar una reserva ajena", ex.Message);
+    }
+
+    [Theory]
+    [InlineData("Gerente")]
+    [InlineData("Admin")]
+    public async Task GetByIdAsync_GerenteOAdmin_RetornaReservaDeCualquierCliente(string rol)
+    {
+        // Arrange (Personal autorizado puede consultar cualquier reserva)
+        var propietario = CrearCliente();
+        var personalId = Guid.NewGuid();
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            ClienteId = propietario.Id,
+            Cliente = propietario,
+            Mesa = CrearMesa(),
+            FechaHora = FechaHoraValida(),
+            CantidadComensales = 2,
+            Estado = ReservaEstado.Confirmada
+        };
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+
+        // Act
+        var resultado = await _sut.GetByIdAsync(reserva.Id, personalId, rol);
+
+        // Assert
+        Assert.NotNull(resultado);
+        Assert.Equal(reserva.Id, resultado.Id);
     }
 
     // =========================================================================
@@ -666,5 +775,422 @@ public class ReservaServiceTests
         // Act & Assert
         await Assert.ThrowsAsync<SinReservasOperativasException>(
             () => _sut.GetTableroOperativoAsync(fecha));
+    }
+
+    // =========================================================================
+    // RF-07: ModificarReservaAsync
+    // =========================================================================
+
+    [Fact]
+    public async Task ModificarReservaAsync_ReservaPendientePropia_ModificaExitosamente()
+    {
+        // Arrange
+        var cliente = CrearCliente();
+        var mesa = CrearMesa();
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            ClienteId = cliente.Id,
+            Cliente = cliente,
+            MesaId = mesa.Id,
+            Mesa = mesa,
+            FechaHora = FechaHoraValida(),
+            CantidadComensales = 2,
+            Estado = ReservaEstado.Pendiente,
+            DuracionEstimadaMinutos = 120
+        };
+
+        var nuevoHorario = FechaHoraValida().AddHours(1);
+        var dto = new ReservaUpdateDTO
+        {
+            FechaHora = nuevoHorario,
+            CantidadComensales = 4,
+            Observaciones = "Cambiamos a 4 comensales"
+        };
+
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+        _reservaRepoMock.Setup(r => r.GetOverlappingReservationsByMesaAsync(mesa.Id, dto.FechaHora, It.IsAny<DateTime>(), reserva.Id))
+            .ReturnsAsync(Enumerable.Empty<Reserva>());
+        _reservaRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Reserva>())).Returns(Task.CompletedTask);
+
+        // Act
+        var resultado = await _sut.ModificarReservaAsync(reserva.Id, dto, cliente.Id, "Cliente");
+
+        // Assert
+        Assert.NotNull(resultado);
+        Assert.Equal(nuevoHorario, resultado.FechaHora);
+        Assert.Equal(4, resultado.CantidadComensales);
+        Assert.Equal("Cambiamos a 4 comensales", resultado.Observaciones);
+        _reservaRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Reserva>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ModificarReservaAsync_ReservaAjenaPorCliente_LanzaAccesoDenegadoException()
+    {
+        // Arrange (IDOR check)
+        var propietario = CrearCliente();
+        var atacanteId = Guid.NewGuid();
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            ClienteId = propietario.Id,
+            Cliente = propietario,
+            Mesa = CrearMesa(),
+            FechaHora = FechaHoraValida(),
+            CantidadComensales = 2,
+            Estado = ReservaEstado.Confirmada
+        };
+
+        var dto = new ReservaUpdateDTO
+        {
+            FechaHora = FechaHoraValida(),
+            CantidadComensales = 2
+        };
+
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<AccesoDenegadoException>(
+            () => _sut.ModificarReservaAsync(reserva.Id, dto, atacanteId, "Cliente"));
+    }
+
+    [Fact]
+    public async Task ModificarReservaAsync_ReservaFinalizada_LanzaTransicionEstadoInvalidaException()
+    {
+        // Arrange
+        var cliente = CrearCliente();
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            ClienteId = cliente.Id,
+            Cliente = cliente,
+            Mesa = CrearMesa(),
+            FechaHora = FechaHoraValida(),
+            CantidadComensales = 2,
+            Estado = ReservaEstado.Finalizada
+        };
+
+        var dto = new ReservaUpdateDTO
+        {
+            FechaHora = FechaHoraValida(),
+            CantidadComensales = 2
+        };
+
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<TransicionEstadoInvalidaException>(
+            () => _sut.ModificarReservaAsync(reserva.Id, dto, cliente.Id, "Cliente"));
+    }
+
+    [Fact]
+    public async Task ModificarReservaAsync_MesaConSolapamiento_LanzaMesaSolapadaException()
+    {
+        // Arrange
+        var cliente = CrearCliente();
+        var mesa = CrearMesa();
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            ClienteId = cliente.Id,
+            Cliente = cliente,
+            MesaId = mesa.Id,
+            Mesa = mesa,
+            FechaHora = FechaHoraValida(),
+            CantidadComensales = 2,
+            Estado = ReservaEstado.Confirmada
+        };
+
+        var dto = new ReservaUpdateDTO
+        {
+            FechaHora = FechaHoraValida(),
+            CantidadComensales = 2,
+            MesaId = mesa.Id
+        };
+
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+        _mesaRepoMock.Setup(m => m.GetByIdAsync(mesa.Id)).ReturnsAsync(mesa);
+        _reservaRepoMock.Setup(r => r.GetOverlappingReservationsByMesaAsync(mesa.Id, dto.FechaHora, It.IsAny<DateTime>(), reserva.Id))
+            .ReturnsAsync(new List<Reserva> { new() { Id = Guid.NewGuid() } });
+
+        // Act & Assert
+        await Assert.ThrowsAsync<MesaSolapadaException>(
+            () => _sut.ModificarReservaAsync(reserva.Id, dto, cliente.Id, "Cliente"));
+    }
+
+    [Fact]
+    public async Task ModificarReservaAsync_GerenteOAdmin_ModificaCualquierReserva()
+    {
+        // Arrange
+        var cliente = CrearCliente();
+        var mesa = CrearMesa();
+        var gerenteId = Guid.NewGuid();
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            ClienteId = cliente.Id,
+            Cliente = cliente,
+            MesaId = mesa.Id,
+            Mesa = mesa,
+            FechaHora = FechaHoraValida(),
+            CantidadComensales = 2,
+            Estado = ReservaEstado.Confirmada,
+            DuracionEstimadaMinutos = 120
+        };
+
+        var nuevoHorario = FechaHoraValida().AddHours(1);
+        var dto = new ReservaUpdateDTO
+        {
+            FechaHora = nuevoHorario,
+            CantidadComensales = 3
+        };
+
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+        _reservaRepoMock.Setup(r => r.GetOverlappingReservationsByMesaAsync(mesa.Id, dto.FechaHora, It.IsAny<DateTime>(), reserva.Id))
+            .ReturnsAsync(Enumerable.Empty<Reserva>());
+        _reservaRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Reserva>())).Returns(Task.CompletedTask);
+
+        // Act
+        var resultado = await _sut.ModificarReservaAsync(reserva.Id, dto, gerenteId, "Gerente");
+
+        // Assert
+        Assert.NotNull(resultado);
+        Assert.Equal(nuevoHorario, resultado.FechaHora);
+        Assert.Equal(3, resultado.CantidadComensales);
+    }
+
+    // =========================================================================
+    // RF-10: CambiarEstadoAsync (Máquina de estados de reservas)
+    // =========================================================================
+
+    [Fact]
+    public async Task CambiarEstadoAsync_TransicionValidaPendienteAConfirmada_CambiaEstado()
+    {
+        // Arrange
+        var cliente = CrearCliente();
+        var mesa = CrearMesa();
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            Cliente = cliente,
+            Mesa = mesa,
+            MesaId = mesa.Id,
+            Estado = ReservaEstado.Pendiente,
+            FechaHora = FechaHoraValida()
+        };
+
+        var dto = new ReservaCambiarEstadoDTO { NuevoEstado = ReservaEstado.Confirmada };
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+        _reservaRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Reserva>())).Returns(Task.CompletedTask);
+
+        // Act
+        var resultado = await _sut.CambiarEstadoAsync(reserva.Id, dto);
+
+        // Assert
+        Assert.Equal(ReservaEstado.Confirmada, resultado.Estado);
+        _reservaRepoMock.Verify(r => r.UpdateAsync(It.Is<Reserva>(res => res.Estado == ReservaEstado.Confirmada)), Times.Once);
+    }
+
+    [Fact]
+    public async Task CambiarEstadoAsync_TransicionValidaConfirmadaAEnCurso_OcupaMesa()
+    {
+        // Arrange
+        var cliente = CrearCliente();
+        var mesa = CrearMesa();
+        mesa.Estado = MesaEstado.Reservada;
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            Cliente = cliente,
+            Mesa = mesa,
+            MesaId = mesa.Id,
+            Estado = ReservaEstado.Confirmada,
+            FechaHora = FechaHoraValida()
+        };
+
+        var dto = new ReservaCambiarEstadoDTO { NuevoEstado = ReservaEstado.EnCurso };
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+        _mesaRepoMock.Setup(m => m.UpdateAsync(It.IsAny<Mesa>())).Returns(Task.CompletedTask);
+        _reservaRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Reserva>())).Returns(Task.CompletedTask);
+
+        // Act
+        var resultado = await _sut.CambiarEstadoAsync(reserva.Id, dto);
+
+        // Assert
+        Assert.Equal(ReservaEstado.EnCurso, resultado.Estado);
+        _mesaRepoMock.Verify(m => m.UpdateAsync(It.Is<Mesa>(mesaUpdated => mesaUpdated.Estado == MesaEstado.Ocupada)), Times.Once);
+    }
+
+    [Fact]
+    public async Task CambiarEstadoAsync_TransicionValidaEnCursoAFinalizada_LiberaMesa()
+    {
+        // Arrange
+        var cliente = CrearCliente();
+        var mesa = CrearMesa();
+        mesa.Estado = MesaEstado.Ocupada;
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            Cliente = cliente,
+            Mesa = mesa,
+            MesaId = mesa.Id,
+            Estado = ReservaEstado.EnCurso,
+            FechaHora = FechaHoraValida()
+        };
+
+        var dto = new ReservaCambiarEstadoDTO { NuevoEstado = ReservaEstado.Finalizada };
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+        _mesaRepoMock.Setup(m => m.UpdateAsync(It.IsAny<Mesa>())).Returns(Task.CompletedTask);
+        _reservaRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Reserva>())).Returns(Task.CompletedTask);
+
+        // Act
+        var resultado = await _sut.CambiarEstadoAsync(reserva.Id, dto);
+
+        // Assert
+        Assert.Equal(ReservaEstado.Finalizada, resultado.Estado);
+        _mesaRepoMock.Verify(m => m.UpdateAsync(It.Is<Mesa>(mesaUpdated => mesaUpdated.Estado == MesaEstado.Libre)), Times.Once);
+    }
+
+    [Fact]
+    public async Task CambiarEstadoAsync_TransicionInvalidaFinalizadaACancelada_LanzaTransicionEstadoInvalidaException()
+    {
+        // Arrange
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            Estado = ReservaEstado.Finalizada,
+            FechaHora = FechaHoraValida()
+        };
+
+        var dto = new ReservaCambiarEstadoDTO { NuevoEstado = ReservaEstado.Cancelada };
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<TransicionEstadoInvalidaException>(
+            () => _sut.CambiarEstadoAsync(reserva.Id, dto));
+    }
+
+    [Fact]
+    public async Task CambiarEstadoAsync_MismoEstado_NoOpYRetornaDTO()
+    {
+        // Arrange
+        var cliente = CrearCliente();
+        var mesa = CrearMesa();
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            Cliente = cliente,
+            Mesa = mesa,
+            Estado = ReservaEstado.Confirmada,
+            FechaHora = FechaHoraValida()
+        };
+
+        var dto = new ReservaCambiarEstadoDTO { NuevoEstado = ReservaEstado.Confirmada };
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+
+        // Act
+        var resultado = await _sut.CambiarEstadoAsync(reserva.Id, dto);
+
+        // Assert
+        Assert.Equal(ReservaEstado.Confirmada, resultado.Estado);
+        _reservaRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Reserva>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CambiarEstadoAsync_ReservaInexistente_LanzaReservaNoEncontradaException()
+    {
+        // Arrange
+        var reservaId = Guid.NewGuid();
+        var dto = new ReservaCambiarEstadoDTO { NuevoEstado = ReservaEstado.Confirmada };
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reservaId)).ReturnsAsync((Reserva?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ReservaNoEncontradaException>(
+            () => _sut.CambiarEstadoAsync(reservaId, dto));
+    }
+
+    [Fact]
+    public async Task CambiarEstadoAsync_TransicionAConfirmada_MesaInactiva_LanzaValidationException()
+    {
+        // Arrange
+        var cliente = CrearCliente();
+        var mesa = CrearMesa();
+        mesa.Activa = false;
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            Cliente = cliente,
+            Mesa = mesa,
+            MesaId = mesa.Id,
+            Estado = ReservaEstado.Pendiente,
+            FechaHora = FechaHoraValida()
+        };
+
+        var dto = new ReservaCambiarEstadoDTO { NuevoEstado = ReservaEstado.Confirmada };
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _sut.CambiarEstadoAsync(reserva.Id, dto));
+    }
+
+    [Fact]
+    public async Task CambiarEstadoAsync_TransicionConfirmadaACancelada_LiberaMesa()
+    {
+        // Arrange
+        var cliente = CrearCliente();
+        var mesa = CrearMesa();
+        mesa.Estado = MesaEstado.Reservada;
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            Cliente = cliente,
+            Mesa = mesa,
+            MesaId = mesa.Id,
+            Estado = ReservaEstado.Confirmada,
+            FechaHora = FechaHoraValida()
+        };
+
+        var dto = new ReservaCambiarEstadoDTO { NuevoEstado = ReservaEstado.Cancelada };
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+        _mesaRepoMock.Setup(m => m.UpdateAsync(It.IsAny<Mesa>())).Returns(Task.CompletedTask);
+        _reservaRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Reserva>())).Returns(Task.CompletedTask);
+
+        // Act
+        var resultado = await _sut.CambiarEstadoAsync(reserva.Id, dto);
+
+        // Assert
+        Assert.Equal(ReservaEstado.Cancelada, resultado.Estado);
+        _mesaRepoMock.Verify(m => m.UpdateAsync(It.Is<Mesa>(mesaUpdated => mesaUpdated.Estado == MesaEstado.Libre)), Times.Once);
+    }
+
+    [Fact]
+    public async Task CambiarEstadoAsync_TransicionConfirmadaANoShow_LiberaMesa()
+    {
+        // Arrange
+        var cliente = CrearCliente();
+        var mesa = CrearMesa();
+        mesa.Estado = MesaEstado.Reservada;
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            Cliente = cliente,
+            Mesa = mesa,
+            MesaId = mesa.Id,
+            Estado = ReservaEstado.Confirmada,
+            FechaHora = FechaHoraValida()
+        };
+
+        var dto = new ReservaCambiarEstadoDTO { NuevoEstado = ReservaEstado.NoShow };
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+        _mesaRepoMock.Setup(m => m.UpdateAsync(It.IsAny<Mesa>())).Returns(Task.CompletedTask);
+        _reservaRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Reserva>())).Returns(Task.CompletedTask);
+
+        // Act
+        var resultado = await _sut.CambiarEstadoAsync(reserva.Id, dto);
+
+        // Assert
+        Assert.Equal(ReservaEstado.NoShow, resultado.Estado);
+        _mesaRepoMock.Verify(m => m.UpdateAsync(It.Is<Mesa>(mesaUpdated => mesaUpdated.Estado == MesaEstado.Libre)), Times.Once);
     }
 }

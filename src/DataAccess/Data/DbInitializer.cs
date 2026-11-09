@@ -9,16 +9,18 @@ public static class DbInitializer
 {
     public static async Task InitializeAsync(RestaurantDbContext context)
     {
-        // Asegura la creación de la base de datos SQLite y sus tablas
-        await context.Database.EnsureCreatedAsync();
+        // Asegura la aplicación de las migraciones en la base de datos SQLite
+        await context.Database.MigrateAsync();
 
-        // Si ya hay clientes cargados, la base ya fue inicializada
+        // Si ya hay clientes cargados, la base ya fue inicializada (idempotencia)
         if (await context.Clientes.AnyAsync())
         {
             return;
         }
 
         // 1. Clientes semilla
+        var clientePasswordHash = BCrypt.Net.BCrypt.HashPassword("Cliente123!");
+
         var cliente1 = new Cliente
         {
             Id = Guid.NewGuid(),
@@ -26,6 +28,7 @@ public static class DbInitializer
             Apellido = "Pérez",
             Email = "juan.perez@example.com",
             Telefono = "+54 11 4455-6677",
+            PasswordHash = clientePasswordHash,
             FechaRegistro = DateTime.UtcNow.AddDays(-30)
         };
 
@@ -36,6 +39,7 @@ public static class DbInitializer
             Apellido = "González",
             Email = "maria.gonzalez@example.com",
             Telefono = "+54 11 5566-7788",
+            PasswordHash = clientePasswordHash,
             FechaRegistro = DateTime.UtcNow.AddDays(-20)
         };
 
@@ -46,6 +50,7 @@ public static class DbInitializer
             Apellido = "Rodríguez",
             Email = "carlos.rodriguez@example.com",
             Telefono = "+54 11 6677-8899",
+            PasswordHash = clientePasswordHash,
             FechaRegistro = DateTime.UtcNow.AddDays(-10)
         };
 
@@ -56,6 +61,7 @@ public static class DbInitializer
             Apellido = "Fernández",
             Email = "laura.fernandez@example.com",
             Telefono = "+54 11 7788-9900",
+            PasswordHash = clientePasswordHash,
             FechaRegistro = DateTime.UtcNow.AddDays(-5)
         };
 
@@ -169,7 +175,7 @@ public static class DbInitializer
             Apellido = "Gerente",
             Email = "gerente@restaurant.com",
             Telefono = "1122334455",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Gerente123!"), 
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(Environment.GetEnvironmentVariable("GERENTE_PASSWORD") ?? throw new InvalidOperationException("Set GERENTE_PASSWORD env var")), 
             Rol = "Gerente" 
         };
 
@@ -181,7 +187,7 @@ public static class DbInitializer
             Apellido = "Admin",
             Email = "admin@restaurant.com",
             Telefono = "9988776655",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"), 
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(Environment.GetEnvironmentVariable("ADMIN_PASSWORD") ?? throw new InvalidOperationException("Set ADMIN_PASSWORD env var")), 
             Rol = "Admin" 
         };
 
