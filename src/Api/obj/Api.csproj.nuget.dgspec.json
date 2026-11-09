@@ -1,6 +1,7 @@
 {
   "format": 1,
   "restore": {
+<<<<<<< HEAD
     "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj": {}
   },
   "projects": {
@@ -12,6 +13,19 @@
         "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj",
         "packagesPath": "C:\\Users\\Marti\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\obj\\",
+=======
+    "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj": {}
+  },
+  "projects": {
+    "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj",
+        "projectName": "Api",
+        "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\Api.csproj",
+        "packagesPath": "C:\\Users\\jeronimo\\.nuget\\packages\\",
+        "outputPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Api\\obj\\",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Marti\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -29,6 +43,7 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
+<<<<<<< HEAD
               "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj": {
                 "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj"
               },
@@ -40,6 +55,19 @@
               },
               "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
                 "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
+=======
+              "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj": {
+                "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj"
+              },
+              "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
+                "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
+              },
+              "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj": {
+                "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj"
+              },
+              "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+                "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
               }
             }
           }
@@ -519,6 +547,7 @@
         }
       }
     },
+<<<<<<< HEAD
     "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -527,6 +556,16 @@
         "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
         "packagesPath": "C:\\Users\\Marti\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\obj\\",
+=======
+    "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
+        "projectName": "BusinessLogic",
+        "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
+        "packagesPath": "C:\\Users\\jeronimo\\.nuget\\packages\\",
+        "outputPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\obj\\",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Marti\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -544,11 +583,19 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
+<<<<<<< HEAD
               "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
                 "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
               },
               "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
                 "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
+=======
+              "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
+                "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
+              },
+              "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+                "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
               }
             }
           }
@@ -576,7 +623,11 @@
             },
             "Microsoft.Extensions.Configuration.Abstractions": {
               "target": "Package",
+<<<<<<< HEAD
               "version": "[10.0.14, )"
+=======
+              "version": "[10.0.13, )"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
             },
             "Microsoft.Extensions.Hosting.Abstractions": {
               "target": "Package",
@@ -881,6 +932,7 @@
         }
       }
     },
+<<<<<<< HEAD
     "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -889,6 +941,16 @@
         "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
         "packagesPath": "C:\\Users\\Marti\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\obj\\",
+=======
+    "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
+        "projectName": "DataAccess",
+        "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
+        "packagesPath": "C:\\Users\\jeronimo\\.nuget\\packages\\",
+        "outputPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\obj\\",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Marti\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -906,8 +968,13 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
+<<<<<<< HEAD
               "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
                 "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
+=======
+              "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+                "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
               }
             }
           }
@@ -1238,6 +1305,7 @@
         }
       }
     },
+<<<<<<< HEAD
     "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -1246,6 +1314,16 @@
         "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj",
         "packagesPath": "C:\\Users\\Marti\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\obj\\",
+=======
+    "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj",
+        "projectName": "Migrations",
+        "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\Migrations.csproj",
+        "packagesPath": "C:\\Users\\jeronimo\\.nuget\\packages\\",
+        "outputPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Migrations\\obj\\",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Marti\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -1263,8 +1341,13 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
+<<<<<<< HEAD
               "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
                 "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
+=======
+              "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
+                "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
               }
             }
           }
@@ -1591,6 +1674,7 @@
         }
       }
     },
+<<<<<<< HEAD
     "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -1599,6 +1683,16 @@
         "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
         "packagesPath": "C:\\Users\\Marti\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\obj\\",
+=======
+    "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
+        "projectName": "Shared",
+        "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj",
+        "packagesPath": "C:\\Users\\jeronimo\\.nuget\\packages\\",
+        "outputPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\obj\\",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Marti\\AppData\\Roaming\\NuGet\\NuGet.Config",

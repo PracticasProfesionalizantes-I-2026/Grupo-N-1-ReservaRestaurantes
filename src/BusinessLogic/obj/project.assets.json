@@ -27,7 +27,11 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
+<<<<<<< HEAD
       "Microsoft.Data.Sqlite.Core/10.0.14": {
+=======
+      "Microsoft.Data.Sqlite.Core/10.0.13": {
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "type": "package",
         "dependencies": {
           "SQLitePCLRaw.core": "2.1.13"
@@ -43,6 +47,7 @@
           }
         }
       },
+<<<<<<< HEAD
       "Microsoft.EntityFrameworkCore/10.0.14": {
         "type": "package",
         "dependencies": {
@@ -50,6 +55,15 @@
           "Microsoft.EntityFrameworkCore.Analyzers": "10.0.14",
           "Microsoft.Extensions.Caching.Memory": "10.0.14",
           "Microsoft.Extensions.Logging": "10.0.14"
+=======
+      "Microsoft.EntityFrameworkCore/10.0.13": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Abstractions": "10.0.13",
+          "Microsoft.EntityFrameworkCore.Analyzers": "10.0.13",
+          "Microsoft.Extensions.Caching.Memory": "10.0.13",
+          "Microsoft.Extensions.Logging": "10.0.13"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         },
         "compile": {
           "lib/net10.0/Microsoft.EntityFrameworkCore.dll": {
@@ -65,7 +79,11 @@
           "buildTransitive/net10.0/Microsoft.EntityFrameworkCore.props": {}
         }
       },
+<<<<<<< HEAD
       "Microsoft.EntityFrameworkCore.Abstractions/10.0.14": {
+=======
+      "Microsoft.EntityFrameworkCore.Abstractions/10.0.13": {
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "type": "package",
         "compile": {
           "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.dll": {
@@ -78,6 +96,7 @@
           }
         }
       },
+<<<<<<< HEAD
       "Microsoft.EntityFrameworkCore.Analyzers/10.0.14": {
         "type": "package"
       },
@@ -88,6 +107,18 @@
           "Microsoft.Extensions.Caching.Memory": "10.0.14",
           "Microsoft.Extensions.Configuration.Abstractions": "10.0.14",
           "Microsoft.Extensions.Logging": "10.0.14"
+=======
+      "Microsoft.EntityFrameworkCore.Analyzers/10.0.13": {
+        "type": "package"
+      },
+      "Microsoft.EntityFrameworkCore.Relational/10.0.13": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "10.0.13",
+          "Microsoft.Extensions.Caching.Memory": "10.0.13",
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.13",
+          "Microsoft.Extensions.Logging": "10.0.13"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         },
         "compile": {
           "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.dll": {
@@ -100,6 +131,7 @@
           }
         }
       },
+<<<<<<< HEAD
       "Microsoft.EntityFrameworkCore.Sqlite/10.0.14": {
         "type": "package",
         "dependencies": {
@@ -108,6 +140,16 @@
           "Microsoft.Extensions.Configuration.Abstractions": "10.0.14",
           "Microsoft.Extensions.DependencyModel": "10.0.14",
           "Microsoft.Extensions.Logging": "10.0.14",
+=======
+      "Microsoft.EntityFrameworkCore.Sqlite/10.0.13": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Sqlite.Core": "10.0.13",
+          "Microsoft.Extensions.Caching.Memory": "10.0.13",
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.13",
+          "Microsoft.Extensions.DependencyModel": "10.0.13",
+          "Microsoft.Extensions.Logging": "10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
           "SQLitePCLRaw.bundle_e_sqlite3": "2.1.13",
           "SQLitePCLRaw.core": "2.1.13"
         },
@@ -118,6 +160,7 @@
           "lib/net10.0/_._": {}
         }
       },
+<<<<<<< HEAD
       "Microsoft.EntityFrameworkCore.Sqlite.Core/10.0.14": {
         "type": "package",
         "dependencies": {
@@ -127,6 +170,17 @@
           "Microsoft.Extensions.Configuration.Abstractions": "10.0.14",
           "Microsoft.Extensions.DependencyModel": "10.0.14",
           "Microsoft.Extensions.Logging": "10.0.14",
+=======
+      "Microsoft.EntityFrameworkCore.Sqlite.Core/10.0.13": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Data.Sqlite.Core": "10.0.13",
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.13",
+          "Microsoft.Extensions.Caching.Memory": "10.0.13",
+          "Microsoft.Extensions.Configuration.Abstractions": "10.0.13",
+          "Microsoft.Extensions.DependencyModel": "10.0.13",
+          "Microsoft.Extensions.Logging": "10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
           "SQLitePCLRaw.core": "2.1.13"
         },
         "compile": {
@@ -140,10 +194,17 @@
           }
         }
       },
+<<<<<<< HEAD
       "Microsoft.Extensions.Caching.Abstractions/10.0.14": {
         "type": "package",
         "dependencies": {
           "Microsoft.Extensions.Primitives": "10.0.14"
+=======
+      "Microsoft.Extensions.Caching.Abstractions/10.0.13": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "10.0.13"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         },
         "compile": {
           "lib/net10.0/Microsoft.Extensions.Caching.Abstractions.dll": {
@@ -159,6 +220,7 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
+<<<<<<< HEAD
       "Microsoft.Extensions.Caching.Memory/10.0.14": {
         "type": "package",
         "dependencies": {
@@ -167,6 +229,16 @@
           "Microsoft.Extensions.Logging.Abstractions": "10.0.14",
           "Microsoft.Extensions.Options": "10.0.14",
           "Microsoft.Extensions.Primitives": "10.0.14"
+=======
+      "Microsoft.Extensions.Caching.Memory/10.0.13": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Caching.Abstractions": "10.0.13",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.13",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.13",
+          "Microsoft.Extensions.Options": "10.0.13",
+          "Microsoft.Extensions.Primitives": "10.0.13"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         },
         "compile": {
           "lib/net10.0/Microsoft.Extensions.Caching.Memory.dll": {
@@ -182,10 +254,17 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
+<<<<<<< HEAD
       "Microsoft.Extensions.Configuration.Abstractions/10.0.14": {
         "type": "package",
         "dependencies": {
           "Microsoft.Extensions.Primitives": "10.0.14"
+=======
+      "Microsoft.Extensions.Configuration.Abstractions/10.0.13": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "10.0.13"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         },
         "compile": {
           "lib/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll": {
@@ -201,10 +280,17 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
+<<<<<<< HEAD
       "Microsoft.Extensions.DependencyInjection/10.0.14": {
         "type": "package",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.14"
+=======
+      "Microsoft.Extensions.DependencyInjection/10.0.13": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.13"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         },
         "compile": {
           "lib/net10.0/Microsoft.Extensions.DependencyInjection.dll": {
@@ -220,7 +306,11 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
+<<<<<<< HEAD
       "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.14": {
+=======
+      "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.13": {
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "type": "package",
         "compile": {
           "lib/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
@@ -236,7 +326,11 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
+<<<<<<< HEAD
       "Microsoft.Extensions.DependencyModel/10.0.14": {
+=======
+      "Microsoft.Extensions.DependencyModel/10.0.13": {
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "type": "package",
         "compile": {
           "lib/net10.0/Microsoft.Extensions.DependencyModel.dll": {
@@ -314,12 +408,21 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
+<<<<<<< HEAD
       "Microsoft.Extensions.Logging/10.0.14": {
         "type": "package",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection": "10.0.14",
           "Microsoft.Extensions.Logging.Abstractions": "10.0.14",
           "Microsoft.Extensions.Options": "10.0.14"
+=======
+      "Microsoft.Extensions.Logging/10.0.13": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection": "10.0.13",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.13",
+          "Microsoft.Extensions.Options": "10.0.13"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         },
         "compile": {
           "lib/net10.0/Microsoft.Extensions.Logging.dll": {
@@ -335,10 +438,17 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
+<<<<<<< HEAD
       "Microsoft.Extensions.Logging.Abstractions/10.0.14": {
         "type": "package",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.14"
+=======
+      "Microsoft.Extensions.Logging.Abstractions/10.0.13": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.13"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         },
         "compile": {
           "lib/net10.0/Microsoft.Extensions.Logging.Abstractions.dll": {
@@ -354,11 +464,19 @@
           "buildTransitive/net8.0/Microsoft.Extensions.Logging.Abstractions.targets": {}
         }
       },
+<<<<<<< HEAD
       "Microsoft.Extensions.Options/10.0.14": {
         "type": "package",
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.14",
           "Microsoft.Extensions.Primitives": "10.0.14"
+=======
+      "Microsoft.Extensions.Options/10.0.13": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.13",
+          "Microsoft.Extensions.Primitives": "10.0.13"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         },
         "compile": {
           "lib/net10.0/Microsoft.Extensions.Options.dll": {
@@ -374,7 +492,11 @@
           "buildTransitive/net8.0/Microsoft.Extensions.Options.targets": {}
         }
       },
+<<<<<<< HEAD
       "Microsoft.Extensions.Primitives/10.0.14": {
+=======
+      "Microsoft.Extensions.Primitives/10.0.13": {
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "type": "package",
         "compile": {
           "lib/net10.0/Microsoft.Extensions.Primitives.dll": {
@@ -690,10 +812,17 @@
         "useSharedDesignerContext.txt"
       ]
     },
+<<<<<<< HEAD
     "Microsoft.Data.Sqlite.Core/10.0.14": {
       "sha512": "1p9rO3Q2X/L/9YrYog3vaDzi8u+WZfJCOkDYoHqmofqYP0DLPLPyZcS2Rnh/79JXAodgbs1AgsaNwLpIvC3Xew==",
       "type": "package",
       "path": "microsoft.data.sqlite.core/10.0.14",
+=======
+    "Microsoft.Data.Sqlite.Core/10.0.13": {
+      "sha512": "Gge8XsSCOwcbkbdmt2UDAe6kIv9Q0vA6yb3wsTStjjexaMFLTWfc/1gH4kbhJ+zWiXRTRA4lG2sOQNVfir204w==",
+      "type": "package",
+      "path": "microsoft.data.sqlite.core/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -703,6 +832,7 @@
         "lib/net8.0/Microsoft.Data.Sqlite.xml",
         "lib/netstandard2.0/Microsoft.Data.Sqlite.dll",
         "lib/netstandard2.0/Microsoft.Data.Sqlite.xml",
+<<<<<<< HEAD
         "microsoft.data.sqlite.core.10.0.14.nupkg.sha512",
         "microsoft.data.sqlite.core.nuspec"
       ]
@@ -711,6 +841,16 @@
       "sha512": "vY3931PYPIDBbKovGHbACmpOWvURvKNyRXfCjMh5yLW+FH6vLWeqUu2xzSCRo4Oz4tgx9GYpd0JlV5LDyAoQdg==",
       "type": "package",
       "path": "microsoft.entityframeworkcore/10.0.14",
+=======
+        "microsoft.data.sqlite.core.10.0.13.nupkg.sha512",
+        "microsoft.data.sqlite.core.nuspec"
+      ]
+    },
+    "Microsoft.EntityFrameworkCore/10.0.13": {
+      "sha512": "u/z4nTQUJ5nJEXAQekgQEQZkh0delp4gL+ESHn7Z6k037c8HC5mSNu1/YdBgxGm7DtLjhOxktNl+aQMzw6wN7A==",
+      "type": "package",
+      "path": "microsoft.entityframeworkcore/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -719,6 +859,7 @@
         "buildTransitive/net10.0/Microsoft.EntityFrameworkCore.props",
         "lib/net10.0/Microsoft.EntityFrameworkCore.dll",
         "lib/net10.0/Microsoft.EntityFrameworkCore.xml",
+<<<<<<< HEAD
         "microsoft.entityframeworkcore.10.0.14.nupkg.sha512",
         "microsoft.entityframeworkcore.nuspec"
       ]
@@ -727,6 +868,16 @@
       "sha512": "/SaznoTTFfKzxYEbCPAwwKBR3XT92DZgH4jJ3/cqs2skP3o2D+TL6i9Aaj+8Azwtu6/sRd0ve4P2mN12nfVmCw==",
       "type": "package",
       "path": "microsoft.entityframeworkcore.abstractions/10.0.14",
+=======
+        "microsoft.entityframeworkcore.10.0.13.nupkg.sha512",
+        "microsoft.entityframeworkcore.nuspec"
+      ]
+    },
+    "Microsoft.EntityFrameworkCore.Abstractions/10.0.13": {
+      "sha512": "ARw+tZ3eiTosnK5nJPUGEzeUQcjyqCqs3qKA3lPtIRH5yJo3qIgxm7AvkZVIT9iWkS2083UsWe3Rj1MysW3p5A==",
+      "type": "package",
+      "path": "microsoft.entityframeworkcore.abstractions/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -734,6 +885,7 @@
         "PACKAGE.md",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.dll",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.xml",
+<<<<<<< HEAD
         "microsoft.entityframeworkcore.abstractions.10.0.14.nupkg.sha512",
         "microsoft.entityframeworkcore.abstractions.nuspec"
       ]
@@ -742,12 +894,23 @@
       "sha512": "gaANlGNTxkgODX2eeVT8jjd3AmlFilQV4DFf8qoW30+wUCm2o4N7nEHtZvnHIwfhaJni2DqcjE47Au7tC0Q5jA==",
       "type": "package",
       "path": "microsoft.entityframeworkcore.analyzers/10.0.14",
+=======
+        "microsoft.entityframeworkcore.abstractions.10.0.13.nupkg.sha512",
+        "microsoft.entityframeworkcore.abstractions.nuspec"
+      ]
+    },
+    "Microsoft.EntityFrameworkCore.Analyzers/10.0.13": {
+      "sha512": "zBx6VeEz/hkhlm0BJ2V+9xebUuDDIszcKvurJceQHuZPEXuXubrL6Lneo9VZiliRyJbQlB2oNKLkJXd3gHteQA==",
+      "type": "package",
+      "path": "microsoft.entityframeworkcore.analyzers/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
         "analyzers/dotnet/cs/Microsoft.EntityFrameworkCore.Analyzers.dll",
         "docs/PACKAGE.md",
+<<<<<<< HEAD
         "microsoft.entityframeworkcore.analyzers.10.0.14.nupkg.sha512",
         "microsoft.entityframeworkcore.analyzers.nuspec"
       ]
@@ -756,6 +919,16 @@
       "sha512": "Ut0kgtfoKX9QElQVEXSEAgdQc79jISWStVWSOhfPDDHNSKMwFzSXG3gtdYFTAbsBoV+8NtXdVaj4xwdqeky8UA==",
       "type": "package",
       "path": "microsoft.entityframeworkcore.relational/10.0.14",
+=======
+        "microsoft.entityframeworkcore.analyzers.10.0.13.nupkg.sha512",
+        "microsoft.entityframeworkcore.analyzers.nuspec"
+      ]
+    },
+    "Microsoft.EntityFrameworkCore.Relational/10.0.13": {
+      "sha512": "QU/sbTtDR5wVAJRVecC1GwM7mwH8bvKOZNm+lulzMr5rhjdb8DDEFIqqdhF08JIo51DPv5uQdZ1nXoZsD5pTag==",
+      "type": "package",
+      "path": "microsoft.entityframeworkcore.relational/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -763,6 +936,7 @@
         "PACKAGE.md",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.dll",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.xml",
+<<<<<<< HEAD
         "microsoft.entityframeworkcore.relational.10.0.14.nupkg.sha512",
         "microsoft.entityframeworkcore.relational.nuspec"
       ]
@@ -771,12 +945,23 @@
       "sha512": "lxrwnVwvlIfQD4IF4WUVupE6Qxfj3MfFftDVwo7tsGAWCKLL8Ttb8UjIt+gE4e9nRlH7EgdC6TrsArFGnNYREw==",
       "type": "package",
       "path": "microsoft.entityframeworkcore.sqlite/10.0.14",
+=======
+        "microsoft.entityframeworkcore.relational.10.0.13.nupkg.sha512",
+        "microsoft.entityframeworkcore.relational.nuspec"
+      ]
+    },
+    "Microsoft.EntityFrameworkCore.Sqlite/10.0.13": {
+      "sha512": "CqPgFVpKjdNjPHO1fqK5Uw/h7RfY6LyjPko9cLiXTBkxUhjO0Bt48tnF/ddw5PL2k5JaR8myDcyogcONY7juLg==",
+      "type": "package",
+      "path": "microsoft.entityframeworkcore.sqlite/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
         "PACKAGE.md",
         "lib/net10.0/_._",
+<<<<<<< HEAD
         "microsoft.entityframeworkcore.sqlite.10.0.14.nupkg.sha512",
         "microsoft.entityframeworkcore.sqlite.nuspec"
       ]
@@ -785,6 +970,16 @@
       "sha512": "08VGlMQ9WbK869as9Ho+VZQbM5Qu6zdorgeh6ShVwQgLYgfUBiaIm02T7spfW7Xc1MBHCvclwPgGWpvx5BYGXQ==",
       "type": "package",
       "path": "microsoft.entityframeworkcore.sqlite.core/10.0.14",
+=======
+        "microsoft.entityframeworkcore.sqlite.10.0.13.nupkg.sha512",
+        "microsoft.entityframeworkcore.sqlite.nuspec"
+      ]
+    },
+    "Microsoft.EntityFrameworkCore.Sqlite.Core/10.0.13": {
+      "sha512": "zXJAJOS34unH9sWP6ywyUmaZ/yeHy0/CljvdsHvzhN/rXHRBXsPRYymTU65my0rGoa60mh7HUXVPEGOxfsiWSg==",
+      "type": "package",
+      "path": "microsoft.entityframeworkcore.sqlite.core/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -792,6 +987,7 @@
         "PACKAGE.md",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Sqlite.dll",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Sqlite.xml",
+<<<<<<< HEAD
         "microsoft.entityframeworkcore.sqlite.core.10.0.14.nupkg.sha512",
         "microsoft.entityframeworkcore.sqlite.core.nuspec"
       ]
@@ -800,6 +996,16 @@
       "sha512": "enSfqeENnSjGH3YAYKsCtsa5ob0HNiwF2nwJiC2yhilNXTlD/0prxrgPkWjoAp9svJcu04AiEIKtdh/A54P2fA==",
       "type": "package",
       "path": "microsoft.extensions.caching.abstractions/10.0.14",
+=======
+        "microsoft.entityframeworkcore.sqlite.core.10.0.13.nupkg.sha512",
+        "microsoft.entityframeworkcore.sqlite.core.nuspec"
+      ]
+    },
+    "Microsoft.Extensions.Caching.Abstractions/10.0.13": {
+      "sha512": "UOJqcdNMoFcV/5RUcOlVKq9pPmbrcmbpLx5iYz9QtrmMcWRQzlL5Q/NZRfbPPLNyIEc1HWjjs5Z7nIwqewU1sg==",
+      "type": "package",
+      "path": "microsoft.extensions.caching.abstractions/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -820,15 +1026,26 @@
         "lib/net9.0/Microsoft.Extensions.Caching.Abstractions.xml",
         "lib/netstandard2.0/Microsoft.Extensions.Caching.Abstractions.dll",
         "lib/netstandard2.0/Microsoft.Extensions.Caching.Abstractions.xml",
+<<<<<<< HEAD
         "microsoft.extensions.caching.abstractions.10.0.14.nupkg.sha512",
+=======
+        "microsoft.extensions.caching.abstractions.10.0.13.nupkg.sha512",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "microsoft.extensions.caching.abstractions.nuspec",
         "useSharedDesignerContext.txt"
       ]
     },
+<<<<<<< HEAD
     "Microsoft.Extensions.Caching.Memory/10.0.14": {
       "sha512": "AxK3kyD6sWNpYKf+66huE7wHHjgKHONlD1dUaD/CxjZVBLEpH5N4jaqgszTcZvaM9/XVeXF28K3E0wsTyTA4Xg==",
       "type": "package",
       "path": "microsoft.extensions.caching.memory/10.0.14",
+=======
+    "Microsoft.Extensions.Caching.Memory/10.0.13": {
+      "sha512": "q+At65RACuCtGwUDVI08TmmrC73YFouimMkJAtlhsGhFcU/dVpqYEKpNBOF9TUxkJ6aefEOShqe7StLK7q3NqA==",
+      "type": "package",
+      "path": "microsoft.extensions.caching.memory/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -849,15 +1066,26 @@
         "lib/net9.0/Microsoft.Extensions.Caching.Memory.xml",
         "lib/netstandard2.0/Microsoft.Extensions.Caching.Memory.dll",
         "lib/netstandard2.0/Microsoft.Extensions.Caching.Memory.xml",
+<<<<<<< HEAD
         "microsoft.extensions.caching.memory.10.0.14.nupkg.sha512",
+=======
+        "microsoft.extensions.caching.memory.10.0.13.nupkg.sha512",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "microsoft.extensions.caching.memory.nuspec",
         "useSharedDesignerContext.txt"
       ]
     },
+<<<<<<< HEAD
     "Microsoft.Extensions.Configuration.Abstractions/10.0.14": {
       "sha512": "4YdfvaoWn3tB1xQQHGrhRTFWJ8fGOqxThxduynSZy9ZFTiSaUi3vX4EK/kj8h2HQMwTlks9MWV1fv2WRBv5/1w==",
       "type": "package",
       "path": "microsoft.extensions.configuration.abstractions/10.0.14",
+=======
+    "Microsoft.Extensions.Configuration.Abstractions/10.0.13": {
+      "sha512": "DY4C2qzTt2lOIY3VoscBH/TCwTolI5DKOfgJLuI+k1QUvRNT5vTMS58AOerNiihdVRStO0wEpLeRWA8jytzHBQ==",
+      "type": "package",
+      "path": "microsoft.extensions.configuration.abstractions/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -878,15 +1106,26 @@
         "lib/net9.0/Microsoft.Extensions.Configuration.Abstractions.xml",
         "lib/netstandard2.0/Microsoft.Extensions.Configuration.Abstractions.dll",
         "lib/netstandard2.0/Microsoft.Extensions.Configuration.Abstractions.xml",
+<<<<<<< HEAD
         "microsoft.extensions.configuration.abstractions.10.0.14.nupkg.sha512",
+=======
+        "microsoft.extensions.configuration.abstractions.10.0.13.nupkg.sha512",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "microsoft.extensions.configuration.abstractions.nuspec",
         "useSharedDesignerContext.txt"
       ]
     },
+<<<<<<< HEAD
     "Microsoft.Extensions.DependencyInjection/10.0.14": {
       "sha512": "2LzcuVjemeXR+WdY9wGIr8iGb7fYsDAit+IScxXX2XJnX0b++mWcE/WO6fEGIqhdMfSQM2ZS5JGMHYZix7YXZg==",
       "type": "package",
       "path": "microsoft.extensions.dependencyinjection/10.0.14",
+=======
+    "Microsoft.Extensions.DependencyInjection/10.0.13": {
+      "sha512": "4tnWU9vrU/A8NwYe9Z6wvieZ0EBb/uM82LAT+edNhdepOBWREZ7M7mzb941EIDPJaeOFdbVrDd5+7s9e89U6bQ==",
+      "type": "package",
+      "path": "microsoft.extensions.dependencyinjection/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -909,15 +1148,26 @@
         "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.xml",
         "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.dll",
         "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.xml",
+<<<<<<< HEAD
         "microsoft.extensions.dependencyinjection.10.0.14.nupkg.sha512",
+=======
+        "microsoft.extensions.dependencyinjection.10.0.13.nupkg.sha512",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "microsoft.extensions.dependencyinjection.nuspec",
         "useSharedDesignerContext.txt"
       ]
     },
+<<<<<<< HEAD
     "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.14": {
       "sha512": "QtpQzuSZVyTPCuHW058yCs9Nj0394uUkNyFHS813nOmK9UgUdBdaprJ5PPsBgsQIpxADTsTkbaMMonykem6qdw==",
       "type": "package",
       "path": "microsoft.extensions.dependencyinjection.abstractions/10.0.14",
+=======
+    "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.13": {
+      "sha512": "G2GrGWNAPZBsii2F6AU8n+JT2tC1/I0Ml/e9ZyNCgPjf3hZqronP7o0X91aAynCmVeae8KkSIUNXXeXCNRmdVQ==",
+      "type": "package",
+      "path": "microsoft.extensions.dependencyinjection.abstractions/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -940,15 +1190,26 @@
         "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
         "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
         "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+<<<<<<< HEAD
         "microsoft.extensions.dependencyinjection.abstractions.10.0.14.nupkg.sha512",
+=======
+        "microsoft.extensions.dependencyinjection.abstractions.10.0.13.nupkg.sha512",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "microsoft.extensions.dependencyinjection.abstractions.nuspec",
         "useSharedDesignerContext.txt"
       ]
     },
+<<<<<<< HEAD
     "Microsoft.Extensions.DependencyModel/10.0.14": {
       "sha512": "N8OcqM0370wSXMJ3ZxO66rSElHrIgxvpfUn0vV7zRj7NvKo0nfwgEoTmC3Yz3860o60IaQ4KIPyeLIGX9EeNWA==",
       "type": "package",
       "path": "microsoft.extensions.dependencymodel/10.0.14",
+=======
+    "Microsoft.Extensions.DependencyModel/10.0.13": {
+      "sha512": "6TyllZsToy3S/Ziu67GddljRTttuVJ8bbrbVUrsdHqH5678Oax5MpaEubxLoPoWLvgUBYo4KfcAig0mkBtktXQ==",
+      "type": "package",
+      "path": "microsoft.extensions.dependencymodel/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -969,7 +1230,11 @@
         "lib/net9.0/Microsoft.Extensions.DependencyModel.xml",
         "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.dll",
         "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.xml",
+<<<<<<< HEAD
         "microsoft.extensions.dependencymodel.10.0.14.nupkg.sha512",
+=======
+        "microsoft.extensions.dependencymodel.10.0.13.nupkg.sha512",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "microsoft.extensions.dependencymodel.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -1062,10 +1327,17 @@
         "useSharedDesignerContext.txt"
       ]
     },
+<<<<<<< HEAD
     "Microsoft.Extensions.Logging/10.0.14": {
       "sha512": "O2fXL6JmtkFwkigxS8fPTQpLXxGDjgZco5D+h88s++Cl0bDCs023PVkpNoifciJ+f30I82jnp8tpwF0wCLdFtA==",
       "type": "package",
       "path": "microsoft.extensions.logging/10.0.14",
+=======
+    "Microsoft.Extensions.Logging/10.0.13": {
+      "sha512": "fqbiPy4nUp4H2XHKAVQXKN2y3T2h4cFIx1DAAgE6iY9OHkN/OA1cKFi+geJKRWGuX6pS5SFbsjIPWHJqrxE0eg==",
+      "type": "package",
+      "path": "microsoft.extensions.logging/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1088,15 +1360,26 @@
         "lib/netstandard2.0/Microsoft.Extensions.Logging.xml",
         "lib/netstandard2.1/Microsoft.Extensions.Logging.dll",
         "lib/netstandard2.1/Microsoft.Extensions.Logging.xml",
+<<<<<<< HEAD
         "microsoft.extensions.logging.10.0.14.nupkg.sha512",
+=======
+        "microsoft.extensions.logging.10.0.13.nupkg.sha512",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "microsoft.extensions.logging.nuspec",
         "useSharedDesignerContext.txt"
       ]
     },
+<<<<<<< HEAD
     "Microsoft.Extensions.Logging.Abstractions/10.0.14": {
       "sha512": "SwcbEBtkECq3D2oywvHkm46fyrX9Dd2JPWphDnHUc2+cUWR1Mdo41atAjh/9iZjgQxuvbKfZKXqostT/LZfefA==",
       "type": "package",
       "path": "microsoft.extensions.logging.abstractions/10.0.14",
+=======
+    "Microsoft.Extensions.Logging.Abstractions/10.0.13": {
+      "sha512": "aSZEhEig4fvNiw2zs8Z6NyDlniKtq6YjcF3DyHuqTEHcZ2VKA/6itMPZ+dW+yWABWExlDcQwwdbqX1Rcb7W8WQ==",
+      "type": "package",
+      "path": "microsoft.extensions.logging.abstractions/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1160,15 +1443,26 @@
         "lib/net9.0/Microsoft.Extensions.Logging.Abstractions.xml",
         "lib/netstandard2.0/Microsoft.Extensions.Logging.Abstractions.dll",
         "lib/netstandard2.0/Microsoft.Extensions.Logging.Abstractions.xml",
+<<<<<<< HEAD
         "microsoft.extensions.logging.abstractions.10.0.14.nupkg.sha512",
+=======
+        "microsoft.extensions.logging.abstractions.10.0.13.nupkg.sha512",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "microsoft.extensions.logging.abstractions.nuspec",
         "useSharedDesignerContext.txt"
       ]
     },
+<<<<<<< HEAD
     "Microsoft.Extensions.Options/10.0.14": {
       "sha512": "EeN/33S418m9oWEaZY4N5T+BNxtOqNTIFoFbIgBKwylh4OJPKIWFAzbIhpTdNbwUs26MhkmbLCAbdY+YCJ1dIQ==",
       "type": "package",
       "path": "microsoft.extensions.options/10.0.14",
+=======
+    "Microsoft.Extensions.Options/10.0.13": {
+      "sha512": "tmMJgdrE4uhf1JcNs9CV9moAHW+hmDuvgMiPpnQxarKaUxqI2eN33sYK5S4l9Uw+rG9PJvlm4qPxMhvolTDTaQ==",
+      "type": "package",
+      "path": "microsoft.extensions.options/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1206,15 +1500,26 @@
         "lib/netstandard2.0/Microsoft.Extensions.Options.xml",
         "lib/netstandard2.1/Microsoft.Extensions.Options.dll",
         "lib/netstandard2.1/Microsoft.Extensions.Options.xml",
+<<<<<<< HEAD
         "microsoft.extensions.options.10.0.14.nupkg.sha512",
+=======
+        "microsoft.extensions.options.10.0.13.nupkg.sha512",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "microsoft.extensions.options.nuspec",
         "useSharedDesignerContext.txt"
       ]
     },
+<<<<<<< HEAD
     "Microsoft.Extensions.Primitives/10.0.14": {
       "sha512": "1bbZqqCJTPba3inTADExbp/9PsGVyvGOX3zr6tFr7ySCgVkX9Lpw7BV0TizktNItd3SsbUu1sQfSAYm1GZMoNw==",
       "type": "package",
       "path": "microsoft.extensions.primitives/10.0.14",
+=======
+    "Microsoft.Extensions.Primitives/10.0.13": {
+      "sha512": "ZjTwxzhiw2TMEzIbUDkMF0dfDB2I4NQgIfKD0ELu9/5Mk+SRGdKZcD0/lvBrRCAPo6KN2r0BW86MRancoyJkoA==",
+      "type": "package",
+      "path": "microsoft.extensions.primitives/10.0.13",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1235,7 +1540,11 @@
         "lib/net9.0/Microsoft.Extensions.Primitives.xml",
         "lib/netstandard2.0/Microsoft.Extensions.Primitives.dll",
         "lib/netstandard2.0/Microsoft.Extensions.Primitives.xml",
+<<<<<<< HEAD
         "microsoft.extensions.primitives.10.0.14.nupkg.sha512",
+=======
+        "microsoft.extensions.primitives.10.0.13.nupkg.sha512",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
         "microsoft.extensions.primitives.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -1472,8 +1781,13 @@
     "net10.0": [
       "BCrypt.Net-Next >= 4.2.0",
       "DataAccess >= 1.0.0",
+<<<<<<< HEAD
       "Microsoft.Extensions.Configuration.Abstractions >= 10.0.14",
       "Microsoft.Extensions.Hosting.Abstractions >= 10.0.14",
+=======
+      "Microsoft.Extensions.Configuration.Abstractions >= 10.0.13",
+      "Microsoft.Extensions.Hosting.Abstractions >= 10.0.12",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "Shared >= 1.0.0",
       "System.IdentityModel.Tokens.Jwt >= 8.23.0"
     ]
@@ -1484,11 +1798,19 @@
   "project": {
     "version": "1.0.0",
     "restore": {
+<<<<<<< HEAD
       "projectUniqueName": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
       "projectName": "BusinessLogic",
       "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
       "packagesPath": "C:\\Users\\Marti\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\obj\\",
+=======
+      "projectUniqueName": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
+      "projectName": "BusinessLogic",
+      "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
+      "packagesPath": "C:\\Users\\jeronimo\\.nuget\\packages\\",
+      "outputPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\obj\\",
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Marti\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -1506,11 +1828,19 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
+<<<<<<< HEAD
             "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
               "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
             },
             "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
               "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
+=======
+            "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
+              "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
+            },
+            "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+              "projectPath": "C:\\repos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
             }
           }
         }
@@ -1538,7 +1868,11 @@
           },
           "Microsoft.Extensions.Configuration.Abstractions": {
             "target": "Package",
+<<<<<<< HEAD
             "version": "[10.0.14, )"
+=======
+            "version": "[10.0.13, )"
+>>>>>>> 28114c86000346c79ee015422ddbaae2e48c2919
           },
           "Microsoft.Extensions.Hosting.Abstractions": {
             "target": "Package",
