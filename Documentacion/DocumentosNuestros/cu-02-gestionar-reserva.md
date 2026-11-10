@@ -29,7 +29,7 @@ Permite al gerente visualizar y administrar las reservas del restaurante desde e
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
 1. El Actor envía una petición al endpoint `GET /api/gerente/reservas` para consultar el tablero de control de reservas operativas.
 2. La **Capa de Presentación** (`GerenteReservasController.GetReservasOperativas`) valida los claims de identidad y rol del usuario (`[Authorize(Roles = "Gerente")]`).
-3. La **Capa de Negocio** (`GerenteReservaService.GetTableroOperativoAsync`) consulta las reservas activas y determina las acciones válidas permitidas según el estado actual de cada una (**RN-02**).
+3. La **Capa de Negocio** (`ReservaService.GetTableroOperativoAsync`) consulta las reservas activas y determina las acciones válidas permitidas según el estado actual de cada una (**RN-02**).
 4. La **Capa de Persistencia** recupera los registros de la base de datos incluyendo información de mesas y clientes vinculados.
 5. El Sistema devuelve un código **200 OK** con la lista de reservas y sus respectivas acciones operativas disponibles.
 
@@ -74,7 +74,7 @@ Permite al gerente visualizar y administrar las reservas del restaurante desde e
 ### Nota: Validación vs. Verificación aplicada
 
 - **Validación (Presentación, → 400):** Comprobación de token de autenticación y atributos de rol en la Capa de Presentación.
-- **Verificación (Negocio, → 400/404/409):** RN-01 (autorización por rol Gerente) y cálculo de transiciones válidas según máquina de estados de reservas (**RN-02**) en `GerenteReservaService`.
+- **Verificación (Negocio, → 400/404/409):** RN-01 (autorización por rol Gerente) y cálculo de transiciones válidas según máquina de estados de reservas (**RN-02**) en `ReservaService`.
 
 ### Matriz de trazabilidad CU-02 → Test
 

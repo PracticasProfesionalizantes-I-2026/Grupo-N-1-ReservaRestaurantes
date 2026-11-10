@@ -9,7 +9,7 @@ public class MesaUpdateDTO
     public int Numero { get; set; }
 
     [Required(ErrorMessage = "La capacidad es obligatoria.")]
-    [Range(1, 50, ErrorMessage = "La capacidad debe ser entre 1 y 50 comensales.")]
+    [Range(1, 30, ErrorMessage = "La capacidad debe ser entre 1 y 30 comensales.")]
     public int Capacidad { get; set; }
 
     [StringLength(80, ErrorMessage = "La ubicación no puede superar los 80 caracteres.")]

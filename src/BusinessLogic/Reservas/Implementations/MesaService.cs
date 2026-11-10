@@ -158,22 +158,51 @@ public class MesaService : IMesaService
             return false; // Retornamos falso si no existe
         }
 
-        // 2. Regla de Negocio: Verificamos si la mesa tiene reservas asignadas
-        var tieneReservas = await _mesaRepository.HasReservationsAsync(id);
-        if (tieneReservas)
+        // 2. CU-23 / RN-02: Bloquear solo reservas en estados activos o futuros (Confirmada, EnCurso, Pendiente con fecha >= UtcNow)
+        if (_reservaRepository != null)
         {
-            throw new ConflictException("No se puede eliminar la mesa porque tiene reservas asociadas.");
+            var reservas = (await _reservaRepository.GetAllAsync(mesaId: id)).ToList();
+            var tieneReservasActivasOFuturas = reservas.Any(r =>
+                r.Estado == ReservaEstado.EnCurso ||
+                r.Estado == ReservaEstado.Confirmada ||
+                (r.Estado == ReservaEstado.Pendiente && r.FechaHora >= DateTime.UtcNow));
+
+            if (tieneReservasActivasOFuturas)
+            {
+                throw new ConflictException("No se puede eliminar la mesa porque posee reservas activas o futuras asignadas.");
+            }
+
+            // Si tiene reservas históricas finalizadas/canceladas/no-show, realizar baja lógica (Activa = false) para preservar el historial
+            var tieneHistorial = reservas.Any();
+            if (tieneHistorial)
+            {
+                mesa.Activa = false;
+                await _mesaRepository.UpdateAsync(mesa);
+                return true;
+            }
+        }
+        else
+        {
+            // Fallback si no está inyectado _reservaRepository: consultar vía _mesaRepository
+            var tieneReservaEnCurso = await _mesaRepository.HasReservaEnCursoAsync(id);
+            if (tieneReservaEnCurso)
+            {
+                throw new ConflictException("No se puede eliminar la mesa porque posee reservas activas o futuras asignadas.");
+            }
         }
 
-        // 3. Si todo está bien y no hay reservas, procedemos a borrarla
+        // 3. Si no posee ningún historial, eliminación física
         await _mesaRepository.DeleteAsync(id);
-
-        // 4. Retornamos true indicando éxito
         return true;
     }
 
     public async Task<MesaResponseDTO?> CambiarEstadoMesaAsync(Guid id, MesaEstado nuevoEstado)
     {
+        if (!Enum.IsDefined(typeof(MesaEstado), nuevoEstado))
+        {
+            throw new ValidationException($"El estado '{nuevoEstado}' no es un valor válido para MesaEstado.");
+        }
+
         var mesa = await _mesaRepository.GetByIdAsync(id);
         if (mesa == null)
         {
@@ -212,13 +241,7 @@ public class MesaService : IMesaService
             filtro.CapacidadMinima,
             filtro.SoloActivas)).ToList();
 
-        // 2. RN: Si no hay resultados con esos filtros, lanzar excepción de negocio
-        if (!mesas.Any())
-        {
-            throw new SinMesasDisponiblesException();
-        }
-
-        // 3. Mapear entidades a DTOs de respuesta
+        // 2. Si no hay resultados para los filtros aplicados, devolver colección vacía (200 OK)
         return mesas.Select(m => new MesaResponseDTO
         {
             Id        = m.Id,

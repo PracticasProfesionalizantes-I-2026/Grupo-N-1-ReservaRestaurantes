@@ -114,6 +114,12 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> CambiarEstadoMesa(Guid id, [FromBody] MesaCambiarEstadoDTO dto)
         {
+            if (dto == null || !Enum.IsDefined(typeof(MesaEstado), dto.NuevoEstado))
+            {
+                ModelState.AddModelError(nameof(dto.NuevoEstado), "El estado especificado no es un valor válido.");
+                return ValidationProblem(ModelState);
+            }
+
             if (!ModelState.IsValid)
             {
                 return ValidationProblem(ModelState);

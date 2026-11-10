@@ -231,21 +231,71 @@ public class MesaServiceTests
     }
 
     [Fact]
-    public async Task EliminarMesaAsync_CuandoTieneReservas_LanzaConflictException()
+    public async Task EliminarMesaAsync_CuandoTieneReservasActivasOFuturas_LanzaConflictException()
     {
-        // Arrange
+        // Arrange — Mesa con reserva activa en curso o futura
         var id = Guid.NewGuid();
-        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(new Mesa { Id = id });
-        _repoMock.Setup(r => r.HasReservationsAsync(id)).ReturnsAsync(true);
+        var mesa = new Mesa { Id = id, Activa = true };
+        var reservaActiva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            MesaId = id,
+            Estado = ReservaEstado.Confirmada,
+            FechaHora = DateTime.UtcNow.AddHours(2)
+        };
+
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(mesa);
+        _reservaRepoMock.Setup(r => r.GetAllAsync(null, null, id, null))
+            .ReturnsAsync(new List<Reserva> { reservaActiva });
 
         // Act & Assert
         await Assert.ThrowsAsync<ConflictException>(() => _sut.EliminarMesaAsync(id));
         _repoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
     }
 
+    [Fact]
+    public async Task EliminarMesaAsync_CuandoSoloTieneReservasHistoricas_AplicaBajaLogica()
+    {
+        // Arrange — Mesa con reservas pasadas finalizadas o canceladas (CU-23)
+        var id = Guid.NewGuid();
+        var mesa = new Mesa { Id = id, Activa = true };
+        var reservaHistorica = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            MesaId = id,
+            Estado = ReservaEstado.Finalizada,
+            FechaHora = DateTime.UtcNow.AddDays(-5)
+        };
+
+        _repoMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync(mesa);
+        _reservaRepoMock.Setup(r => r.GetAllAsync(null, null, id, null))
+            .ReturnsAsync(new List<Reserva> { reservaHistorica });
+        _repoMock.Setup(r => r.UpdateAsync(It.IsAny<Mesa>())).Returns(Task.CompletedTask);
+
+        // Act
+        var resultado = await _sut.EliminarMesaAsync(id);
+
+        // Assert — Debe retornar true y dar de baja lógica (Activa = false) sin borrar físicamente
+        Assert.True(resultado);
+        Assert.False(mesa.Activa);
+        _repoMock.Verify(r => r.UpdateAsync(It.Is<Mesa>(m => !m.Activa)), Times.Once);
+        _repoMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
     // =========================================================================
     // CambiarEstadoMesaAsync
     // =========================================================================
+
+    [Fact]
+    public async Task CambiarEstadoMesaAsync_CuandoEstadoEsInvalido_LanzaValidationException()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+
+        // Act & Assert — Debe rechazar cualquier enum no definido
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            _sut.CambiarEstadoMesaAsync(id, (MesaEstado)999));
+    }
 
     [Fact]
     public async Task CambiarEstadoMesaAsync_CuandoMesaNoExiste_RetornaNull()
@@ -340,14 +390,18 @@ public class MesaServiceTests
     }
 
     [Fact]
-    public async Task FiltrarMapaMesasAsync_CuandoNoHayMesas_LanzaSinMesasDisponiblesException()
+    public async Task FiltrarMapaMesasAsync_CuandoNoHayMesas_RetornaColeccionVacia()
     {
         // Arrange
         var filtro = new MesaFiltroDTO { Estado = MesaEstado.Ocupada };
         _repoMock.Setup(r => r.GetFiltroAsync(filtro.Estado, filtro.CapacidadMinima, filtro.SoloActivas))
                  .ReturnsAsync(new List<Mesa>());
 
-        // Act & Assert
-        await Assert.ThrowsAsync<SinMesasDisponiblesException>(() => _sut.FiltrarMapaMesasAsync(filtro));
+        // Act
+        var resultado = await _sut.FiltrarMapaMesasAsync(filtro);
+
+        // Assert: Filtros vacíos devuelven 200 OK con colección vacía
+        Assert.NotNull(resultado);
+        Assert.Empty(resultado);
     }
 }

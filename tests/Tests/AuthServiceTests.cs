@@ -281,5 +281,35 @@ public class AuthServiceTests
         await Assert.ThrowsAsync<UnauthorizedException>(
             () => _sut.LoginAsync(dto));
     }
+
+    [Fact]
+    public async Task LoginAsync_UsuarioInactivoConCredencialesValidas_LanzaCuentaInactivaException()
+    {
+        // Arrange — Usuario registrado con contraseña correcta pero inactivo/deshabilitado
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword("PasswordValida123!");
+        var cliente = new Cliente
+        {
+            Id = Guid.NewGuid(),
+            Nombre = "Usuario",
+            Apellido = "Inactivo",
+            Email = "inactivo@test.com",
+            PasswordHash = passwordHash,
+            Rol = "Cliente",
+            Activo = false // Cuenta inactiva
+        };
+
+        _clienteRepoMock.Setup(r => r.GetByEmailAsync("inactivo@test.com"))
+            .ReturnsAsync(cliente);
+
+        var dto = new LoginRequestDTO
+        {
+            Email = "inactivo@test.com",
+            Password = "PasswordValida123!"
+        };
+
+        // Act & Assert — Debe lanzar CuentaInactivaException (HTTP 403)
+        await Assert.ThrowsAsync<CuentaInactivaException>(
+            () => _sut.LoginAsync(dto));
+    }
 }
 

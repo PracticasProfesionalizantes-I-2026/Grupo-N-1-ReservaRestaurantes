@@ -2962,11 +2962,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
+      "projectUniqueName": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
       "projectName": "DataAccess",
-      "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
+      "projectPath": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj",
       "packagesPath": "C:\\Users\\jerob\\.nuget\\packages\\",
-      "outputPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\obj\\",
+      "outputPath": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\jerob\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -2984,8 +2984,8 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
-              "projectPath": "C:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
+            "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+              "projectPath": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
             }
           }
         }

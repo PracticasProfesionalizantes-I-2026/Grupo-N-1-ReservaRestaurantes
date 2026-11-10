@@ -232,6 +232,8 @@ public class ReservaServiceTests
         };
 
         _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+        _reservaRepoMock.Setup(r => r.GetOverlappingReservationsByMesaAsync(mesa.Id, reserva.FechaHora, It.IsAny<DateTime>(), reserva.Id))
+            .ReturnsAsync(Enumerable.Empty<Reserva>());
         _reservaRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Reserva>())).Returns(Task.CompletedTask);
 
         // Act
@@ -240,6 +242,59 @@ public class ReservaServiceTests
         // Assert
         Assert.Equal(ReservaEstado.Confirmada, resultado.Estado);
         _reservaRepoMock.Verify(r => r.UpdateAsync(It.Is<Reserva>(res => res.Estado == ReservaEstado.Confirmada)), Times.Once);
+    }
+
+    [Fact]
+    public async Task ConfirmarReservaAsync_MesaConSolapamiento_LanzaMesaSolapadaException()
+    {
+        // Arrange — Mesa asignada pero con solapamiento sobrevenido (RN-03 del CU-12)
+        var cliente = CrearCliente();
+        var mesa = CrearMesa();
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            Cliente = cliente,
+            MesaId = mesa.Id,
+            Mesa = mesa,
+            FechaHora = FechaHoraValida(),
+            CantidadComensales = 2,
+            DuracionEstimadaMinutos = 120,
+            Estado = ReservaEstado.Pendiente
+        };
+
+        var reservaSolapada = new Reserva { Id = Guid.NewGuid(), MesaId = mesa.Id };
+
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+        _reservaRepoMock.Setup(r => r.GetOverlappingReservationsByMesaAsync(mesa.Id, reserva.FechaHora, It.IsAny<DateTime>(), reserva.Id))
+            .ReturnsAsync(new List<Reserva> { reservaSolapada });
+
+        // Act & Assert
+        await Assert.ThrowsAsync<MesaSolapadaException>(() => _sut.ConfirmarReservaAsync(reserva.Id));
+        _reservaRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Reserva>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ConfirmarReservaAsync_MesaInactivaOEnMantenimiento_LanzaMesaNoCompatibleException()
+    {
+        // Arrange
+        var cliente = CrearCliente();
+        var mesa = CrearMesa();
+        mesa.Activa = false; // Deshabilitada
+        var reserva = new Reserva
+        {
+            Id = Guid.NewGuid(),
+            Cliente = cliente,
+            MesaId = mesa.Id,
+            Mesa = mesa,
+            FechaHora = FechaHoraValida(),
+            CantidadComensales = 2,
+            Estado = ReservaEstado.Pendiente
+        };
+
+        _reservaRepoMock.Setup(r => r.GetByIdAsync(reserva.Id)).ReturnsAsync(reserva);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<MesaNoCompatibleException>(() => _sut.ConfirmarReservaAsync(reserva.Id));
     }
 
     [Fact]
@@ -770,15 +825,34 @@ public class ReservaServiceTests
     }
 
     [Fact]
-    public async Task GetListaEsperaAsync_SinReservas_LanzaListaEsperaVaciaException()
+    public async Task GetListaEsperaAsync_SinReservas_RetornaColeccionVacia()
     {
         // Arrange
         _reservaRepoMock.Setup(r => r.GetAllAsync(null, null, null, ReservaEstado.Pendiente))
             .ReturnsAsync(Enumerable.Empty<Reserva>());
 
-        // Act & Assert
-        await Assert.ThrowsAsync<ListaEsperaVaciaException>(
-            () => _sut.GetListaEsperaAsync());
+        // Act
+        var resultado = await _sut.GetListaEsperaAsync();
+
+        // Assert: Filtros vacíos devuelven 200 OK con colección vacía
+        Assert.NotNull(resultado);
+        Assert.Empty(resultado);
+    }
+
+    [Fact]
+    public async Task FiltrarReservasAsync_SinReservas_RetornaColeccionVacia()
+    {
+        // Arrange
+        var filtro = new ReservaFiltroDTO { Estado = ReservaEstado.Cancelada };
+        _reservaRepoMock.Setup(r => r.GetAllAsync(filtro.Fecha, filtro.ClienteId, filtro.MesaId, filtro.Estado))
+            .ReturnsAsync(Enumerable.Empty<Reserva>());
+
+        // Act
+        var resultado = await _sut.FiltrarReservasAsync(filtro);
+
+        // Assert: Filtros vacíos devuelven 200 OK con colección vacía
+        Assert.NotNull(resultado);
+        Assert.Empty(resultado);
     }
 
     // =========================================================================

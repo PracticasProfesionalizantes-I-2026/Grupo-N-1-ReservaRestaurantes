@@ -8,6 +8,7 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Route("api/[controller]")]
 [Authorize]
 public class ReservasController : ControllerBase
 {

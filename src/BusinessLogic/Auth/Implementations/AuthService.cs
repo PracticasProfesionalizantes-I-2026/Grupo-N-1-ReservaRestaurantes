@@ -90,7 +90,7 @@ public class AuthService : IAuthService
 
         // 2. Buscar cliente por email
         var cliente = await _clienteRepository.GetByEmailAsync(normalizedEmail);
-        if (cliente == null || !cliente.Activo)
+        if (cliente == null)
         {
             throw new UnauthorizedException("Credenciales inválidas.");
         }
@@ -99,6 +99,12 @@ public class AuthService : IAuthService
         if (!VerifyPassword(dto.Password, cliente.PasswordHash))
         {
             throw new UnauthorizedException("Credenciales inválidas.");
+        }
+
+        // RN-01 / CU-05: Si las credenciales son válidas pero la cuenta está inactiva, responder 403 Forbidden
+        if (!cliente.Activo)
+        {
+            throw new CuentaInactivaException("La cuenta de usuario se encuentra deshabilitada.");
         }
 
         // 4. Generar Token JWT y Refresh Token

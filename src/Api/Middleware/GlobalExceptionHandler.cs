@@ -36,8 +36,9 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             // 401 Unauthorized — acceso denegado por credenciales o sesión
             UnauthorizedException               => (StatusCodes.Status401Unauthorized, "No Autorizado"),
 
-            // 403 Forbidden — acceso denegado por permisos insuficientes o recurso ajeno
+            // 403 Forbidden — acceso denegado por permisos insuficientes, cuenta inactiva o recurso ajeno
             AccesoDenegadoException             => (StatusCodes.Status403Forbidden,    "Acceso Denegado"),
+            CuentaInactivaException             => (StatusCodes.Status403Forbidden,    "Cuenta Inactiva"),
 
             // 404 Not Found — recursos inexistentes (subclases antes de NotFoundException base)
             ReservaNoEncontradaException        => (StatusCodes.Status404NotFound,     "Reserva No Encontrada"),

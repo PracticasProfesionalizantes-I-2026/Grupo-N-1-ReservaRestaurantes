@@ -343,11 +343,6 @@ public class ReservaService : IReservaService
         // La lista de espera son las reservas en estado Pendiente
         var reservas = await _reservaRepository.GetAllAsync(estado: ReservaEstado.Pendiente);
 
-        if (!reservas.Any())
-        {
-            throw new ListaEsperaVaciaException();
-        }
-
         return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
     }
 
@@ -375,14 +370,44 @@ public class ReservaService : IReservaService
                 $"No es posible confirmar una reserva que se encuentra en estado '{reserva.Estado}'. Solo se admiten reservas Pendientes.");
         }
 
-        // 3. Aplicar cambios
-        reserva.Estado = ReservaEstado.Confirmada;
+        // 3. RN-03 / CU-12: Revalidar disponibilidad de mesa, capacidad y ausencia de solapamiento
+        if (reserva.MesaId == Guid.Empty)
+        {
+            throw new ConflictException("La reserva no tiene una mesa asignada para poder confirmarse.");
+        }
 
-        // 4. Persistir cambios
+        var mesa = reserva.Mesa ?? await _mesaRepository.GetByIdAsync(reserva.MesaId);
+        if (mesa == null || !mesa.Activa || mesa.Estado == MesaEstado.EnMantenimiento)
+        {
+            throw new MesaNoCompatibleException("La mesa asignada no se encuentra disponible o activa.");
+        }
+
+        if (mesa.Capacidad < reserva.CantidadComensales)
+        {
+            throw new CapacidadInsuficienteException();
+        }
+
+        var finReserva = reserva.FechaHora.AddMinutes(reserva.DuracionEstimadaMinutos);
+        var solapadas = await _reservaRepository.GetOverlappingReservationsByMesaAsync(
+            mesa.Id,
+            reserva.FechaHora,
+            finReserva,
+            reserva.Id);
+
+        if (solapadas.Any())
+        {
+            throw new MesaSolapadaException();
+        }
+
+        // 4. Aplicar cambios
+        reserva.Estado = ReservaEstado.Confirmada;
+        reserva.Mesa = mesa;
+
+        // 5. Persistir cambios
         await _reservaRepository.UpdateAsync(reserva);
 
-        // 5. Retornar DTO
-        return MapToResponseDTO(reserva, reserva.Cliente, reserva.Mesa);
+        // 6. Retornar DTO
+        return MapToResponseDTO(reserva, reserva.Cliente, mesa);
     }
 
     public async Task<ReservaResponseDTO> IniciarReservaAsync(Guid reservaId)
@@ -665,11 +690,6 @@ public class ReservaService : IReservaService
             filtro.ClienteId,
             filtro.MesaId,
             filtro.Estado);
-
-        if (!reservas.Any())
-        {
-            throw new SinReservasOperativasException();
-        }
 
         return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
     }

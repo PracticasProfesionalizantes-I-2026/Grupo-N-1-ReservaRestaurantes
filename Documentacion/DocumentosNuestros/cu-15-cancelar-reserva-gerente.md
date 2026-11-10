@@ -29,7 +29,7 @@ Permite al gerente cancelar una reserva activa o confirmada registrando el motiv
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
 1. El Actor envía una petición al endpoint `PATCH /api/gerente/reservas/{id}/cancelar` con un JSON conteniendo `motivo` (`GerenteCancelarReservaDTO`).
 2. La **Capa de Presentación** (`GerenteReservasController.CancelarReserva`) valida la autorización del rol `Gerente` (**RN-01**) y que el campo `motivo` no se encuentre vacío (data annotation `[Required]`).
-3. La **Capa de Negocio** (`GerenteReservaService.CancelarReservaAsync`) verifica la existencia de la reserva, comprueba que no esté `Finalizada` y cambia su estado a `Cancelada`, guardando el motivo de cancelación (**RN-02**).
+3. La **Capa de Negocio** (`ReservaService.CancelarReservaGerenteAsync`) verifica la existencia de la reserva, comprueba que no esté `Finalizada` y cambia su estado a `Cancelada`, guardando el motivo de cancelación obligatorio (**RN-02**).
 4. La Capa de Negocio libera la mesa asignada cambiándola a `Libre` (**RN-03**) y evalúa la lista de espera para posible reasignación automática o sugerida.
 5. La **Capa de Persistencia** actualiza los cambios en la base de datos.
 6. El Sistema devuelve un código **200 OK** confirmando la cancelación de la reserva y la liberación de la mesa.
@@ -89,7 +89,7 @@ Permite al gerente cancelar una reserva activa o confirmada registrando el motiv
 ### Nota: Validación vs. Verificación aplicada
 
 - **Validación (Presentación, → 400):** Campo `motivo` requerido en `GerenteCancelarReservaDTO` y verificación de rol Gerente en Presentación.
-- **Verificación (Negocio, → 400/404/409):** RN-01 (rol Gerente), RN-02 (registro de motivo y estado de reserva) y RN-03 (liberación inmediata de mesa) en `GerenteReservaService`.
+- **Verificación (Negocio, → 400/404/409):** RN-01 (rol Gerente), RN-02 (registro obligatorio de motivo y estado de reserva) y RN-03 (liberación inmediata de mesa) en `ReservaService`.
 
 ### Matriz de trazabilidad CU-15 → Test
 
