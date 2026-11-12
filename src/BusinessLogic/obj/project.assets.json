@@ -1479,19 +1479,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\jerob\\.nuget\\packages\\": {}
+    "C:\\Users\\Marti\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
+      "projectUniqueName": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
       "projectName": "BusinessLogic",
-      "projectPath": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
-      "packagesPath": "C:\\Users\\jerob\\.nuget\\packages\\",
-      "outputPath": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\obj\\",
+      "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\BusinessLogic.csproj",
+      "packagesPath": "C:\\Users\\Marti\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\BusinessLogic\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\jerob\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Marti\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -1506,11 +1506,11 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {
-            "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
-              "projectPath": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
+            "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj": {
+              "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\DataAccess\\DataAccess.csproj"
             },
-            "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
-              "projectPath": "c:\\GitHub\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
+            "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj": {
+              "projectPath": "C:\\Users\\Marti\\OneDrive\\Documentos\\Grupo-N-1-ReservaRestaurantes\\src\\Shared\\Shared.csproj"
             }
           }
         }
@@ -1565,7 +1565,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.403/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",
