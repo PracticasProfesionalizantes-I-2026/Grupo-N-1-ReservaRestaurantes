@@ -27,7 +27,7 @@ Permite al gerente visualizar y administrar las reservas del restaurante desde e
 - Existe al menos una reserva registrada en el sistema.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `GET /api/gerente/reservas` para consultar el tablero de control de reservas operativas.
+1. El Actor envía una petición al endpoint `GET /api/v1/gerente/reservas` para consultar el tablero de control de reservas operativas.
 2. La **Capa de Presentación** (`GerenteReservasController.GetReservasOperativas`) valida los claims de identidad y rol del usuario (`[Authorize(Roles = "Gerente")]`).
 3. La **Capa de Negocio** (`ReservaService.GetTableroOperativoAsync`) consulta las reservas activas y determina las acciones válidas permitidas según el estado actual de cada una (**RN-02**).
 4. La **Capa de Persistencia** recupera los registros de la base de datos incluyendo información de mesas y clientes vinculados.
@@ -52,7 +52,7 @@ Permite al gerente visualizar y administrar las reservas del restaurante desde e
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El gerente puede acceder desde la estación de trabajo de recepción o desde un dispositivo móvil/tablet del salón.
-2. Es posible parametrizar la consulta mediante query strings para filtrar por estado (`GET /api/gerente/reservas?estado=Confirmada`).
+2. Es posible parametrizar la consulta mediante query strings para filtrar por estado (`GET /api/v1/gerente/reservas?estado=Confirmada`).
 
 ### 6. POSTCONDICIONES
 - El gerente visualiza el estado completo de las reservas del salón.
@@ -80,9 +80,9 @@ Permite al gerente visualizar y administrar las reservas del restaurante desde e
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `GetTableroOperativoAsync_ReturnsActiveReservasWithAvailableActions` | `GetReservasOperativas_AsGerente_Returns200OK` |
-| 2a. Sin rol Gerente | `403 Forbidden` | `— (pipeline de autorización ASP.NET Core)` | `GetReservasOperativas_AsCliente_Returns403Forbidden` |
-| 3a. Sin reservas registradas | `200 OK` | `GetTableroOperativoAsync_WhenNoReservas_ReturnsEmptyList` | `GetReservasOperativas_WhenEmpty_Returns200WithEmptyArray` |
+| Flujo principal | `200 OK` | `GetTableroOperativoAsync_ConReservasOperativas_RetornaDTOs` | _pendiente de test_ |
+| 2a. Sin rol Gerente | `403 Forbidden` | `— (pipeline de autorización ASP.NET Core)` | `ListaReservas_ComoCliente_RetornaForbidden` |
+| 3a. Sin reservas registradas | `200 OK` | `GetTableroOperativoAsync_SinReservas_RetornaColeccionVacia` | `GetTableroOperativo_SinReservas_Returns200WithEmptyArray` |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

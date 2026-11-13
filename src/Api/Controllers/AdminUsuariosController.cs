@@ -9,7 +9,6 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/v1/admin/usuarios")]
-[Route("api/admin/usuarios")]
 [Authorize(Roles = "Admin")] // RN-01: Solo el Admin podrá gestionar roles de usuarios
 public class AdminUsuariosController : ControllerBase
 {

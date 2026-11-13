@@ -27,7 +27,7 @@ Permite al gerente cancelar una reserva activa o confirmada registrando el motiv
 - La reserva debe existir y no encontrarse en estado `Finalizada`.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `PATCH /api/gerente/reservas/{id}/cancelar` con un JSON conteniendo `motivo` (`GerenteCancelarReservaDTO`).
+1. El Actor envía una petición al endpoint `PATCH /api/v1/gerente/reservas/{id}/cancelar` con un JSON conteniendo `motivo` (`GerenteCancelarReservaDTO`).
 2. La **Capa de Presentación** (`GerenteReservasController.CancelarReserva`) valida la autorización del rol `Gerente` (**RN-01**) y que el campo `motivo` no se encuentre vacío (data annotation `[Required]`).
 3. La **Capa de Negocio** (`ReservaService.CancelarReservaGerenteAsync`) verifica la existencia de la reserva, comprueba que no esté `Finalizada` y cambia su estado a `Cancelada`, guardando el motivo de cancelación obligatorio (**RN-02**).
 4. La Capa de Negocio libera la mesa asignada cambiándola a `Libre` (**RN-03**) y evalúa la lista de espera para posible reasignación automática o sugerida.
@@ -63,7 +63,7 @@ Permite al gerente cancelar una reserva activa o confirmada registrando el motiv
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El gerente puede seleccionar motivos tipificados (ej. 'No-show / Cliente ausente', 'Cancelación telefónica', 'Problema operativo') o ingresar texto personalizado.
-2. En todos los casos se invoca `PATCH /api/gerente/reservas/{id}/cancelar`.
+2. En todos los casos se invoca `PATCH /api/v1/gerente/reservas/{id}/cancelar`.
 
 ### 6. POSTCONDICIONES
 - La reserva queda registrada con estado `Cancelada` junto con el motivo y usuario responsable.
@@ -95,10 +95,10 @@ Permite al gerente cancelar una reserva activa o confirmada registrando el motiv
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `CancelarReservaAsync_WithValidReason_CancelsAndFreesTable` | `CancelarReservaGerente_Returns200OK` |
-| 2a. Motivo faltante | `400 Bad Request` | `— (detectado por DataAnnotations en DTO)` | `CancelarReservaGerente_WithoutMotivo_Returns400BadRequest` |
-| 2b. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `CancelarReservaGerente_AsCliente_Returns403Forbidden` |
-| 3a. Reserva inexistente | `404 Not Found` | `CancelarReservaAsync_WhenNotFound_ThrowsReservaNoEncontradaException` | `CancelarReservaGerente_NonExistingId_Returns404NotFound` |
+| Flujo principal | `200 OK` | `CancelarReservaGerenteAsync_ReservaEnCurso_CancelaYLiberaMesaYPersisteMotivo` | _pendiente de test_ |
+| 2a. Motivo faltante | `400 Bad Request` | `— (detectado por DataAnnotations en DTO)` | `CancelarReservaGerenteAsync_SinMotivo_LanzaValidationException` |
+| 2b. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `AccionesDeGerente_ComoCliente_Returns403Forbidden` |
+| 3a. Reserva inexistente | `404 Not Found` | _pendiente de test_ | `CancelarReservaGerenteInexistente_ComoGerente_Returns404NotFound` |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

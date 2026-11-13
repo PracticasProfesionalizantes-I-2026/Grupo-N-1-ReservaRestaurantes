@@ -9,7 +9,6 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    [Route("api/mesas")]
     [Authorize] // Todos los endpoints requieren estar autenticado
     public class MesasController : ControllerBase
     {
@@ -21,7 +20,7 @@ namespace Api.Controllers
         }
 
         // ==========================================
-        // GET /api/mesas/{id} — Obtener Mesa por ID
+        // GET /api/v1/mesas/{id} — Obtener Mesa por ID
         // ==========================================
         [HttpGet("{id:guid}")]
         [ProducesResponseType(typeof(MesaResponseDTO), StatusCodes.Status200OK)]
@@ -38,7 +37,7 @@ namespace Api.Controllers
         }
 
         // ==========================================
-        // POST /api/mesas — Crear Mesa (CU-21)
+        // POST /api/v1/mesas — Crear Mesa (CU-21)
         // ==========================================
         [HttpPost]
         [Authorize(Roles = "Admin")] // Solo el Admin puede crear mesas
@@ -58,7 +57,7 @@ namespace Api.Controllers
             return CreatedAtAction(nameof(GetById), new { id = mesaCreada.Id }, mesaCreada);
         }
 
-        // PUT /api/mesas/{id} — Modificar Mesa (CU-22)
+        // PUT /api/v1/mesas/{id} — Modificar Mesa (CU-22)
         [HttpPut("{id:guid}")]
         [Authorize(Roles = "Admin")] // Solo el Admin puede modificar mesas
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -83,7 +82,7 @@ namespace Api.Controllers
             return NoContent();
         }
 
-        // DELETE /api/mesas/{id} — Eliminar Mesa (CU-23)
+        // DELETE /api/v1/mesas/{id} — Eliminar Mesa (CU-23)
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")] // Solo el Admin puede eliminar mesas
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -103,7 +102,7 @@ namespace Api.Controllers
             return NoContent();
         }
 
-        // PATCH /api/mesas/{id}/estado — Cambiar Estado Mesa (CU-03)
+        // PATCH /api/v1/mesas/{id}/estado — Cambiar Estado Mesa (CU-03)
         [HttpPatch("{id:guid}/estado")]
         [Authorize(Roles = "Gerente,Admin")] // RN-01: Rol Gerente o Admin
         [ProducesResponseType(typeof(MesaResponseDTO), StatusCodes.Status200OK)]

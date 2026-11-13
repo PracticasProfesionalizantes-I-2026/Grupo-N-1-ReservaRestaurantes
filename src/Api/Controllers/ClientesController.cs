@@ -9,7 +9,6 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-[Route("api/[controller]")]
 [Authorize] // Protegido por defecto: evita que usuarios anónimos accedan a información de clientes
 public class ClientesController : ControllerBase
 {

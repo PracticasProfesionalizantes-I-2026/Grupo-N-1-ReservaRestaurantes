@@ -26,7 +26,7 @@ Permite al usuario finalizar su sesión activa, asegurando la revocación de tok
 - El usuario debe contar con una sesión activa y un token JWT válido.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `POST /api/auth/logout` con el token JWT en el header `Authorization` y el refresh token en el cuerpo (`LogoutRequestDTO`).
+1. El Actor envía una petición al endpoint `POST /api/v1/auth/logout` con el token JWT en el header `Authorization` y el refresh token en el cuerpo (`LogoutRequestDTO`).
 2. La **Capa de Presentación** (`AuthController.Logout`) valida la presencia de la cabecera de autenticación.
 3. La **Capa de Negocio** (`AuthService.LogoutAsync`) extrae el identificador de sesión/usuario y revoca el refresh token almacenado en la base de datos (**RN-01**).
 4. La **Capa de Persistencia** actualiza el estado del token a revocado.
@@ -46,7 +46,7 @@ Permite al usuario finalizar su sesión activa, asegurando la revocación de tok
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El usuario puede cerrar sesión desde el menú de la aplicación web o móvil.
-2. Ambas invocan `POST /api/auth/logout`.
+2. Ambas invocan `POST /api/v1/auth/logout`.
 
 ### 6. POSTCONDICIONES
 - El refresh token queda revocado en la base de datos (**RN-01**).
@@ -73,8 +73,8 @@ Permite al usuario finalizar su sesión activa, asegurando la revocación de tok
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `LogoutAsync_WithValidSession_RevokesRefreshToken` | `Logout_WithValidAuth_Returns200OK` |
-| 2a. Sin token | `401 Unauthorized` | `— (rechazado por middleware JWT)` | `Logout_WithoutToken_Returns401Unauthorized` |
+| Flujo principal | `200 OK` | `LogoutAsync_ConTokenYUsuario_InvocaRevocacionDeTokenYUsuario` | `Logout_ConTokenValido_RetornaOk` |
+| 2a. Sin token | `401 Unauthorized` | `— (rechazado por middleware JWT)` | `Logout_SinToken_RetornaUnauthorized` |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

@@ -27,7 +27,7 @@ Permite al gerente dar por concluido el servicio de una reserva activa, cambiand
 - La reserva debe encontrarse en estado `En curso`.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `PATCH /api/reservas/{id}/finalizar` con su token JWT.
+1. El Actor envía una petición al endpoint `PATCH /api/v1/reservas/{id}/finalizar` con su token JWT.
 2. La **Capa de Presentación** (`ReservasController.FinalizarReserva`) valida la autorización del rol `Gerente` (**RN-03**).
 3. La **Capa de Negocio** (`ReservaService.FinalizarReservaAsync`) verifica la existencia de la reserva y confirma que su estado actual sea `En curso` (**RN-01**).
 4. La Capa de Negocio cambia el estado de la reserva a `Finalizada`, registra la hora de cierre y actualiza el estado de la mesa asociada a `Libre` (**RN-02**).
@@ -58,7 +58,7 @@ Permite al gerente dar por concluido el servicio de una reserva activa, cambiand
 
 ### 5. SUB-VARIACIONES (opcional)
 1. La finalización puede accionarse desde la vista de mesa en el mapa interactivo o desde la lista de reservas en curso.
-2. Ambas operaciones invocan `PATCH /api/reservas/{id}/finalizar`.
+2. Ambas operaciones invocan `PATCH /api/v1/reservas/{id}/finalizar`.
 
 ### 6. POSTCONDICIONES
 - La reserva pasa a estado `Finalizada` con registro de hora de egreso.
@@ -89,10 +89,10 @@ Permite al gerente dar por concluido el servicio de una reserva activa, cambiand
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `FinalizarReservaAsync_WhenEnCurso_TransitionsToFinalizadaAndFreesTable` | `FinalizarReserva_Returns200OK` |
-| 2a. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `FinalizarReserva_AsCliente_Returns403Forbidden` |
-| 3a. Reserva inexistente | `404 Not Found` | `FinalizarReservaAsync_WhenNotFound_ThrowsReservaNoEncontradaException` | `FinalizarReserva_NonExistingId_Returns404NotFound` |
-| 3b. Estado inválido | `409 Conflict` | `FinalizarReservaAsync_WhenNotEnCurso_ThrowsTransicionEstadoInvalidaException` | `FinalizarReserva_WhenConfirmada_Returns409Conflict` |
+| Flujo principal | `200 OK` | `FinalizarReservaAsync_ReservaEnCurso_CambiaAFinalizadaYLiberaMesa` | _pendiente de test_ |
+| 2a. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `AccionesDeGerente_ComoCliente_Returns403Forbidden` |
+| 3a. Reserva inexistente | `404 Not Found` | _pendiente de test_ | `AccionesSobreReservaInexistente_ComoGerente_Returns404NotFound` |
+| 3b. Estado inválido | `409 Conflict` | `FinalizarReservaAsync_ReservaPendiente_LanzaTransicionEstadoInvalidaException` | _pendiente de test_ |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

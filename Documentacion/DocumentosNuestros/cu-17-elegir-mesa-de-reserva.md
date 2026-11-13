@@ -28,7 +28,7 @@ Permite al gerente asignar o cambiar manualmente la mesa asignada a una reserva,
 - La mesa seleccionada debe existir en el sistema.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `PATCH /api/reservas/{id}/asignar-mesa` con un JSON conteniendo `mesaId` (`ReservaAsignarMesaDTO`).
+1. El Actor envía una petición al endpoint `PATCH /api/v1/reservas/{id}/asignar-mesa` con un JSON conteniendo `mesaId` (`ReservaAsignarMesaDTO`).
 2. La **Capa de Presentación** (`ReservasController.AsignarMesa`) valida la autorización del rol `Gerente` (**RN-03**) y que `mesaId` sea un número entero válido mayor a cero.
 3. La **Capa de Negocio** (`ReservaService.AsignarMesaAsync`) comprueba la existencia de la reserva y de la mesa seleccionada.
 4. La Capa de Negocio verifica que la capacidad máxima de la mesa sea mayor o igual a la cantidad de personas de la reserva (**RN-01**) y que la mesa no posea otra reserva activa en ese horario (**RN-02**).
@@ -69,7 +69,7 @@ Permite al gerente asignar o cambiar manualmente la mesa asignada a una reserva,
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El gerente puede seleccionar la mesa desde un desplegable en el formulario de la reserva o haciendo clic sobre la mesa en el mapa visual interactivo.
-2. En ambos casos se invoca `PATCH /api/reservas/{id}/asignar-mesa`.
+2. En ambos casos se invoca `PATCH /api/v1/reservas/{id}/asignar-mesa`.
 
 ### 6. POSTCONDICIONES
 - La reserva queda vinculada a la nueva mesa en la base de datos.
@@ -100,11 +100,11 @@ Permite al gerente asignar o cambiar manualmente la mesa asignada a una reserva,
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `AsignarMesaAsync_WithValidTableAndCapacity_AssignsSuccessfully` | `AsignarMesa_Returns200OK` |
-| 2a. ID mesa inválido | `400 Bad Request` | `— (detectado por validación de DTO)` | `AsignarMesa_WithInvalidTableId_Returns400BadRequest` |
-| 3a. Mesa no encontrada | `404 Not Found` | `AsignarMesaAsync_WhenTableNotFound_ThrowsEntidadNoEncontradaException` | `AsignarMesa_NonExistingTable_Returns404NotFound` |
-| 4a. Capacidad insuficiente | `409 Conflict` | `AsignarMesaAsync_WhenCapacityInsufficient_ThrowsCapacidadInsuficienteException` | `AsignarMesa_WhenInsufficientCapacity_Returns409Conflict` |
-| 4b. Solapamiento de horario | `409 Conflict` | `AsignarMesaAsync_WhenTableOverlaps_ThrowsMesaSolapadaException` | `AsignarMesa_WhenOverlappingSchedule_Returns409Conflict` |
+| Flujo principal | `200 OK` | `AsignarMesaAsync_MesaValida_AsignaCorrectamente` | _pendiente de test_ |
+| 2a. ID mesa inválido | `400 Bad Request` | `— (detectado por validación de DTO)` | _pendiente de test_ |
+| 3a. Mesa no encontrada | `404 Not Found` | `AsignarMesaAsync_MesaInexistente_LanzaNotFoundException` | _pendiente de test_ |
+| 4a. Capacidad insuficiente | `409 Conflict` | `AsignarMesaAsync_CapacidadInsuficiente_LanzaCapacidadInsuficienteException` | _pendiente de test_ |
+| 4b. Solapamiento de horario | `409 Conflict` | `AsignarMesaAsync_MesaSolapada_LanzaMesaSolapadaException` | _pendiente de test_ |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

@@ -27,7 +27,7 @@ Permite al gerente rechazar una solicitud de reserva pendiente especificando el 
 - La reserva debe existir y encontrarse en estado `Pendiente` (o `Solicitada`).
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `PATCH /api/reservas/{id}/rechazar` con un JSON conteniendo `motivoRechazo` (`ReservaRechazarDTO`).
+1. El Actor envía una petición al endpoint `PATCH /api/v1/reservas/{id}/rechazar` con un JSON conteniendo `motivoRechazo` (`ReservaRechazarDTO`).
 2. La **Capa de Presentación** (`ReservasController.RechazarReserva`) valida la autorización del rol `Gerente` (**RN-01**) y que el campo `motivoRechazo` esté presente y no vacío.
 3. La **Capa de Negocio** (`ReservaService.RechazarReservaAsync`) verifica que la reserva exista y que su estado actual sea `Pendiente` (**RN-02**).
 4. La Capa de Negocio actualiza el estado de la reserva a `Rechazada`, guarda el motivo (**RN-03**) y libera cualquier bloqueo provisorio de mesa.
@@ -63,7 +63,7 @@ Permite al gerente rechazar una solicitud de reserva pendiente especificando el 
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El rechazo puede realizarse desde la vista detallada de la reserva o desde la lista de pendientes.
-2. En ambos casos se invoca `PATCH /api/reservas/{id}/rechazar`.
+2. En ambos casos se invoca `PATCH /api/v1/reservas/{id}/rechazar`.
 
 ### 6. POSTCONDICIONES
 - La reserva queda con estado `Rechazada` de forma persistente en la base de datos.
@@ -95,11 +95,11 @@ Permite al gerente rechazar una solicitud de reserva pendiente especificando el 
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `RechazarReservaAsync_WhenPendingWithReason_RejectsSuccessfully` | `RechazarReserva_Returns200OK` |
-| 2a. Sin motivo | `400 Bad Request` | `— (validado por DTO DataAnnotations)` | `RechazarReserva_WithoutMotivo_Returns400BadRequest` |
-| 2b. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `RechazarReserva_AsCliente_Returns403Forbidden` |
-| 3a. Reserva inexistente | `404 Not Found` | `RechazarReservaAsync_WhenNotFound_ThrowsReservaNoEncontradaException` | `RechazarReserva_NonExistingId_Returns404NotFound` |
-| 3b. Estado no rechazable | `409 Conflict` | `RechazarReservaAsync_WhenConfirmada_ThrowsTransicionEstadoInvalidaException` | `RechazarReserva_WhenConfirmada_Returns409Conflict` |
+| Flujo principal | `200 OK` | `RechazarReservaAsync_ReservaPendiente_CambiaARechazadaYLiberaMesaYPersisteMotivo` | _pendiente de test_ |
+| 2a. Sin motivo | `400 Bad Request` | `— (validado por DTO DataAnnotations)` | `RechazarReservaAsync_SinMotivo_LanzaValidationException` |
+| 2b. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `RechazarReserva_ComoCliente_Returns403Forbidden` |
+| 3a. Reserva inexistente | `404 Not Found` | _pendiente de test_ | `RechazarReservaInexistente_ComoGerente_Returns404NotFound` |
+| 3b. Estado no rechazable | `409 Conflict` | `RechazarReservaAsync_ReservaNoPendiente_LanzaTransicionEstadoInvalidaException` | _pendiente de test_ |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

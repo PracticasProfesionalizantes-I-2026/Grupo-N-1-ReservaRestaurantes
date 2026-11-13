@@ -26,7 +26,7 @@ Permite a un nuevo usuario crear una cuenta en el sistema proporcionando su nomb
 - El usuario no debe contar con una sesión activa en el dispositivo.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 201 Created)
-1. El Actor envía una petición al endpoint `POST /api/auth/register` con un JSON conteniendo `nombre`, `apellido`, `email`, `telefono` y `password` (`UsuarioRegisterDTO`).
+1. El Actor envía una petición al endpoint `POST /api/v1/auth/register` con un JSON conteniendo `nombre`, `apellido`, `email`, `telefono` y `password` (`UsuarioRegisterDTO`).
 2. La **Capa de Presentación** (`AuthController.Register`) valida que los campos requeridos estén presentes, que el email cumpla con el formato válido y que la contraseña cumpla los requisitos de longitud y complejidad mínima (data annotations `[Required]`, `[EmailAddress]`, `[MinLength(8)]`).
 3. La **Capa de Negocio** (`AuthService.RegisterAsync`) normaliza los datos (`Trim()`, `ToLower()` en email) y verifica que el correo electrónico no se encuentre ya registrado en la base de datos (**RN-01**).
 4. La Capa de Negocio aplica hashing seguro (BCrypt / PBKDF2) sobre la contraseña (**RN-02**) y asigna por defecto el rol `Cliente` (**RN-03**).
@@ -62,7 +62,7 @@ Permite a un nuevo usuario crear una cuenta en el sistema proporcionando su nomb
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El registro puede efectuarse desde la interfaz web o mediante clientes de prueba API.
-2. En ambos casos se envía el payload al endpoint `POST /api/v1/auth/register` (o `POST /api/auth/register`).
+2. En ambos casos se envía el payload al endpoint `POST /api/v1/auth/register`.
 3. De forma homóloga y para compatibilidad con la API de clientes, el alta puede realizarse a través de `POST /api/v1/Clientes` (`ClienteCreateDTO`) o `POST /api/v1/auth/register` (`UsuarioRegisterDTO`), ambos con rate limiting, hash BCrypt y asignación de rol `Cliente`.
 
 ### 6. POSTCONDICIONES
@@ -95,7 +95,7 @@ Permite a un nuevo usuario crear una cuenta en el sistema proporcionando su nomb
 | 2a. Formato email inválido | `400 Bad Request` | `— (detectado por validación de DTO)` | `Validator.TryValidateObject` |
 | 2b. Contraseña débil | `400 Bad Request` | `— (detectado por validación de DTO)` | `Validator.TryValidateObject` |
 | 2c. Teléfono con letras | `400 Bad Request` | `CreateAsync_ConTelefonoConLetras_LanzaValidationException` | `ClienteCreateDTO_DataAnnotation_ConTelefonoConLetras_FallaValidacion` |
-| 3a. Email duplicado | `409 Conflict` | `CreateAsync_WhenEmailExists_ThrowsConflictException` | `POST /api/v1/Clientes` con email existente |
+| 3a. Email duplicado | `409 Conflict` | `RegisterAsync_ConEmailExistente_LanzaEmailDuplicadoException` | `POST /api/v1/Clientes` con email existente |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

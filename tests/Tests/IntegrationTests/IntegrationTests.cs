@@ -386,8 +386,20 @@ public class IntegrationTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task Logout_ConTokenValido_RetornaOk()
     {
-        // Arrange
-        var loginResult = await LoginAsync("juan.perez@example.com", "Cliente123!");
+        // Arrange: usuario propio para no revocar tokens de usuarios compartidos con otros tests
+        // (la revocación por usuario es global dentro del host de tests).
+        var email = $"logout.{Guid.NewGuid():N}@test.com";
+        var registerResponse = await _client.PostAsJsonAsync("/api/v1/Auth/register", new UsuarioRegisterDTO
+        {
+            Nombre = "Logout",
+            Apellido = "Test",
+            Email = email,
+            Telefono = "+54 11 1234-5678",
+            Password = "Password123!"
+        });
+        Assert.Equal(HttpStatusCode.Created, registerResponse.StatusCode);
+
+        var loginResult = await LoginAsync(email, "Password123!");
         SetAuthToken(loginResult.Token);
 
         // Act

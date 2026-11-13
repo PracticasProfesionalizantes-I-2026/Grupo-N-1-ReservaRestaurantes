@@ -7,7 +7,6 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/v1/lista-espera")]
-[Route("api/lista-espera")]
 [Authorize(Roles = "Gerente,Admin")]
 public class ListaEsperaController : ControllerBase
 {

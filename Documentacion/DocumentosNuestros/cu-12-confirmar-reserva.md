@@ -27,7 +27,7 @@ Permite al gerente confirmar formalmente una solicitud de reserva pendiente, ase
 - La reserva debe existir y encontrarse en estado `Pendiente` (o `Solicitada`).
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `PATCH /api/reservas/{id}/confirmar` con su token JWT.
+1. El Actor envía una petición al endpoint `PATCH /api/v1/reservas/{id}/confirmar` con su token JWT.
 2. La **Capa de Presentación** (`ReservasController.ConfirmarReserva`) valida la autorización del rol `Gerente` (`[Authorize(Roles = "Gerente")]`) (**RN-01**).
 3. La **Capa de Negocio** (`ReservaService.ConfirmarReservaAsync`) verifica la existencia de la reserva, comprueba que su estado sea `Pendiente` (**RN-02**) y constata que tenga una mesa asignada válida (**RN-03**).
 4. La Capa de Negocio actualiza el estado de la reserva a `Confirmada` y reserva formalmente el recurso mesa para esa franja horaria.
@@ -63,7 +63,7 @@ Permite al gerente confirmar formalmente una solicitud de reserva pendiente, ase
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El gerente puede confirmar la reserva desde el panel operativo o desde el detalle individual de la reserva.
-2. En ambos casos se invoca `PATCH /api/reservas/{id}/confirmar`.
+2. En ambos casos se invoca `PATCH /api/v1/reservas/{id}/confirmar`.
 
 ### 6. POSTCONDICIONES
 - La reserva pasa a estado `Confirmada` en la base de datos.
@@ -94,10 +94,10 @@ Permite al gerente confirmar formalmente una solicitud de reserva pendiente, ase
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `ConfirmarReservaAsync_WhenPendingAndTableAssigned_ConfirmsSuccessfully` | `ConfirmarReserva_Returns200OK` |
-| 2a. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `ConfirmarReserva_AsCliente_Returns403Forbidden` |
-| 3a. Reserva inexistente | `404 Not Found` | `ConfirmarReservaAsync_WhenNotFound_ThrowsReservaNoEncontradaException` | `ConfirmarReserva_NonExistingId_Returns404NotFound` |
-| 3b. Estado inválido | `409 Conflict` | `ConfirmarReservaAsync_WhenAlreadyConfirmed_ThrowsTransicionEstadoInvalidaException` | `ConfirmarReserva_WhenNotPending_Returns409Conflict` |
+| Flujo principal | `200 OK` | `ConfirmarReservaAsync_ReservaPendiente_CambiaAConfirmada` | `ConfirmarReserva_Gerente_RetornaOk` |
+| 2a. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `ConfirmarReserva_ComoCliente_RetornaForbidden` |
+| 3a. Reserva inexistente | `404 Not Found` | `ConfirmarReservaAsync_ReservaNoExiste_LanzaReservaNoEncontradaException` | `AccionesSobreReservaInexistente_ComoGerente_Returns404NotFound` |
+| 3b. Estado inválido | `409 Conflict` | `ConfirmarReservaAsync_ReservaYaConfirmada_LanzaTransicionEstadoInvalidaException` | _pendiente de test_ |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

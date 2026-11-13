@@ -27,7 +27,7 @@ Permite al gerente modificar manualmente el estado operativo de una mesa (Libre,
 - La mesa a modificar debe existir previamente en el sistema.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `PATCH /api/mesas/{id}/estado` con un JSON conteniendo `nuevoEstado` (`MesaCambiarEstadoDTO`).
+1. El Actor envía una petición al endpoint `PATCH /api/v1/mesas/{id}/estado` con un JSON conteniendo `nuevoEstado` (`MesaCambiarEstadoDTO`).
 2. La **Capa de Presentación** (`MesasController.CambiarEstado`) valida que el ID de mesa sea un número entero positivo y que el estado enviado corresponda a un valor válido del enum (**RN-02**).
 3. La **Capa de Negocio** (`MesaService.CambiarEstadoMesaAsync`) verifica la existencia de la mesa, la autorización del rol Gerente (**RN-01**) y valida que la mesa no posea una reserva en curso si se intenta pasar a `Libre` sin haber finalizado dicha reserva (**RN-03**).
 4. La **Capa de Persistencia** actualiza el campo `Estado` en la entidad `Mesa` y guarda los cambios en la base de datos.
@@ -57,7 +57,7 @@ Permite al gerente modificar manualmente el estado operativo de una mesa (Libre,
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El gerente puede cambiar el estado desde la vista de lista de mesas o interactuando directamente sobre el plano visual del salón.
-2. Ambas acciones envían la misma petición a `PATCH /api/mesas/{id}/estado`.
+2. Ambas acciones envían la misma petición a `PATCH /api/v1/mesas/{id}/estado`.
 
 ### 6. POSTCONDICIONES
 - El estado de la mesa queda actualizado de forma persistente en la tabla `Mesas`.
@@ -88,10 +88,10 @@ Permite al gerente modificar manualmente el estado operativo de una mesa (Libre,
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `CambiarEstadoMesaAsync_WithValidState_UpdatesMesaSuccessfully` | `CambiarEstadoMesa_Returns200OK` |
+| Flujo principal | `200 OK` | `CambiarEstadoMesaAsync_ALibreSinReservaEnCurso_ActualizaEstado` | _pendiente de test_ |
 | 2a. Estado no válido | `400 Bad Request` | `— (capturado por validación de enum en DTO)` | `CambiarEstadoMesa_WithInvalidState_Returns400BadRequest` |
-| 3a. Mesa inexistente | `404 Not Found` | `CambiarEstadoMesaAsync_WhenMesaNotFound_ThrowsMesaNoEncontradaException` | `CambiarEstadoMesa_NonExistingId_Returns404NotFound` |
-| 3b. Reserva en curso activa | `409 Conflict` | `CambiarEstadoMesaAsync_WhenReservaEnCurso_ThrowsMesaConReservaActivaException` | `CambiarEstadoMesa_WhenReservaEnCurso_Returns409Conflict` |
+| 3a. Mesa inexistente | `404 Not Found` | `CambiarEstadoMesaAsync_CuandoMesaNoExiste_RetornaNull` | `CambiarEstadoMesa_NonExistingId_Returns404NotFound` |
+| 3b. Reserva en curso activa | `409 Conflict` | `CambiarEstadoMesaAsync_ALibreConReservaEnCurso_LanzaMesaConReservaActivaException` | _pendiente de test_ |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

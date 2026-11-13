@@ -27,7 +27,7 @@ Permite al administrador consultar el listado de usuarios del sistema y modifica
 - Deben existir usuarios registrados en el sistema.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `PUT /api/admin/usuarios/{id}/rol` con un JSON conteniendo `nuevoRol` (`UsuarioCambiarRolDTO`).
+1. El Actor envía una petición al endpoint `PUT /api/v1/admin/usuarios/{id}/rol` con un JSON conteniendo `nuevoRol` (`UsuarioCambiarRolDTO`).
 2. La **Capa de Presentación** (`AdminUsuariosController.CambiarRol`) valida la autorización del rol `Admin` (`[Authorize(Roles = "Admin")]`) (**RN-01**) y que el campo `nuevoRol` no esté vacío.
 3. La **Capa de Negocio** (`UsuarioService.CambiarRolUsuarioAsync`) verifica la existencia del usuario, valida que el rol solicitado pertenezca al catálogo oficial de roles válidos (`Cliente`, `Gerente`, `Admin`) (**RN-02**) y comprueba que no se despoje al último administrador del sistema.
 4. La Capa de Negocio actualiza el rol en la entidad `Usuario` y revoca los tokens activos del usuario para forzar la reemisión de credenciales con los nuevos claims (**RN-03**).
@@ -63,7 +63,7 @@ Permite al administrador consultar el listado de usuarios del sistema y modifica
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El administrador puede cambiar el rol desde la grilla de administración de cuentas de usuario.
-2. Se envía la petición PUT a `/api/admin/usuarios/{id}/rol`.
+2. Se envía la petición PUT a `/api/v1/admin/usuarios/{id}/rol`.
 
 ### 6. POSTCONDICIONES
 - El usuario queda asociado a su nuevo rol en la base de datos.
@@ -95,11 +95,11 @@ Permite al administrador consultar el listado de usuarios del sistema y modifica
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `CambiarRolUsuarioAsync_WithValidRole_UpdatesRoleAndRevokesTokens` | `CambiarRolUsuario_Returns200OK` |
+| Flujo principal | `200 OK` | `CambiarRolUsuarioAsync_ConRevocacion_InvocaRevokeUserTokens` | `CambiarRolUsuario_Returns200OK` |
 | 2a. Rol inexistente | `400 Bad Request` | `— (validado por catálogo de roles en DTO)` | `CambiarRolUsuario_WithInvalidRole_Returns400BadRequest` |
 | 2b. Sin rol Admin | `403 Forbidden` | `— (middleware de autorización)` | `CambiarRolUsuario_AsGerente_Returns403Forbidden` |
-| 3a. Usuario inexistente | `404 Not Found` | `CambiarRolUsuarioAsync_WhenNotFound_ThrowsUsuarioNoEncontradoException` | `CambiarRolUsuario_NonExistingId_Returns404NotFound` |
-| 3b. Remover único Admin | `409 Conflict` | `CambiarRolUsuarioAsync_WhenLastAdmin_ThrowsOperacionInvalidaException` | `CambiarRolUsuario_WhenLastAdmin_Returns409Conflict` |
+| 3a. Usuario inexistente | `404 Not Found` | `CambiarRolUsuarioAsync_CuandoUsuarioNoExiste_LanzaNotFoundException` | `CambiarRolUsuario_NonExistingId_Returns404NotFound` |
+| 3b. Remover único Admin | `409 Conflict` | `CambiarRolUsuarioAsync_QuitarAdminUnicoAdmin_LanzaConflictException` | _pendiente de test_ |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

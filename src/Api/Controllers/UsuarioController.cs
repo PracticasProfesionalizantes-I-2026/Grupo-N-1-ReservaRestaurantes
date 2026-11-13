@@ -8,7 +8,6 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/v1/usuario")]
-[Route("api/usuario")]
 [Authorize]
 public class UsuarioController : ControllerBase
 {

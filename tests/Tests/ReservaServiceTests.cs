@@ -883,16 +883,18 @@ public class ReservaServiceTests
     }
 
     [Fact]
-    public async Task GetTableroOperativoAsync_SinReservas_LanzaSinReservasOperativasException()
+    public async Task GetTableroOperativoAsync_SinReservas_RetornaColeccionVacia()
     {
         // Arrange
         var fecha = DateTime.Today;
         _reservaRepoMock.Setup(r => r.GetReservasOperativasAsync(fecha))
             .ReturnsAsync(Enumerable.Empty<Reserva>());
 
-        // Act & Assert
-        await Assert.ThrowsAsync<SinReservasOperativasException>(
-            () => _sut.GetTableroOperativoAsync(fecha));
+        // Act
+        var result = await _sut.GetTableroOperativoAsync(fecha);
+
+        // Assert
+        Assert.Empty(result);
     }
 
     // =========================================================================

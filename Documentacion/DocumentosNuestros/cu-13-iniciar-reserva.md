@@ -27,7 +27,7 @@ Permite al gerente registrar la llegada efectiva de los clientes al restaurante,
 - La reserva debe encontrarse previamente en estado `Confirmada`.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `PATCH /api/reservas/{id}/iniciar` con su token JWT.
+1. El Actor envía una petición al endpoint `PATCH /api/v1/reservas/{id}/iniciar` con su token JWT.
 2. La **Capa de Presentación** (`ReservasController.IniciarReserva`) valida la autorización del rol `Gerente` (`[Authorize(Roles = "Gerente")]`) (**RN-02**).
 3. La **Capa de Negocio** (`ReservaService.IniciarReservaAsync`) verifica la existencia de la reserva y constata que su estado actual sea `Confirmada` (**RN-01**).
 4. La Capa de Negocio actualiza el estado de la reserva a `En curso`, registra la hora real de ingreso y cambia el estado de la mesa asignada a `Ocupada` (**RN-03**).
@@ -58,7 +58,7 @@ Permite al gerente registrar la llegada efectiva de los clientes al restaurante,
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El gerente puede iniciar la reserva desde la tablet de recepción o desde la terminal de salón.
-2. En ambos casos se invoca `PATCH /api/reservas/{id}/iniciar`.
+2. En ambos casos se invoca `PATCH /api/v1/reservas/{id}/iniciar`.
 
 ### 6. POSTCONDICIONES
 - La reserva pasa a estado `En curso` con la hora de inicio registrada.
@@ -89,10 +89,10 @@ Permite al gerente registrar la llegada efectiva de los clientes al restaurante,
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `IniciarReservaAsync_WhenConfirmed_TransitionsToEnCursoAndTableOccupied` | `IniciarReserva_Returns200OK` |
-| 2a. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `IniciarReserva_AsCliente_Returns403Forbidden` |
-| 3a. Reserva inexistente | `404 Not Found` | `IniciarReservaAsync_WhenNotFound_ThrowsReservaNoEncontradaException` | `IniciarReserva_NonExistingId_Returns404NotFound` |
-| 3b. Estado inválido | `409 Conflict` | `IniciarReservaAsync_WhenNotConfirmed_ThrowsTransicionEstadoInvalidaException` | `IniciarReserva_WhenPendiente_Returns409Conflict` |
+| Flujo principal | `200 OK` | _pendiente de test_ | _pendiente de test_ |
+| 2a. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `AccionesDeGerente_ComoCliente_Returns403Forbidden` |
+| 3a. Reserva inexistente | `404 Not Found` | _pendiente de test_ | `AccionesSobreReservaInexistente_ComoGerente_Returns404NotFound` |
+| 3b. Estado inválido | `409 Conflict` | _pendiente de test_ | _pendiente de test_ |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

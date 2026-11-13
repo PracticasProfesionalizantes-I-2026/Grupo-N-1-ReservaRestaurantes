@@ -2,6 +2,7 @@ using DataAccess.Context;
 using DataAccess.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -15,6 +16,10 @@ namespace Tests.IntegrationTests;
 /// </summary>
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    // Conexión que mantiene viva la base SQLite en memoria durante toda la vida del factory.
+    // Si se cerrara al terminar el scope de configuración, el schema se perdería.
+    private SqliteConnection? _keepAliveConnection;
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Variables de entorno para JWT y datos semilla
@@ -33,6 +38,11 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
             // Registrar DbContext con SQLite en memoria (conexión compartida)
             var connectionString = $"Data Source=IntegrationTest_{Guid.NewGuid()};Mode=Memory;Cache=Shared";
+
+            // Abrir y mantener la conexión durante toda la vida del factory
+            _keepAliveConnection = new SqliteConnection(connectionString);
+            _keepAliveConnection.Open();
+
             services.AddDbContext<RestaurantDbContext>(options =>
                 options.UseSqlite(connectionString, b => b.MigrationsAssembly("Migrations"))
                        .ConfigureWarnings(w => w.Ignore(
@@ -43,13 +53,23 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<RestaurantDbContext>();
 
-            // Abrir la conexión (mantiene la DB en memoria viva)
-            db.Database.OpenConnection();
-            db.Database.EnsureCreated();
+            // Usar migraciones (mismo camino que Program.cs) para que el arranque del host
+            // no intente crear tablas que ya existen.
+            db.Database.Migrate();
 
-            // Sembrar datos iniciales (sin Migrate, ya que EnsureCreated creó el schema)
+            // Sembrar datos iniciales
             DbInitializer.SeedOnlyAsync(db).GetAwaiter().GetResult();
         });
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (disposing)
+        {
+            _keepAliveConnection?.Dispose();
+            _keepAliveConnection = null;
+        }
     }
 }
 

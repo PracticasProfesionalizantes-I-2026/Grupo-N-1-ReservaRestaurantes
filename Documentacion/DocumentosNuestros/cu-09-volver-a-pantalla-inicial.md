@@ -26,7 +26,7 @@ Permite al usuario retornar a la pantalla principal del sistema, obteniendo los 
 - El usuario debe contar con una sesión activa con un rol asignado.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `GET /api/usuario/contexto-inicio` con su token de autenticación.
+1. El Actor envía una petición al endpoint `GET /api/v1/usuario/contexto-inicio` con su token de autenticación.
 2. La **Capa de Presentación** (`UsuarioController.GetContextoInicio`) valida que el usuario esté autenticado (`[Authorize]`).
 3. La **Capa de Negocio** (`UsuarioService.GetContextoInicioAsync`) lee el rol del usuario desde los claims del token (**RN-01**) y recopila la información de resumen correspondiente (Cliente → próximas reservas; Gerente → métricas del salón del día; Admin → resumen de usuarios y configuración).
 4. La **Capa de Persistencia** consulta los datos resumidos según el perfil requerido.
@@ -79,7 +79,7 @@ Permite al usuario retornar a la pantalla principal del sistema, obteniendo los 
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `GetContextoInicioAsync_ReturnsSummaryAccordingToRole` | `GetContextoInicio_Returns200WithContextData` |
+| Flujo principal | `200 OK` | `GetContextoInicioAsync_Cliente_RetornaResumenClienteYAccesosRapidos` | `GetContextoInicio_Returns200WithContextData` |
 | 2a. Sin token | `401 Unauthorized` | `— (manejado por autenticación ASP.NET Core)` | `GetContextoInicio_WithoutToken_Returns401Unauthorized` |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos

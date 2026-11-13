@@ -26,7 +26,7 @@ Permite al administrador dar de alta una nueva mesa en el plano del restaurante 
 - El actor debe poseer un token JWT válido con rol "Admin".
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 201 Created)
-1. El Actor envía una petición al endpoint `POST /api/mesas` con un JSON conteniendo `numero`, `capacidad` y `sector` (`MesaCreateDTO`).
+1. El Actor envía una petición al endpoint `POST /api/v1/mesas` con un JSON conteniendo `numero`, `capacidad` y `sector` (`MesaCreateDTO`).
 2. La **Capa de Presentación** (`MesasController.CrearMesa`) valida que el usuario posea rol `Admin` (**RN-01**) y que los campos requeridos estén presentes y sean válidos (`[Required]`, `[Range(1, 30)]` sobre capacidad) (**RN-02**).
 3. La **Capa de Negocio** (`MesaService.CrearMesaAsync`) normaliza los datos y verifica que el número de mesa no se encuentre ya en uso (**RN-03**).
 4. La Capa de Negocio inicializa el estado de la nueva entidad `Mesa` como `Libre` y delega su persistencia.
@@ -57,7 +57,7 @@ Permite al administrador dar de alta una nueva mesa en el plano del restaurante 
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El administrador puede crear mesas desde el formulario de configuración o mediante un editor de layout visual.
-2. En ambos casos se invoca `POST /api/mesas`.
+2. En ambos casos se invoca `POST /api/v1/mesas`.
 
 ### 6. POSTCONDICIONES
 - Se registra una nueva entidad `Mesa` con estado `Libre` en la tabla `Mesas`.
@@ -87,10 +87,10 @@ Permite al administrador dar de alta una nueva mesa en el plano del restaurante 
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `201 Created` | `CrearMesaAsync_WithValidData_CreatesMesaWithLibreState` | `CrearMesa_Returns201Created` |
+| Flujo principal | `201 Created` | `CreateAsync_CuandoNumeroNoExiste_RetornaDTO` | `CrearMesa_Returns201Created` |
 | 2a. Capacidad inválida | `400 Bad Request` | `— (detectado por validación de DTO)` | `CrearMesa_WithZeroCapacity_Returns400BadRequest` |
 | 2b. Sin rol Admin | `403 Forbidden` | `— (middleware de autorización)` | `CrearMesa_AsGerente_Returns403Forbidden` |
-| 3a. Número duplicado | `409 Conflict` | `CrearMesaAsync_WhenNumeroExists_ThrowsNumeroMesaDuplicadoException` | `CrearMesa_DuplicateNumero_Returns409Conflict` |
+| 3a. Número duplicado | `409 Conflict` | `CreateAsync_CuandoNumeroYaExiste_LanzaConflictException` | `CrearMesa_DuplicateNumero_Returns409Conflict` |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

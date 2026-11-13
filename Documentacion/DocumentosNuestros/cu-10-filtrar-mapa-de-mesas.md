@@ -26,7 +26,7 @@ Permite al gerente filtrar y visualizar las mesas del salón según su estado op
 - El actor debe poseer un token JWT válido con rol "Gerente".
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `GET /api/mesas?estado={estado}&capacidadMin={cap}` con su token JWT.
+1. El Actor envía una petición al endpoint `GET /api/v1/mesas?estado={estado}&capacidadMin={cap}` con su token JWT.
 2. La **Capa de Presentación** (`MesasController.GetMesasFiltradas`) valida que el usuario posea rol `Gerente` (`[Authorize(Roles = "Gerente,Admin")]`) (**RN-01**) y que el estado consultado pertenezca al conjunto de estados válidos (**RN-02**).
 3. La **Capa de Negocio** (`MesaService.GetMesasFiltradasAsync`) construye la consulta aplicando los filtros solicitados sobre la tabla de mesas.
 4. La **Capa de Persistencia** ejecuta la consulta en la base de datos recuperando las entidades que coinciden con los criterios.
@@ -56,7 +56,7 @@ Permite al gerente filtrar y visualizar las mesas del salón según su estado op
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El filtro puede aplicarse visualmente en la representación gráfica del mapa del restaurante o en el listado tabular de mesas.
-2. En ambos casos se consumen los mismos parámetros en `GET /api/mesas`.
+2. En ambos casos se consumen los mismos parámetros en `GET /api/v1/mesas`.
 
 ### 6. POSTCONDICIONES
 - El gerente visualiza el subconjunto de mesas que cumplen los criterios solicitados.
@@ -85,10 +85,10 @@ Permite al gerente filtrar y visualizar las mesas del salón según su estado op
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `GetMesasFiltradasAsync_WithValidFilters_ReturnsFilteredMesas` | `GetMesas_WithValidFilters_Returns200OK` |
+| Flujo principal | `200 OK` | `FiltrarMapaMesasAsync_CuandoHayMesas_RetornaLista` | `GetMesas_WithValidFilters_Returns200OK` |
 | 2a. Estado inválido | `400 Bad Request` | `— (capturado en validación de enum query parameter)` | `GetMesas_WithInvalidState_Returns400BadRequest` |
 | 2b. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización ASP.NET Core)` | `GetMesas_AsCliente_Returns403Forbidden` |
-| 3a. Sin coincidencias | `200 OK` | `GetMesasFiltradasAsync_WhenNoMatch_ReturnsEmptyList` | `GetMesas_WhenNoMatch_Returns200WithEmptyArray` |
+| 3a. Sin coincidencias | `200 OK` | `FiltrarMapaMesasAsync_CuandoNoHayMesas_RetornaColeccionVacia` | `GetMesas_WhenNoMatch_Returns200WithEmptyArray` |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

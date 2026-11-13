@@ -27,7 +27,7 @@ Permite al cliente consultar el listado de reservas que ha realizado en una fech
 - Debe existir al menos una reserva registrada a nombre del cliente en el sistema.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `GET /api/cliente/reservas?fecha={fecha}`.
+1. El Actor envía una petición al endpoint `GET /api/v1/cliente/reservas?fecha={fecha}`.
 2. La **Capa de Presentación** (`ClienteReservasController.GetReservasPorFecha`) valida que el query parameter `fecha` tenga formato ISO 8601 válido (`YYYY-MM-DD`) (**RN-02**).
 3. La **Capa de Negocio** (`ClienteReservaService.GetReservasPorFechaAsync`) extrae el `ClienteId` desde los claims del token JWT (**RN-01**) y consulta las reservas que coincidan con la fecha provista.
 4. La **Capa de Persistencia** ejecuta la consulta filtrada en la tabla `Reservas` (`Where(r => r.ClienteId == clienteId && r.Fecha == fecha)`).
@@ -80,9 +80,9 @@ Permite al cliente consultar el listado de reservas que ha realizado en una fech
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `GetReservasPorFechaAsync_ReturnsClientReservasForGivenDate` | `GetReservasPorFecha_Returns200WithReservasList` |
-| 2a. Formato fecha inválido | `400 Bad Request` | `— (capturado en validación de query param)` | `GetReservasPorFecha_WithInvalidDate_Returns400BadRequest` |
-| 3a. Sin reservas en esa fecha | `200 OK` | `GetReservasPorFechaAsync_WhenNoReservas_ReturnsEmptyList` | `GetReservasPorFecha_WhenNone_Returns200WithEmptyArray` |
+| Flujo principal | `200 OK` | _pendiente de test_ | `FiltrarPorFecha_ClienteAutenticado_RetornaOk` |
+| 2a. Formato fecha inválido | `400 Bad Request` | `— (capturado en validación de query param)` | _pendiente de test_ |
+| 3a. Sin reservas en esa fecha | `200 OK` | _pendiente de test_ | `GetReservasPorFecha_WhenNone_Returns200WithEmptyArray` |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

@@ -27,7 +27,7 @@ Permite al cliente solicitar una reserva indicando la fecha, horario y cantidad 
 - El cliente debe poseer una sesión activa (Token JWT válido con rol Cliente).
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 201 Created)
-1. El Actor envía una petición al endpoint `POST /api/reservas/solicitar` con un JSON conteniendo `fecha`, `hora` y `cantidadPersonas` (`ReservaSolicitudDTO`).
+1. El Actor envía una petición al endpoint `POST /api/v1/reservas/solicitar` con un JSON conteniendo `fecha`, `hora` y `cantidadPersonas` (`ReservaSolicitudDTO`).
 2. La **Capa de Presentación** (`ReservasController.SolicitarReserva`) valida que el JSON sea estructuralmente correcto y que los campos requeridos estén presentes y dentro de rangos válidos (data annotations `[Required]`, `[Range(1, 20)]`).
 3. La **Capa de Negocio** (`ReservaService.SolicitarReservaAsync`) verifica que la fecha y hora correspondan a una franja habilitada (**RN-03**), que el cliente no posea ya una reserva activa en ese horario y busca mesas con capacidad suficiente (**RN-01**) sin solapamiento de turnos (**RN-02**).
 4. La **Capa de Persistencia** (`ApplicationDbContext.Reservas`) persiste la nueva entidad `Reserva` con estado `Pendiente` y genera un nuevo identificador único (GUID).
@@ -97,12 +97,12 @@ Permite al cliente solicitar una reserva indicando la fecha, horario y cantidad 
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `201 Created` | `SolicitarReservaAsync_WithValidData_ReturnsCreatedReserva` | `SolicitarReserva_Returns201Created` |
+| Flujo principal | `201 Created` | `SolicitarReservaAsync_ConDatosValidos_CreaReservaYRetornaDTO` | `SolicitarReserva_Autenticado_RetornaCreated` |
 | 1a. JSON inválido | `400 Bad Request` | `— (validado por ASP.NET Model Binding)` | `SolicitarReserva_WithMalformedJson_Returns400BadRequest` |
 | 2a. Datos incompletos | `400 Bad Request` | `— (detectado por DataAnnotations en DTO)` | `SolicitarReserva_WithMissingFields_Returns400BadRequest` |
-| 3a. Horario no habilitado | `400 Bad Request` | `SolicitarReservaAsync_OutsideOperatingHours_ThrowsHorarioNoHabilitadoException` | `SolicitarReserva_WhenOutsideHours_Returns400BadRequest` |
-| 3b. Sin disponibilidad | `409 Conflict` | `SolicitarReservaAsync_NoTablesAvailable_ThrowsSinDisponibilidadException` | `SolicitarReserva_WhenNoTables_Returns409Conflict` |
-| 3c. Reserva duplicada cliente | `409 Conflict` | `SolicitarReservaAsync_ExistingActiveReserva_ThrowsReservaDuplicadaException` | `SolicitarReserva_WhenClientHasDuplicate_Returns409Conflict` |
+| 3a. Horario no habilitado | `400 Bad Request` | `SolicitarReservaAsync_HorarioFueraDeServicio_LanzaHorarioNoHabilitadoException` | `SolicitarReserva_WhenOutsideHours_Returns400BadRequest` |
+| 3b. Sin disponibilidad | `409 Conflict` | `SolicitarReservaAsync_SinMesasConCapacidadSuficiente_LanzaSinDisponibilidadException` | _pendiente de test_ |
+| 3c. Reserva duplicada cliente | `409 Conflict` | `SolicitarReservaAsync_ClienteConReservaActivaEnMismoTurno_LanzaReservaDuplicadaClienteException` | _pendiente de test_ |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

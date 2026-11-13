@@ -27,10 +27,10 @@ Permite al gerente consultar la cola de espera de clientes y promover solicitude
 - Existen solicitudes en lista de espera registradas.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `GET /api/lista-espera` para consultar las solicitudes en espera activas.
+1. El Actor envía una petición al endpoint `GET /api/v1/lista-espera` para consultar las solicitudes en espera activas.
 2. La **Capa de Presentación** (`ListaEsperaController.GetSolicitudes`) valida el rol `Gerente` (**RN-01**).
 3. La **Capa de Negocio** (`ListaEsperaService.GetSolicitudesOrdenadasAsync`) recupera las solicitudes activas ordenadas por fecha/hora de registro en estricto orden de llegada (**RN-02**).
-4. Ante una mesa disponible, el Gerente envía `PATCH /api/lista-espera/{id}/promover` con el `mesaId` propuesto.
+4. Ante una mesa disponible, el Gerente envía `PATCH /api/v1/lista-espera/{id}/promover` con el `mesaId` propuesto.
 5. La Capa de Negocio verifica que la mesa seleccionada esté efectivamente libre y cuente con capacidad adecuada (**RN-03**), promueve la solicitud creando una entidad `Reserva` en estado `Confirmada` y desactiva la entrada de lista de espera.
 6. La **Capa de Persistencia** guarda los cambios de forma transaccional.
 7. El Sistema devuelve un código **200 OK** con los datos de la nueva reserva generada desde la lista de espera.
@@ -95,10 +95,10 @@ Permite al gerente consultar la cola de espera de clientes y promover solicitude
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `PromoverSolicitudAsync_WithCompatibleTable_CreatesConfirmedReserva` | `PromoverSolicitud_Returns200OK` |
-| 2a. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `GetSolicitudesEspera_AsCliente_Returns403Forbidden` |
-| 4a. Solicitud inexistente | `404 Not Found` | `PromoverSolicitudAsync_WhenNotFound_ThrowsEntidadNoEncontradaException` | `PromoverSolicitud_NonExistingId_Returns404NotFound` |
-| 5a. Mesa incompatible | `409 Conflict` | `PromoverSolicitudAsync_WhenIncompatibleTable_ThrowsMesaNoCompatibleException` | `PromoverSolicitud_WhenIncompatibleTable_Returns409Conflict` |
+| Flujo principal | `200 OK` | `PromoverSolicitudAsync_WithCompatibleTable_CreatesConfirmedReserva` | _pendiente de test_ |
+| 2a. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `PromoverListaEspera_ComoCliente_Returns403Forbidden` |
+| 4a. Solicitud inexistente | `404 Not Found` | `PromoverSolicitudAsync_WhenNotFound_ThrowsReservaNoEncontradaException` | _pendiente de test_ |
+| 5a. Mesa incompatible | `409 Conflict` | `PromoverSolicitudAsync_WhenIncompatibleTable_ThrowsMesaNoCompatibleException` | _pendiente de test_ |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

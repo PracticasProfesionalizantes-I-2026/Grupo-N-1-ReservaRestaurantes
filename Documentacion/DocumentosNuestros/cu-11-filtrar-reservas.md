@@ -26,7 +26,7 @@ Permite al gerente consultar y filtrar todas las reservas del sistema combinando
 - El actor debe poseer un token JWT válido con rol "Gerente".
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `GET /api/reservas?fecha={f}&estado={e}&cliente={c}` con su token JWT.
+1. El Actor envía una petición al endpoint `GET /api/v1/reservas?fecha={f}&estado={e}&cliente={c}` con su token JWT.
 2. La **Capa de Presentación** (`ReservasController.GetReservasFiltradas`) valida que el usuario posea rol `Gerente` (**RN-01**) y que los parámetros de formato de fecha y estado sean válidos (**RN-02**).
 3. La **Capa de Negocio** (`ReservaService.GetReservasFiltradasAsync`) construye la consulta dinámica combinando los filtros provistos.
 4. La **Capa de Persistencia** ejecuta la consulta en la tabla `Reservas` incluyendo los datos de la mesa y el cliente.
@@ -85,9 +85,9 @@ Permite al gerente consultar y filtrar todas las reservas del sistema combinando
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `GetReservasFiltradasAsync_WithFilters_ReturnsMatchingReservas` | `GetReservasFiltradas_Returns200OK` |
-| 2a. Filtro inválido | `400 Bad Request` | `— (validado en binding de query params)` | `GetReservasFiltradas_WithBadParams_Returns400BadRequest` |
-| 2b. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `GetReservasFiltradas_AsCliente_Returns403Forbidden` |
+| Flujo principal | `200 OK` | _pendiente de test_ | `FiltrarReservas_Returns200OK` |
+| 2a. Filtro inválido | `400 Bad Request` | `— (validado en binding de query params)` | `FiltrarReservas_WithBadParams_Returns400BadRequest` |
+| 2b. Sin rol Gerente | `403 Forbidden` | `— (middleware de autorización)` | `FiltrarReservas_AsCliente_Returns403Forbidden` |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

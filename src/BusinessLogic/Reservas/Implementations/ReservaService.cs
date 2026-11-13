@@ -674,11 +674,7 @@ public class ReservaService : IReservaService
 
         var reservas = await _reservaRepository.GetReservasOperativasAsync(fechaConsulta);
 
-        if (!reservas.Any())
-        {
-            throw new SinReservasOperativasException();
-        }
-
+        // CU-02 3a: sin reservas en la jornada se devuelve colección vacía (200 OK), no un error.
         return reservas.Select(r => MapToResponseDTO(r, r.Cliente, r.Mesa));
     }
 

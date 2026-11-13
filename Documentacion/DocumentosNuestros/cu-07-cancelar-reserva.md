@@ -27,7 +27,7 @@ Permite al cliente cancelar una reserva previamente solicitada o confirmada, lib
 - La reserva debe existir y encontrarse en estado susceptible de cancelación (`Pendiente` o `Confirmada`).
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `PATCH /api/reservas/{id}/cancelar` con un JSON opcional indicando el motivo de cancelación (`ReservaCancelarDTO`).
+1. El Actor envía una petición al endpoint `PATCH /api/v1/reservas/{id}/cancelar` con un JSON opcional indicando el motivo de cancelación (`ReservaCancelarDTO`).
 2. La **Capa de Presentación** (`ReservasController.CancelarReservaCliente`) valida que el ID sea un identificador válido.
 3. La **Capa de Negocio** (`ReservaService.CancelarReservaClienteAsync`) verifica que la reserva pertenezca al cliente autenticado (**RN-01**) y que su estado actual permita la cancelación (**RN-02**).
 4. La Capa de Negocio cambia el estado de la reserva a `Cancelada`, libera la mesa asociada (**RN-03**) y evalúa si hay solicitudes en lista de espera para esa fecha y horario.
@@ -90,10 +90,10 @@ Permite al cliente cancelar una reserva previamente solicitada o confirmada, lib
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `CancelarReservaClienteAsync_WhenOwnerAndPending_CancelsAndFreesMesa` | `CancelarReservaCliente_Returns200OK` |
-| 2a. Reserva inexistente | `404 Not Found` | `CancelarReservaClienteAsync_WhenNotFound_ThrowsReservaNoEncontradaException` | `CancelarReservaCliente_NonExisting_Returns404NotFound` |
-| 3a. Reserva ajena | `403 Forbidden` | `CancelarReservaClienteAsync_WhenNotOwner_ThrowsAccesoDenegadoException` | `CancelarReservaCliente_OtherUserReserva_Returns403Forbidden` |
-| 3b. Estado no cancelable | `409 Conflict` | `CancelarReservaClienteAsync_WhenEnCurso_ThrowsTransicionEstadoInvalidaException` | `CancelarReservaCliente_WhenEnCurso_Returns409Conflict` |
+| Flujo principal | `200 OK` | `CancelarReservaClienteAsync_ReservaPendiente_CambiaACancelada` | `CancelarReserva_ClienteDueño_RetornaOk` |
+| 2a. Reserva inexistente | `404 Not Found` | _pendiente de test_ | `CancelarReserva_NonExistingId_Returns404NotFound` |
+| 3a. Reserva ajena | `403 Forbidden` | `CancelarReservaClienteAsync_ReservaDeOtroCliente_LanzaAccesoDenegadoException` | _pendiente de test_ |
+| 3b. Estado no cancelable | `409 Conflict` | `CancelarReservaClienteAsync_ReservaEnCurso_LanzaTransicionEstadoInvalidaException` | _pendiente de test_ |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

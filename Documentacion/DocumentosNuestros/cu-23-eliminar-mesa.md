@@ -28,7 +28,7 @@ Permite al administrador eliminar una mesa del sistema cuando esta no posee rese
 - La mesa no debe poseer reservas activas (Confirmadas o En curso) asociadas.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `DELETE /api/mesas/{id}` con confirmación en el cuerpo o cabecera (`{ "confirmado": true }`).
+1. El Actor envía una petición al endpoint `DELETE /api/v1/mesas/{id}` con confirmación en el cuerpo o cabecera (`{ "confirmado": true }`).
 2. La **Capa de Presentación** (`MesasController.EliminarMesa`) valida que el usuario posea rol `Admin` (**RN-01**) y que el flag de confirmación esté presente (**RN-03**).
 3. La **Capa de Negocio** (`MesaService.EliminarMesaAsync`) comprueba la existencia de la mesa y verifica que no tenga reservas asociadas en estado `En curso`, `Confirmada` o futuras (**RN-02**).
 4. La Capa de Negocio ejecuta la eliminación física si no tiene historial o baja lógica (`IsDeleted = true`) si posee historial histórico pasado.
@@ -64,7 +64,7 @@ Permite al administrador eliminar una mesa del sistema cuando esta no posee rese
 
 ### 5. SUB-VARIACIONES (opcional)
 1. El administrador puede ejecutar la eliminación desde la tabla de mesas o desde el mapa del salón tras confirmar en el modal de alerta.
-2. En ambos casos se envía `DELETE /api/mesas/{id}`.
+2. En ambos casos se envía `DELETE /api/v1/mesas/{id}`.
 
 ### 6. POSTCONDICIONES
 - La mesa queda eliminada o dada de baja del sistema.
@@ -96,11 +96,11 @@ Permite al administrador eliminar una mesa del sistema cuando esta no posee rese
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `EliminarMesaAsync_WithoutActiveReservas_DeletesSuccessfully` | `EliminarMesa_Returns200OK` |
-| 2a. Sin confirmación | `400 Bad Request` | `— (validado en controlador)` | `EliminarMesa_WithoutConfirmation_Returns400BadRequest` |
+| Flujo principal | `200 OK` | `EliminarMesaAsync_CuandoMesaExisteSinReservas_EliminaYRetornaTrue` | `EliminarMesa_Returns204NoContent` |
+| 2a. Sin confirmación | `400 Bad Request` | `— (validado en controlador)` | _pendiente de test_ |
 | 2b. Sin rol Admin | `403 Forbidden` | `— (middleware de autorización)` | `EliminarMesa_AsGerente_Returns403Forbidden` |
-| 3a. Mesa inexistente | `404 Not Found` | `EliminarMesaAsync_WhenNotFound_ThrowsMesaNoEncontradaException` | `EliminarMesa_NonExistingId_Returns404NotFound` |
-| 3b. Con reservas activas | `409 Conflict` | `EliminarMesaAsync_WhenHasActiveReservas_ThrowsMesaConReservasActivasException` | `EliminarMesa_WhenHasActiveReservas_Returns409Conflict` |
+| 3a. Mesa inexistente | `404 Not Found` | `EliminarMesaAsync_CuandoMesaNoExiste_RetornaFalse` | `EliminarMesa_NonExistingId_Returns404NotFound` |
+| 3b. Con reservas activas | `409 Conflict` | `EliminarMesaAsync_CuandoTieneReservasActivasOFuturas_LanzaConflictException` | _pendiente de test_ |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

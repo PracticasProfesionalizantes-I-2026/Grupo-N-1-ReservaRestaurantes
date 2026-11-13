@@ -26,7 +26,7 @@ Permite a un usuario autenticarse en el sistema mediante su correo electrónico 
 - El usuario debe poseer una cuenta previamente registrada en el sistema.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `POST /api/auth/login` con un JSON conteniendo `email` y `password` (`LoginRequestDTO`).
+1. El Actor envía una petición al endpoint `POST /api/v1/auth/login` con un JSON conteniendo `email` y `password` (`LoginRequestDTO`).
 2. La **Capa de Presentación** (`AuthController.Login`) valida que los campos no vengan vacíos ni con formatos inválidos.
 3. La **Capa de Negocio** (`AuthService.LoginAsync`) busca al usuario por email (**RN-01**) y verifica la contraseña utilizando el comparador criptográfico de hash (**RN-02**).
 4. La Capa de Negocio genera un Token JWT firmado con la clave del servidor, incorporando claims de `UserId`, `Email` y `Role` (**RN-03**).
@@ -56,7 +56,7 @@ Permite a un usuario autenticarse en el sistema mediante su correo electrónico 
 
 ### 5. SUB-VARIACIONES (opcional)
 1. Inicio de sesión desde la aplicación web o mediante clientes de prueba API.
-2. Ambas envían el payload al endpoint `POST /api/auth/login`.
+2. Ambas envían el payload al endpoint `POST /api/v1/auth/login`.
 
 ### 6. POSTCONDICIONES
 - El usuario recibe un Token JWT válido para autenticar subsiguientes peticiones HTTP en el header `Authorization: Bearer <token>`.
@@ -85,10 +85,10 @@ Permite a un usuario autenticarse en el sistema mediante su correo electrónico 
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `LoginAsync_WithValidCredentials_ReturnsTokenAndUserClaims` | `Login_WithCorrectCredentials_Returns200AndJwtToken` |
+| Flujo principal | `200 OK` | `LoginAsync_CredencialesValidas_RetornaTokenYDatos` | `Login_ConCredencialesValidas_RetornaTokenJWT` |
 | 2a. Campos vacíos | `400 Bad Request` | `— (detectado en model binding)` | `Login_WithEmptyFields_Returns400BadRequest` |
-| 3a. Credenciales incorrectas | `401 Unauthorized` | `LoginAsync_WithWrongPassword_ThrowsCredencialesInvalidasException` | `Login_WithWrongCredentials_Returns401Unauthorized` |
-| 3b. Cuenta inactiva | `403 Forbidden` | `LoginAsync_WhenUserInactive_ThrowsCuentaInactivaException` | `Login_WhenUserIsInactive_Returns403Forbidden` |
+| 3a. Credenciales incorrectas | `401 Unauthorized` | `LoginAsync_ContrasenaBCryptIncorrecta_LanzaUnauthorizedException` | `Login_ConCredencialesInvalidas_RetornaUnauthorized` |
+| 3b. Cuenta inactiva | `403 Forbidden` | `LoginAsync_UsuarioInactivoConCredencialesValidas_LanzaCuentaInactivaException` | _pendiente de test_ |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

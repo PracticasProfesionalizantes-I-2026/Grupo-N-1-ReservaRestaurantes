@@ -27,7 +27,7 @@ Permite al administrador eliminar o deshabilitar lógicamente una cuenta de usua
 - El usuario a eliminar debe existir en el sistema.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `DELETE /api/admin/usuarios/{id}` con confirmación en header o cuerpo (`{ "confirmado": true }`).
+1. El Actor envía una petición al endpoint `DELETE /api/v1/admin/usuarios/{id}` con confirmación en header o cuerpo (`{ "confirmado": true }`).
 2. La **Capa de Presentación** (`AdminUsuariosController.EliminarUsuario`) valida el rol `Admin` (**RN-01**) y comprueba el flag de confirmación (**RN-02**).
 3. La **Capa de Negocio** (`UsuarioService.EliminarUsuarioAsync`) verifica la existencia del usuario, constata que no se trate de la cuenta propia del administrador en sesión y evalúa si tiene registros de reservas asociadas.
 4. Si el usuario posee reservas o historial, la Capa de Negocio aplica una **baja lógica** (`IsDeleted = true`, `Activo = false`) preservando los datos históricos (**RN-03**); si no posee relaciones, procede a su remoción física.
@@ -63,7 +63,7 @@ Permite al administrador eliminar o deshabilitar lógicamente una cuenta de usua
 
 ### 5. SUB-VARIACIONES (opcional)
 1. La eliminación puede realizarse desde la tabla de usuarios con diálogo modal de confirmación.
-2. En todos los casos se invoca `DELETE /api/admin/usuarios/{id}`.
+2. En todos los casos se invoca `DELETE /api/v1/admin/usuarios/{id}`.
 
 ### 6. POSTCONDICIONES
 - La cuenta queda eliminada o marcada con baja lógica en la base de datos.
@@ -95,11 +95,11 @@ Permite al administrador eliminar o deshabilitar lógicamente una cuenta de usua
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `EliminarUsuarioAsync_WithHistory_PerformsSoftDelete` | `EliminarUsuario_Returns200OK` |
+| Flujo principal | `200 OK` | `EliminarUsuarioAsync_ConReservas_AplicaBajaLogicaYRetornaFalse` | `EliminarUsuario_Returns200OK` |
 | 2a. Sin confirmación | `400 Bad Request` | `— (validado en controlador/DTO)` | `EliminarUsuario_WithoutConfirm_Returns400BadRequest` |
 | 2b. Sin rol Admin | `403 Forbidden` | `— (middleware de autorización)` | `EliminarUsuario_AsGerente_Returns403Forbidden` |
-| 3a. Usuario inexistente | `404 Not Found` | `EliminarUsuarioAsync_WhenNotFound_ThrowsUsuarioNoEncontradoException` | `EliminarUsuario_NonExistingId_Returns404NotFound` |
-| 3b. Auto-eliminación | `409 Conflict` | `EliminarUsuarioAsync_SelfDelete_ThrowsOperacionInvalidaException` | `EliminarUsuario_SelfDelete_Returns409Conflict` |
+| 3a. Usuario inexistente | `404 Not Found` | `EliminarUsuarioAsync_UsuarioNoExiste_LanzaNotFoundException` | `EliminarUsuario_NonExistingId_Returns404NotFound` |
+| 3b. Auto-eliminación | `409 Conflict` | `EliminarUsuarioAsync_AutoEliminacion_LanzaConflictException` | `EliminarUsuario_SelfDelete_Returns409Conflict` |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración

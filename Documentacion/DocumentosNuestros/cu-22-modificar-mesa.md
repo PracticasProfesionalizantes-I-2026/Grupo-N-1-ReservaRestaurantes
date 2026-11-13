@@ -27,7 +27,7 @@ Permite al administrador modificar los datos de una mesa existente (número, cap
 - La mesa a modificar debe existir previamente en el sistema.
 
 ### 3. FLUJO PRINCIPAL (Camino Feliz - HTTP 200 OK)
-1. El Actor envía una petición al endpoint `PUT /api/mesas/{id}` con un JSON conteniendo `numero`, `capacidad` y `sector` (`MesaUpdateDTO`).
+1. El Actor envía una petición al endpoint `PUT /api/v1/mesas/{id}` con un JSON conteniendo `numero`, `capacidad` y `sector` (`MesaUpdateDTO`).
 2. La **Capa de Presentación** (`MesasController.ModificarMesa`) valida el rol `Admin` (**RN-01**) y que los campos requeridos cumplan las reglas de validación de esquema (**RN-02**).
 3. La **Capa de Negocio** (`MesaService.ModificarMesaAsync`) verifica la existencia de la mesa, constata que el nuevo número no pertenezca a otra mesa y comprueba que la nueva capacidad no sea inferior a las personas de reservas futuras ya confirmadas para esa mesa (**RN-03**).
 4. La Capa de Negocio actualiza los valores de la entidad `Mesa` y delega su guardado.
@@ -63,7 +63,7 @@ Permite al administrador modificar los datos de una mesa existente (número, cap
 
 ### 5. SUB-VARIACIONES (opcional)
 1. La modificación puede efectuarse desde la grilla de administración de mesas.
-2. En todos los casos se invoca `PUT /api/mesas/{id}`.
+2. En todos los casos se invoca `PUT /api/v1/mesas/{id}`.
 
 ### 6. POSTCONDICIONES
 - Los datos de la mesa quedan actualizados de forma persistente en la tabla `Mesas`.
@@ -94,10 +94,10 @@ Permite al administrador modificar los datos de una mesa existente (número, cap
 
 | Paso del CU | Excepción / Código | Test unitario (BusinessLogic) | Test integración (HTTP) |
 | --- | --- | --- | --- |
-| Flujo principal | `200 OK` | `ModificarMesaAsync_WithValidData_UpdatesMesaSuccessfully` | `ModificarMesa_Returns200OK` |
+| Flujo principal | `200 OK` | `ModificarMesaAsync_CuandoMesaExiste_ActualizaYRetornaTrue` | `ModificarMesa_Returns204NoContent` |
 | 2a. Capacidad inválida | `400 Bad Request` | `— (detectado por DTO)` | `ModificarMesa_WithInvalidCapacity_Returns400BadRequest` |
-| 3a. Mesa inexistente | `404 Not Found` | `ModificarMesaAsync_WhenNotFound_ThrowsMesaNoEncontradaException` | `ModificarMesa_NonExistingId_Returns404NotFound` |
-| 3b. Inconsistencia con reservas | `409 Conflict` | `ModificarMesaAsync_WhenCapacityBelowConfirmed_ThrowsCapacidadIncompatibleException` | `ModificarMesa_WhenCapacityBelowConfirmed_Returns409Conflict` |
+| 3a. Mesa inexistente | `404 Not Found` | `ModificarMesaAsync_CuandoMesaNoExiste_RetornaFalse` | `ModificarMesa_NonExistingId_Returns404NotFound` |
+| 3b. Inconsistencia con reservas | `409 Conflict` | `ModificarMesaAsync_CapacidadRompeReservaFutura_LanzaConflictException` | _pendiente de test_ |
 
 > Regla de oro: cada flujo del caso de uso debe tener al menos un test. En los flujos
 > resueltos en la Capa de Presentación el test aplicable es el de integración
